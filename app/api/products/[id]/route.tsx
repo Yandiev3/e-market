@@ -1,8 +1,10 @@
+// app/api/products/[id]/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import dbConnect from '@/lib/dbConnect';
-import Product from '@/models/Product';
+import Product, { IProductLean } from '@/models/Product';
 import { getServerSession } from 'next-auth';
-import { authOptions } from '../../auth/[...nextauth]/route';
+import { authOptions } from '@/lib/auth-config';
+import { toProductLean } from '@/lib/utils'; // импортируем функцию преобразования
 
 interface Params {
   params: { id: string };
@@ -17,14 +19,20 @@ export async function GET(request: NextRequest, { params }: Params) {
       return NextResponse.json({ message: 'Product not found' }, { status: 404 });
     }
 
-    if (!product.active) {
+    // Безопасное преобразование
+    const typedProduct = toProductLean(product);
+    if (!typedProduct) {
+      return NextResponse.json({ message: 'Product not found' }, { status: 404 });
+    }
+    
+    if (!typedProduct.active) {
       const session = await getServerSession(authOptions);
       if (!session || session.user.role !== 'admin') {
         return NextResponse.json({ message: 'Product not found' }, { status: 404 });
       }
     }
 
-    return NextResponse.json(product);
+    return NextResponse.json(typedProduct);
   } catch (error: any) {
     console.error('Product fetch error:', error);
     return NextResponse.json(

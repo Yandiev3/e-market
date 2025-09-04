@@ -21,6 +21,31 @@ export interface IProduct extends Document {
   updatedAt: Date;
 }
 
+export interface IProductLean {
+  _id: string;
+  name: string;
+  description: string;
+  price: number;
+  originalPrice?: number;
+  images: string[];
+  category: string;
+  stock: number;
+  sku: string;
+  slug: string;
+  featured: boolean;
+  active: boolean;
+  specifications?: Record<string, string>;
+  ratings: {
+    average: number;
+    count: number;
+  };
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export type ProductDocument = IProduct & Document;
+
+
 const productSchema = new Schema<IProduct>(
   {
     name: {

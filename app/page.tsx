@@ -1,10 +1,11 @@
 import Link from 'next/link';
 import { getServerSession } from 'next-auth';
-import { authOptions } from './api/auth/[...nextauth]/route';
+import { authOptions } from '@/lib/auth-config';
 import dbConnect from '@/lib/dbConnect';
 import Product from '@/models/Product';
 import ProductList from '@/components/product/ProductList';
 import Button from '@/components/ui/Button';
+import { IProductLean } from '@/types/product';
 
 export default async function Home() {
   await dbConnect();
@@ -17,7 +18,7 @@ export default async function Home() {
   })
     .limit(8)
     .select('name price images slug stock ratings')
-    .lean();
+    .lean() as unknown as IProductLean[];
 
   const session = await getServerSession(authOptions);
 
@@ -61,7 +62,7 @@ export default async function Home() {
         </div>
 
         <ProductList products={featuredProducts.map(product => ({
-          id: product._id.toString(),
+          id: product._id?.toString() || '',
           name: product.name,
           price: product.price,
           originalPrice: product.originalPrice,

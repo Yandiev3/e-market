@@ -8,7 +8,6 @@ interface User {
   email: string;
   name: string;
   role: string;
-  avatar?: string;
 }
 
 interface AuthContextType {
@@ -41,7 +40,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         email: session.user.email!,
         name: session.user.name!,
         role: session.user.role || 'user',
-        avatar: session.user.image,
       });
       setLoading(false);
     } else {

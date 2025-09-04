@@ -6,7 +6,7 @@ export interface IUser extends Document {
   password: string;
   name: string;
   role: 'user' | 'admin';
-  avatar?: string;
+  active: boolean;
   shippingAddress?: {
     street: string;
     city: string;
@@ -48,7 +48,10 @@ const userSchema = new Schema<IUser>(
       enum: ['user', 'admin'],
       default: 'user',
     },
-    avatar: String,
+     active: { // ← ДОБАВЬТЕ ЭТО ПОЛЕ!
+      type: Boolean,
+      default: true, // По умолчанию активен
+    },
     shippingAddress: {
       street: String,
       city: String,

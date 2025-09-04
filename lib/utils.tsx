@@ -1,3 +1,5 @@
+import { IProductLean } from '@/models/Product';
+
 export function formatPrice(price: number): string {
   return new Intl.NumberFormat('ru-RU', {
     style: 'currency',
@@ -34,4 +36,30 @@ export function formatDate(date: Date): string {
     month: 'long',
     day: 'numeric',
   }).format(date);
+}
+
+export function toProductLean(obj: any): IProductLean | null {
+  if (!obj) return null;
+  
+  return {
+    _id: obj._id?.toString(),
+    name: obj.name,
+    description: obj.description,
+    price: obj.price,
+    originalPrice: obj.originalPrice,
+    images: obj.images || [],
+    category: obj.category,
+    stock: obj.stock,
+    sku: obj.sku,
+    slug: obj.slug,
+    featured: obj.featured,
+    active: obj.active,
+    specifications: obj.specifications,
+    ratings: obj.ratings ? {
+      average: obj.ratings.average,
+      count: obj.ratings.count
+    } : { average: 0, count: 0 },
+    createdAt: obj.createdAt,
+    updatedAt: obj.updatedAt
+  };
 }
