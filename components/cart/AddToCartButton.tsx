@@ -1,3 +1,4 @@
+// components/cart/AddToCartButton.tsx
 'use client';
 
 import React, { useState } from 'react';
@@ -16,17 +17,23 @@ interface AddToCartButtonProps {
   product: Product;
   quantity?: number;
   className?: string;
+  disabled?: boolean;
+  size?: 'sm' | 'md' | 'lg' | 'xl';
 }
 
 const AddToCartButton: React.FC<AddToCartButtonProps> = ({
   product,
   quantity = 1,
   className = '',
+  disabled = false,
+  size = 'md'
 }) => {
   const { addItem } = useCart();
   const [adding, setAdding] = useState(false);
 
   const handleAddToCart = async () => {
+    if (disabled) return;
+    
     setAdding(true);
     
     // Simulate async operation
@@ -49,11 +56,12 @@ const AddToCartButton: React.FC<AddToCartButtonProps> = ({
     <Button
       onClick={handleAddToCart}
       loading={adding}
-      disabled={isOutOfStock || adding}
+      disabled={isOutOfStock || adding || disabled}
       className={`w-full ${className}`}
       variant={isOutOfStock ? 'secondary' : 'primary'}
+      size={size}
     >
-      {isOutOfStock ? 'Out of Stock' : 'Add to Cart'}
+      {isOutOfStock ? 'Нет в наличии' : 'В корзину'}
     </Button>
   );
 };

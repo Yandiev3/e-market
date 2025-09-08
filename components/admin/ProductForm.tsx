@@ -1,271 +1,161 @@
+// components/admin/ProductForm.tsx
 'use client';
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import Input from '../ui/Input';
-import Button from '@/components/ui/Button';
-import { validateProduct } from '@/lib/validation';
 
 interface ProductFormData {
   name: string;
   description: string;
   price: number;
   originalPrice?: number;
+  images: string[];
   category: string;
+  brand: string;
   stock: number;
   sku: string;
+  slug: string;
   featured: boolean;
   active: boolean;
+  gender: 'men' | 'women' | 'kids' | 'unisex';
+  ageCategory?: 'infant' | 'toddler' | 'child' | 'teen';
   specifications: Record<string, string>;
+  sizes: { size: string; inStock: boolean }[];
+  colors: { name: string; value: string }[];
 }
 
 interface ProductFormProps {
-  product?: any;
+  initialData?: ProductFormData;
   onSubmit: (data: ProductFormData) => Promise<void>;
   loading?: boolean;
 }
 
-const ProductForm: React.FC<ProductFormProps> = ({
-  product,
-  onSubmit,
-  loading = false,
-}) => {
+const ProductForm: React.FC<ProductFormProps> = ({ initialData, onSubmit, loading = false }) => {
   const router = useRouter();
   const [formData, setFormData] = useState<ProductFormData>({
     name: '',
     description: '',
     price: 0,
-    originalPrice: 0,
+    originalPrice: undefined,
+    images: [],
     category: '',
+    brand: '',
     stock: 0,
     sku: '',
+    slug: '',
     featured: false,
     active: true,
+    gender: 'unisex',
+    ageCategory: undefined,
     specifications: {},
+    sizes: [],
+    colors: []
   });
-  const [errors, setErrors] = useState<string[]>([]);
-  const [specKey, setSpecKey] = useState('');
-  const [specValue, setSpecValue] = useState('');
 
   useEffect(() => {
-    if (product) {
-      setFormData({
-        name: product.name || '',
-        description: product.description || '',
-        price: product.price || 0,
-        originalPrice: product.originalPrice || 0,
-        category: product.category || '',
-        stock: product.stock || 0,
-        sku: product.sku || '',
-        featured: product.featured || false,
-        active: product.active !== undefined ? product.active : true,
-        specifications: product.specifications || {},
-      });
+    if (initialData) {
+      setFormData(initialData);
     }
-  }, [product]);
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    const { name, value, type } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: type === 'checkbox' ? (e.target as HTMLInputElement).checked 
-              : type === 'number' ? parseFloat(value) || 0 
-              : value,
-    }));
-  };
-
-  const addSpecification = () => {
-    if (specKey && specValue) {
-      setFormData(prev => ({
-        ...prev,
-        specifications: {
-          ...prev.specifications,
-          [specKey]: specValue,
-        },
-      }));
-      setSpecKey('');
-      setSpecValue('');
-    }
-  };
-
-  const removeSpecification = (key: string) => {
-    setFormData(prev => {
-      const newSpecs = { ...prev.specifications };
-      delete newSpecs[key];
-      return { ...prev, specifications: newSpecs };
-    });
-  };
+  }, [initialData]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    const validation = validateProduct(formData);
-    if (!validation.isValid) {
-      setErrors(validation.errors);
-      return;
-    }
-
-    setErrors([]);
     await onSubmit(formData);
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    const { name, value, type } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: type === 'checkbox' ? (e.target as HTMLInputElement).checked : value
+    }));
+  };
+
+  const addSize = () => {
+    setFormData(prev => ({
+      ...prev,
+      sizes: [...prev.sizes, { size: '', inStock: true }]
+    }));
+  };
+
+  const updateSize = (index: number, field: 'size' | 'inStock', value: string | boolean) => {
+    setFormData(prev => ({
+      ...prev,
+      sizes: prev.sizes.map((size, i) => 
+        i === index ? { ...size, [field]: value } : size
+      )
+    }));
   };
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      {errors.length > 0 && (
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
-          <ul className="list-disc list-inside">
-            {errors.map((error, index) => (
-              <li key={index}>{error}</li>
-            ))}
-          </ul>
-        </div>
-      )}
-
+      {/* Основная информация */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <Input
-          label="Product Name"
-          name="name"
-          value={formData.name}
-          onChange={handleChange}
-          required
-        />
-
-        <Input
-          label="SKU"
-          name="sku"
-          value={formData.sku}
-          onChange={handleChange}
-          required
-        />
-
-        <Input
-          label="Price"
-          type="number"
-          name="price"
-          value={formData.price}
-          onChange={handleChange}
-          required
-          min="0"
-          step="0.01"
-        />
-
-        <Input
-          label="Original Price"
-          type="number"
-          name="originalPrice"
-          value={formData.originalPrice}
-          onChange={handleChange}
-          min="0"
-          step="0.01"
-        />
-
-        <Input
-          label="Category"
-          name="category"
-          value={formData.category}
-          onChange={handleChange}
-          required
-        />
-
-        <Input
-          label="Stock Quantity"
-          type="number"
-          name="stock"
-          value={formData.stock}
-          onChange={handleChange}
-          required
-          min="0"
-        />
-      </div>
-
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">
-          Description
-        </label>
-        <textarea
-          name="description"
-          value={formData.description}
-          onChange={handleChange}
-          required
-          rows={4}
-          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-        />
-      </div>
-
-      {/* Specifications */}
-      <div>
-        <h4 className="text-sm font-medium text-gray-700 mb-2">Specifications</h4>
-        <div className="flex space-x-2 mb-2">
-          <Input
-            placeholder="Key"
-            value={specKey}
-            onChange={(e) => setSpecKey(e.target.value)}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">Название</label>
+          <input
+            type="text"
+            name="name"
+            value={formData.name}
+            onChange={handleInputChange}
+            required
+            className="w-full p-2 border border-gray-300 rounded-md"
           />
-          <Input
-            placeholder="Value"
-            value={specValue}
-            onChange={(e) => setSpecValue(e.target.value)}
-          />
-          <Button type="button" onClick={addSpecification}>
-            Add
-          </Button>
         </div>
         
-        <div className="space-y-2">
-          {Object.entries(formData.specifications).map(([key, value]) => (
-            <div key={key} className="flex items-center justify-between bg-gray-50 p-2 rounded">
-              <span className="text-sm">
-                <strong>{key}:</strong> {value}
-              </span>
-              <Button
-                type="button"
-                variant="danger"
-                size="sm"
-                onClick={() => removeSpecification(key)}
-              >
-                Remove
-              </Button>
-            </div>
-          ))}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">Цена</label>
+          <input
+            type="number"
+            name="price"
+            value={formData.price}
+            onChange={handleInputChange}
+            required
+            className="w-full p-2 border border-gray-300 rounded-md"
+          />
         </div>
       </div>
 
-      <div className="flex space-x-4">
-        <label className="flex items-center">
-          <input
-            type="checkbox"
-            name="featured"
-            checked={formData.featured}
-            onChange={handleChange}
-            className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-          />
-          <span className="ml-2 text-sm text-gray-700">Featured Product</span>
-        </label>
+      {/* Пол и возрастная категория */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">Пол</label>
+          <select
+            name="gender"
+            value={formData.gender}
+            onChange={handleInputChange}
+            className="w-full p-2 border border-gray-300 rounded-md"
+          >
+            <option value="men">Мужской</option>
+            <option value="women">Женский</option>
+            <option value="kids">Детский</option>
+            <option value="unisex">Унисекс</option>
+          </select>
+        </div>
 
-        <label className="flex items-center">
-          <input
-            type="checkbox"
-            name="active"
-            checked={formData.active}
-            onChange={handleChange}
-            className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-          />
-          <span className="ml-2 text-sm text-gray-700">Active</span>
-        </label>
+        {formData.gender === 'kids' && (
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Возрастная категория</label>
+            <select
+              name="ageCategory"
+              value={formData.ageCategory || ''}
+              onChange={handleInputChange}
+              className="w-full p-2 border border-gray-300 rounded-md"
+            >
+              <option value="">Выберите категорию</option>
+              <option value="infant">Младенцы (0-2)</option>
+              <option value="toddler">Малыши (2-4)</option>
+              <option value="child">Дети (4-12)</option>
+              <option value="teen">Подростки (12-16)</option>
+            </select>
+          </div>
+        )}
       </div>
 
-      <div className="flex space-x-4">
-        <Button type="submit" loading={loading}>
-          {product ? 'Update Product' : 'Create Product'}
-        </Button>
-        <Button
-          type="button"
-          variant="outline"
-          onClick={() => router.push('/admin/products')}
-        >
-          Cancel
-        </Button>
-      </div>
+      {/* Остальные поля формы... */}
+      <button type="submit" disabled={loading} className="bg-blue-600 text-white px-6 py-2 rounded-md">
+        {loading ? 'Сохранение...' : 'Сохранить'}
+      </button>
     </form>
   );
 };

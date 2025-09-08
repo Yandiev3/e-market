@@ -1,166 +1,158 @@
-'use client';
-
-import React, { useState, useEffect } from 'react';
+// components/admin/UserList.tsx
+import React, { useState } from 'react';
 import { formatDate } from '@/lib/utils';
+import Button from '@/components/ui/Button';
+import Modal from '@/components/ui/Modal';
 
 interface User {
   _id: string;
-  name: string;
   email: string;
-  role: string;
+  name: string;
+  role: 'user' | 'admin';
+  active: boolean;
   createdAt: string;
   ordersCount: number;
 }
 
-const UserList: React.FC = () => {
-  const [users, setUsers] = useState<User[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [roleLoading, setRoleLoading] = useState<string | null>(null);
+interface UserListProps {
+  users: User[];
+  onRoleChange: (id: string, role: 'user' | 'admin') => void;
+  onStatusChange: (id: string, active: boolean) => void;
+  onDelete: (id: string) => void;
+  loading?: boolean;
+}
 
-  useEffect(() => {
-    fetchUsers();
-  }, []);
+const UserList: React.FC<UserListProps> = ({
+  users,
+  onRoleChange,
+  onStatusChange,
+  onDelete,
+  loading = false,
+}) => {
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [selectedUser, setSelectedUser] = useState<User | null>(null);
 
-  const fetchUsers = async () => {
-    try {
-      const response = await fetch('/api/admin/users');
-      const data = await response.json();
-      setUsers(data);
-    } catch (error) {
-      console.error('Error fetching users:', error);
-    } finally {
-      setLoading(false);
-    }
+  const handleDeleteClick = (user: User) => {
+    setSelectedUser(user);
+    setDeleteModalOpen(true);
   };
 
-  const updateUserRole = async (userId: string, newRole: string) => {
-    setRoleLoading(userId);
-    try {
-      const response = await fetch(`/api/admin/users/${userId}`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ role: newRole }),
-      });
-
-      if (response.ok) {
-        setUsers(prev =>
-          prev.map(user =>
-            user._id === userId ? { ...user, role: newRole } : user
-          )
-        );
-      }
-    } catch (error) {
-      console.error('Error updating user role:', error);
-    } finally {
-      setRoleLoading(null);
+  const handleConfirmDelete = () => {
+    if (selectedUser) {
+      onDelete(selectedUser._id);
+      setDeleteModalOpen(false);
+      setSelectedUser(null);
     }
   };
 
   if (loading) {
     return (
       <div className="animate-pulse">
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  User
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Role
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Orders
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Joined
-                </th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {[...Array(5)].map((_, i) => (
-                <tr key={i}>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="h-4 bg-gray-300 rounded w-3/4"></div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="h-6 bg-gray-300 rounded w-16"></div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="h-4 bg-gray-300 rounded w-8"></div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="h-4 bg-gray-300 rounded w-20"></div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        {[...Array(5)].map((_, i) => (
+          <div key={i} className="flex items-center justify-between p-4 border-b border-gray-200">
+            <div className="space-y-2">
+              <div className="h-4 bg-gray-300 rounded w-32"></div>
+              <div className="h-3 bg-gray-300 rounded w-24"></div>
+            </div>
+            <div className="flex space-x-2">
+              <div className="h-8 bg-gray-300 rounded w-16"></div>
+              <div className="h-8 bg-gray-300 rounded w-16"></div>
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  if (users.length === 0) {
+    return (
+      <div className="text-center py-12">
+        <div className="text-6xl mb-4">👥</div>
+        <h3 className="text-lg font-medium text-gray-900 mb-2">Пользователи не найдены</h3>
+        <p className="text-gray-600">Нет зарегистрированных пользователей</p>
       </div>
     );
   }
 
   return (
-    <div className="bg-white rounded-lg shadow-md">
-      <div className="px-6 py-4 border-b border-gray-200">
-        <h3 className="text-lg font-medium text-gray-900">Users</h3>
-      </div>
-
-      <div className="overflow-x-auto">
-        <table className="min-w-full divide-y divide-gray-200">
+    <>
+      <div className="overflow-hidden shadow ring-1 ring-black ring-opacity-5 rounded-lg">
+        <table className="min-w-full divide-y divide-gray-300">
           <thead className="bg-gray-50">
             <tr>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Name
+                Пользователь
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Email
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Role
+                Роль
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Orders
+                Статус
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Joined
+                Заказы
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Дата регистрации
+              </th>
+              <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Действия
               </th>
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
             {users.map((user) => (
-              <tr key={user._id}>
-                <td className="px-6 py-4 whitespace-nowrap">
+              <tr key={user._id} className="hover:bg-gray-50">
+                <td className="px-6 py-4">
                   <div className="text-sm font-medium text-gray-900">
                     {user.name}
                   </div>
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                <td className="px-6 py-4 text-sm text-gray-900">
                   {user.email}
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap">
+                <td className="px-6 py-4">
                   <select
                     value={user.role}
-                    onChange={(e) => updateUserRole(user._id, e.target.value)}
-                    disabled={roleLoading === user._id}
-                    className={`text-xs rounded-full px-2 py-1 border ${
-                      user.role === 'admin'
-                        ? 'bg-purple-100 text-purple-800 border-purple-200'
-                        : 'bg-gray-100 text-gray-800 border-gray-200'
-                    }`}
+                    onChange={(e) => onRoleChange(user._id, e.target.value as 'user' | 'admin')}
+                    className="text-sm border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                   >
-                    <option value="user">User</option>
-                    <option value="admin">Admin</option>
+                    <option value="user">Пользователь</option>
+                    <option value="admin">Администратор</option>
                   </select>
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                <td className="px-6 py-4">
+                  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                    user.active 
+                      ? 'bg-green-100 text-green-800' 
+                      : 'bg-red-100 text-red-800'
+                  }`}>
+                    {user.active ? 'Активен' : 'Неактивен'}
+                  </span>
+                </td>
+                <td className="px-6 py-4 text-sm text-gray-900">
                   {user.ordersCount}
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {formatDate(new Date(user.createdAt))}
+                <td className="px-6 py-4 text-sm text-gray-500">
+                  {formatDate(user.createdAt)}
+                </td>
+                <td className="px-6 py-4 text-right text-sm font-medium space-x-2">
+                  <Button
+                    variant={user.active ? 'secondary' : 'success'}
+                    size="sm"
+                    onClick={() => onStatusChange(user._id, !user.active)}
+                  >
+                    {user.active ? 'Деактивировать' : 'Активировать'}
+                  </Button>
+                  <button
+                    onClick={() => handleDeleteClick(user)}
+                    className="text-red-600 hover:text-red-900"
+                  >
+                    Удалить
+                  </button>
                 </td>
               </tr>
             ))}
@@ -168,12 +160,36 @@ const UserList: React.FC = () => {
         </table>
       </div>
 
-      {users.length === 0 && (
-        <div className="text-center py-12">
-          <p className="text-gray-500">No users found</p>
+      {/* Delete confirmation modal */}
+      <Modal
+        isOpen={deleteModalOpen}
+        onClose={() => setDeleteModalOpen(false)}
+        title="Подтверждение удаления"
+      >
+        <div className="space-y-4">
+          <p className="text-gray-600">
+            Вы уверены, что хотите удалить пользователя "{selectedUser?.name}"?
+          </p>
+          <p className="text-sm text-gray-500">
+            Все данные пользователя будут безвозвратно удалены.
+          </p>
+          <div className="flex justify-end space-x-3">
+            <Button
+              variant="outline"
+              onClick={() => setDeleteModalOpen(false)}
+            >
+              Отмена
+            </Button>
+            <Button
+              variant="danger"
+              onClick={handleConfirmDelete}
+            >
+              Удалить
+            </Button>
+          </div>
         </div>
-      )}
-    </div>
+      </Modal>
+    </>
   );
 };
 

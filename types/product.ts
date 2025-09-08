@@ -9,6 +9,11 @@ export interface IProduct {
   category: string;
   stock: number;
   active: boolean;
+  gender: 'men' | 'women' | 'kids' | 'unisex'; // Добавлено
+  ageCategory?: 'infant' | 'toddler' | 'child' | 'teen'; // Добавлено
+  specifications?: Record<string, string>;
+  sizes?: { size: string; inStock: boolean }[]; // Добавлено
+  colors?: { name: string; value: string }[]; // Добавлено
   ratings: {
     average: number;
     count: number;
@@ -28,6 +33,9 @@ export interface IProductLean {
   category?: string;
   stock: number;
   active?: boolean;
+  brand: string;
+  gender: 'men' | 'women' | 'kids' | 'unisex'; // Добавлено
+  ageCategory?: 'infant' | 'toddler' | 'child' | 'teen'; // Добавлено
   ratings: {
     average: number;
     count: number;

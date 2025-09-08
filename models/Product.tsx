@@ -1,4 +1,5 @@
-import mongoose, { Document, Schema } from 'mongoose';
+// models/Product.tsx
+import mongoose, { Document, Schema, Types } from 'mongoose';
 
 export interface IProduct extends Document {
   name: string;
@@ -7,6 +8,7 @@ export interface IProduct extends Document {
   originalPrice?: number;
   images: string[];
   category: string;
+  brand: string;
   stock: number;
   sku: string;
   slug: string;
@@ -22,13 +24,14 @@ export interface IProduct extends Document {
 }
 
 export interface IProductLean {
-  _id: string;
+  _id: Types.ObjectId | string; // Исправлено: может быть ObjectId или string
   name: string;
   description: string;
   price: number;
   originalPrice?: number;
   images: string[];
   category: string;
+  brand: string;
   stock: number;
   sku: string;
   slug: string;
@@ -44,7 +47,6 @@ export interface IProductLean {
 }
 
 export type ProductDocument = IProduct & Document;
-
 
 const productSchema = new Schema<IProduct>(
   {
@@ -70,6 +72,10 @@ const productSchema = new Schema<IProduct>(
       type: String,
     }],
     category: {
+      type: String,
+      required: true,
+    },
+    brand: {
       type: String,
       required: true,
     },

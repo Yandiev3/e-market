@@ -1,3 +1,4 @@
+// lib/utils.tsx
 import { IProductLean } from '@/models/Product';
 
 export function formatPrice(price: number): string {
@@ -30,12 +31,13 @@ export function debounce<T extends (...args: any[]) => any>(
   };
 }
 
-export function formatDate(date: Date): string {
+export function formatDate(date: Date | string): string {
+  const dateObj = typeof date === 'string' ? new Date(date) : date;
   return new Intl.DateTimeFormat('ru-RU', {
     year: 'numeric',
     month: 'long',
     day: 'numeric',
-  }).format(date);
+  }).format(dateObj);
 }
 
 export function toProductLean(obj: any): IProductLean | null {
@@ -49,6 +51,7 @@ export function toProductLean(obj: any): IProductLean | null {
     originalPrice: obj.originalPrice,
     images: obj.images || [],
     category: obj.category,
+    brand: obj.brand,
     stock: obj.stock,
     sku: obj.sku,
     slug: obj.slug,

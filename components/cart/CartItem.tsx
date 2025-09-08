@@ -1,10 +1,7 @@
-'use client';
-
+// components/cart/CartItem.tsx
 import React from 'react';
 import Image from 'next/image';
 import { formatPrice } from '@/lib/utils';
-import { useCart } from '@/context/CartContext';
-import Button from '@/components/ui/Button';
 
 interface CartItemProps {
   item: {
@@ -13,24 +10,24 @@ interface CartItemProps {
     price: number;
     image: string;
     quantity: number;
-    stock: number;
+    size?: string;
+    color?: string;
   };
+  onUpdateQuantity: (id: string, quantity: number) => void;
+  onRemove: (id: string) => void;
 }
 
-const CartItem: React.FC<CartItemProps> = ({ item }) => {
-  const { updateQuantity, removeItem } = useCart();
-
+const CartItem: React.FC<CartItemProps> = ({ item, onUpdateQuantity, onRemove }) => {
   const handleQuantityChange = (newQuantity: number) => {
-    if (newQuantity <= 0) {
-      removeItem(item.id);
-    } else {
-      updateQuantity(item.id, newQuantity);
+    if (newQuantity >= 1 && newQuantity <= 10) {
+      onUpdateQuantity(item.id, newQuantity);
     }
   };
 
   return (
-    <div className="flex items-center space-x-4 border-b border-gray-200 py-4">
-      <div className="relative w-16 h-16 flex-shrink-0">
+    <div className="flex items-center py-6 border-b border-gray-200 last:border-b-0">
+      {/* Product image */}
+      <div className="relative w-20 h-20 md:w-24 md:h-24 flex-shrink-0">
         <Image
           src={item.image || '/images/placeholder.jpg'}
           alt={item.name}
@@ -39,49 +36,63 @@ const CartItem: React.FC<CartItemProps> = ({ item }) => {
         />
       </div>
 
-      <div className="flex-1 min-w-0">
-        <h3 className="text-sm font-medium text-gray-900 truncate">
+      {/* Product info */}
+      <div className="ml-4 flex-1 min-w-0">
+        <h3 className="text-sm font-medium text-gray-900 line-clamp-2">
           {item.name}
         </h3>
-        <p className="text-sm text-gray-500 mt-1">
+        
+        {/* Size and color */}
+        {(item.size || item.color) && (
+          <div className="mt-1 text-xs text-gray-500">
+            {item.size && <span>Размер: {item.size}</span>}
+            {item.size && item.color && <span className="mx-2">•</span>}
+            {item.color && <span>Цвет: {item.color}</span>}
+          </div>
+        )}
+
+        {/* Price */}
+        <div className="mt-2 text-sm font-semibold text-gray-900">
           {formatPrice(item.price)}
-        </p>
+        </div>
+
+        {/* Quantity controls */}
+        <div className="mt-3 flex items-center">
+          <div className="flex items-center border border-gray-300 rounded-md">
+            <button
+              onClick={() => handleQuantityChange(item.quantity - 1)}
+              disabled={item.quantity <= 1}
+              className="px-3 py-1 text-gray-600 hover:text-gray-900 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              −
+            </button>
+            <span className="px-3 py-1 text-sm font-medium w-8 text-center">
+              {item.quantity}
+            </span>
+            <button
+              onClick={() => handleQuantityChange(item.quantity + 1)}
+              disabled={item.quantity >= 10}
+              className="px-3 py-1 text-gray-600 hover:text-gray-900 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              +
+            </button>
+          </div>
+
+          {/* Remove button */}
+          <button
+            onClick={() => onRemove(item.id)}
+            className="ml-4 text-red-600 hover:text-red-800 text-sm font-medium"
+          >
+            Удалить
+          </button>
+        </div>
       </div>
 
-      <div className="flex items-center space-x-2">
-        <button
-          onClick={() => handleQuantityChange(item.quantity - 1)}
-          className="w-8 h-8 flex items-center justify-center border border-gray-300 rounded-md hover:bg-gray-50"
-        >
-          -
-        </button>
-        
-        <span className="w-8 text-center text-sm font-medium">
-          {item.quantity}
-        </span>
-        
-        <button
-          onClick={() => handleQuantityChange(item.quantity + 1)}
-          disabled={item.quantity >= item.stock}
-          className="w-8 h-8 flex items-center justify-center border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          +
-        </button>
-      </div>
-
-      <div className="flex flex-col items-end space-y-2">
-        <p className="text-sm font-medium text-gray-900">
+      {/* Total price */}
+      <div className="ml-4 text-right">
+        <div className="text-lg font-semibold text-gray-900">
           {formatPrice(item.price * item.quantity)}
-        </p>
-        
-        <Button
-          variant="danger"
-          size="sm"
-          onClick={() => removeItem(item.id)}
-          className="text-xs"
-        >
-          Remove
-        </Button>
+        </div>
       </div>
     </div>
   );

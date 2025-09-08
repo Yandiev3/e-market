@@ -1,185 +1,130 @@
-'use client';
-
-import React, { useState, useEffect } from 'react';
+// components/admin/ProductList.tsx
+import React, { useState } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
 import { formatPrice } from '@/lib/utils';
 import Button from '@/components/ui/Button';
+import Modal from '@/components/ui/Modal';
 
 interface Product {
   _id: string;
   name: string;
   price: number;
   stock: number;
-  category: string;
-  featured: boolean;
   active: boolean;
+  featured: boolean;
+  category: string;
+  brand: string;
   images: string[];
   createdAt: string;
 }
 
-const ProductList: React.FC = () => {
-  const [products, setProducts] = useState<Product[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [deleteLoading, setDeleteLoading] = useState<string | null>(null);
+interface ProductListProps {
+  products: Product[];
+  onDelete: (id: string) => void;
+  onToggleStatus: (id: string, active: boolean) => void;
+  loading?: boolean;
+}
 
-  useEffect(() => {
-    fetchProducts();
-  }, []);
+const ProductList: React.FC<ProductListProps> = ({
+  products,
+  onDelete,
+  onToggleStatus,
+  loading = false,
+}) => {
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
 
-  const fetchProducts = async () => {
-    try {
-      const response = await fetch('/api/admin/products');
-      const data = await response.json();
-      setProducts(data);
-    } catch (error) {
-      console.error('Error fetching products:', error);
-    } finally {
-      setLoading(false);
+  const handleDeleteClick = (product: Product) => {
+    setSelectedProduct(product);
+    setDeleteModalOpen(true);
+  };
+
+  const handleConfirmDelete = () => {
+    if (selectedProduct) {
+      onDelete(selectedProduct._id);
+      setDeleteModalOpen(false);
+      setSelectedProduct(null);
     }
   };
 
-  const handleDelete = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this product?')) return;
-
-    setDeleteLoading(id);
-    try {
-      const response = await fetch(`/api/admin/products/${id}`, {
-        method: 'DELETE',
-      });
-
-      if (response.ok) {
-        setProducts(prev => prev.filter(product => product._id !== id));
-      } else {
-        alert('Failed to delete product');
-      }
-    } catch (error) {
-      console.error('Error deleting product:', error);
-      alert('Error deleting product');
-    } finally {
-      setDeleteLoading(null);
-    }
-  };
-
-  const toggleStatus = async (id: string, currentStatus: boolean) => {
-    try {
-      const response = await fetch(`/api/admin/products/${id}`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ active: !currentStatus }),
-      });
-
-      if (response.ok) {
-        setProducts(prev =>
-          prev.map(product =>
-            product._id === id
-              ? { ...product, active: !currentStatus }
-              : product
-          )
-        );
-      }
-    } catch (error) {
-      console.error('Error updating product status:', error);
-    }
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('ru-RU');
   };
 
   if (loading) {
     return (
       <div className="animate-pulse">
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Product
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Price
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Stock
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Status
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {[...Array(5)].map((_, i) => (
-                <tr key={i}>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="h-4 bg-gray-300 rounded w-3/4"></div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="h-4 bg-gray-300 rounded w-1/2"></div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="h-4 bg-gray-300 rounded w-1/4"></div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="h-6 bg-gray-300 rounded w-16"></div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="h-8 bg-gray-300 rounded w-24"></div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        {[...Array(5)].map((_, i) => (
+          <div key={i} className="flex items-center justify-between p-4 border-b border-gray-200">
+            <div className="flex items-center space-x-4">
+              <div className="w-16 h-16 bg-gray-300 rounded"></div>
+              <div className="space-y-2">
+                <div className="h-4 bg-gray-300 rounded w-32"></div>
+                <div className="h-3 bg-gray-300 rounded w-24"></div>
+              </div>
+            </div>
+            <div className="flex space-x-2">
+              <div className="h-8 bg-gray-300 rounded w-16"></div>
+              <div className="h-8 bg-gray-300 rounded w-16"></div>
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  if (products.length === 0) {
+    return (
+      <div className="text-center py-12">
+        <div className="text-6xl mb-4">📦</div>
+        <h3 className="text-lg font-medium text-gray-900 mb-2">Товары не найдены</h3>
+        <p className="text-gray-600">Начните с добавления первого товара</p>
+        <Button href="/admin/manage-products/new" className="mt-4">
+          Добавить товар
+        </Button>
       </div>
     );
   }
 
   return (
-    <div className="bg-white rounded-lg shadow-md">
-      <div className="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
-        <h3 className="text-lg font-medium text-gray-900">Products</h3>
-        <Link href="/admin/products/new">
-          <Button>Add New Product</Button>
-        </Link>
-      </div>
-
-      <div className="overflow-x-auto">
-        <table className="min-w-full divide-y divide-gray-200">
+    <>
+      <div className="overflow-hidden shadow ring-1 ring-black ring-opacity-5 rounded-lg">
+        <table className="min-w-full divide-y divide-gray-300">
           <thead className="bg-gray-50">
             <tr>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Product
+                Товар
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Price
+                Категория
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Stock
+                Цена
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Category
+                Наличие
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Status
+                Статус
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Actions
+                Дата
+              </th>
+              <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Действия
               </th>
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
             {products.map((product) => (
-              <tr key={product._id}>
-                <td className="px-6 py-4 whitespace-nowrap">
+              <tr key={product._id} className="hover:bg-gray-50">
+                <td className="px-6 py-4">
                   <div className="flex items-center">
-                    <div className="relative h-10 w-10 flex-shrink-0">
-                      <Image
-                        src={product.images?.[0] || '/images/placeholder.jpg'}
+                    <div className="flex-shrink-0 h-10 w-10">
+                      <img
+                        className="h-10 w-10 rounded object-cover"
+                        src={product.images[0] || '/images/placeholder.jpg'}
                         alt={product.name}
-                        fill
-                        className="object-cover rounded"
                       />
                     </div>
                     <div className="ml-4">
@@ -187,47 +132,57 @@ const ProductList: React.FC = () => {
                         {product.name}
                       </div>
                       <div className="text-sm text-gray-500">
-                        {product.featured && (
-                          <span className="text-blue-600">Featured</span>
-                        )}
+                        {product.brand}
                       </div>
                     </div>
                   </div>
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                  {formatPrice(product.price)}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                  {product.stock}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                <td className="px-6 py-4 text-sm text-gray-900">
                   {product.category}
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <span
-                    className={`px-2 py-1 text-xs rounded-full cursor-pointer ${
-                      product.active
-                        ? 'bg-green-100 text-green-800'
-                        : 'bg-red-100 text-red-800'
-                    }`}
-                    onClick={() => toggleStatus(product._id, product.active)}
-                  >
-                    {product.active ? 'Active' : 'Inactive'}
+                <td className="px-6 py-4 text-sm text-gray-900">
+                  {formatPrice(product.price)}
+                </td>
+                <td className="px-6 py-4 text-sm text-gray-900">
+                  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                    product.stock > 0 
+                      ? 'bg-green-100 text-green-800' 
+                      : 'bg-red-100 text-red-800'
+                  }`}>
+                    {product.stock} шт.
                   </span>
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
+                <td className="px-6 py-4">
+                  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                    product.active 
+                      ? 'bg-green-100 text-green-800' 
+                      : 'bg-red-100 text-red-800'
+                  }`}>
+                    {product.active ? 'Активен' : 'Неактивен'}
+                  </span>
+                </td>
+                <td className="px-6 py-4 text-sm text-gray-500">
+                  {formatDate(product.createdAt)}
+                </td>
+                <td className="px-6 py-4 text-right text-sm font-medium space-x-2">
+                  <Button
+                    variant={product.active ? 'secondary' : 'success'}
+                    size="sm"
+                    onClick={() => onToggleStatus(product._id, !product.active)}
+                  >
+                    {product.active ? 'Деактивировать' : 'Активировать'}
+                  </Button>
                   <Link
-                    href={`/admin/products/edit/${product._id}`}
+                    href={`/admin/manage-products/edit/${product._id}`}
                     className="text-blue-600 hover:text-blue-900"
                   >
-                    Edit
+                    Редактировать
                   </Link>
                   <button
-                    onClick={() => handleDelete(product._id)}
-                    disabled={deleteLoading === product._id}
-                    className="text-red-600 hover:text-red-900 disabled:opacity-50"
+                    onClick={() => handleDeleteClick(product)}
+                    className="text-red-600 hover:text-red-900"
                   >
-                    {deleteLoading === product._id ? 'Deleting...' : 'Delete'}
+                    Удалить
                   </button>
                 </td>
               </tr>
@@ -236,12 +191,36 @@ const ProductList: React.FC = () => {
         </table>
       </div>
 
-      {products.length === 0 && (
-        <div className="text-center py-12">
-          <p className="text-gray-500">No products found</p>
+      {/* Delete confirmation modal */}
+      <Modal
+        isOpen={deleteModalOpen}
+        onClose={() => setDeleteModalOpen(false)}
+        title="Подтверждение удаления"
+      >
+        <div className="space-y-4">
+          <p className="text-gray-600">
+            Вы уверены, что хотите удалить товар "{selectedProduct?.name}"?
+          </p>
+          <p className="text-sm text-gray-500">
+            Это действие нельзя будет отменить.
+          </p>
+          <div className="flex justify-end space-x-3">
+            <Button
+              variant="outline"
+              onClick={() => setDeleteModalOpen(false)}
+            >
+              Отмена
+            </Button>
+            <Button
+              variant="danger"
+              onClick={handleConfirmDelete}
+            >
+              Удалить
+            </Button>
+          </div>
         </div>
-      )}
-    </div>
+      </Modal>
+    </>
   );
 };
 
