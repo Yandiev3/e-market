@@ -4,16 +4,34 @@ import dbConnect from '@/lib/dbConnect';
 import Product from '@/models/Product';
 import AddToCartButton from '@/components/cart/AddToCartButton';
 import { formatPrice } from '@/lib/utils';
+import { IProduct } from '@/types/product';
 
 interface ProductDetailPageProps {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }
 
 export default async function ProductDetailPage({ params }: ProductDetailPageProps) {
+  // Ожидаем params перед использованием
+  const resolvedParams = await params;
   await dbConnect();
 
-  const product = await Product.findById(params.id).lean();
-  if (!product || !product.active) {
+  // Проверяем, является ли resolvedParams.id ObjectId (24 hex characters) или slug
+  const isObjectId = /^[0-9a-fA-F]{24}$/.test(resolvedParams.id);
+  
+  let product;
+  
+  if (isObjectId) {
+    // Если это ObjectId, ищем по ID
+    product = await Product.findById(resolvedParams.id).lean().exec() as unknown as IProduct;
+  } else {
+    // Если это не ObjectId, ищем по slug
+    product = await Product.findOne({ 
+      slug: resolvedParams.id, 
+      active: true 
+    }).lean().exec() as unknown as IProduct;
+  }
+  
+  if (!product) {
     notFound();
   }
 

@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import Image from 'next/image';
 import { formatPrice } from '@/lib/utils';
 import AddToCartButton from '@/components/cart/AddToCartButton';
+import AddToFavoritesButton from '@/components/favorites/AddToFavoritesButton';
 
 interface ProductDetailProps {
   product: {
@@ -21,6 +22,7 @@ interface ProductDetailProps {
     category: string;
     sku: string;
     brand: string;
+    slug: string; // Добавлено поле slug
     colors?: { name: string; value: string; image: string }[];
     sizes?: { size: string; inStock: boolean }[];
   };
@@ -70,6 +72,20 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product }) => {
                 -{discountPercent}%
               </div>
             )}
+            
+            {/* Favorite button */}
+            <div className="absolute top-4 right-4">
+              <AddToFavoritesButton
+                product={{
+                  id: product.id,
+                  name: product.name,
+                  price: product.price,
+                  image: product.images[0],
+                  slug: product.slug, // Исправлено: используем product.slug
+                }}
+                size="lg"
+              />
+            </div>
           </div>
           
           {/* Thumbnails */}

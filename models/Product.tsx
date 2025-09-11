@@ -14,7 +14,11 @@ export interface IProduct extends Document {
   slug: string;
   featured: boolean;
   active: boolean;
+  gender: 'men' | 'women' | 'kids' | 'unisex'; // Добавлено поле пола
+  ageCategory?: 'infant' | 'toddler' | 'child' | 'teen'; // Возрастная категория для детей
   specifications?: Record<string, string>;
+  sizes?: { size: string; inStock: boolean }[]; // Добавлены размеры
+  colors?: { name: string; value: string }[]; // Добавлены цвета
   ratings: {
     average: number;
     count: number;
@@ -24,7 +28,7 @@ export interface IProduct extends Document {
 }
 
 export interface IProductLean {
-  _id: Types.ObjectId | string; // Исправлено: может быть ObjectId или string
+  _id: Types.ObjectId | string;
   name: string;
   description: string;
   price: number;
@@ -37,7 +41,11 @@ export interface IProductLean {
   slug: string;
   featured: boolean;
   active: boolean;
+  gender: 'men' | 'women' | 'kids' | 'unisex'; // Добавлено
+  ageCategory?: 'infant' | 'toddler' | 'child' | 'teen'; // Добавлено
   specifications?: Record<string, string>;
+  sizes?: { size: string; inStock: boolean }[]; // Добавлено
+  colors?: { name: string; value: string }[]; // Добавлено
   ratings: {
     average: number;
     count: number;
@@ -103,10 +111,31 @@ const productSchema = new Schema<IProduct>(
       type: Boolean,
       default: true,
     },
+    gender: {
+      type: String,
+      enum: ['men', 'women', 'kids', 'unisex'],
+      required: true,
+      default: 'unisex'
+    },
+    ageCategory: {
+      type: String,
+      enum: ['infant', 'toddler', 'child', 'teen'],
+      required: function() {
+        return this.gender === 'kids';
+      }
+    },
     specifications: {
       type: Map,
       of: String,
     },
+    sizes: [{
+      size: String,
+      inStock: Boolean
+    }],
+    colors: [{
+      name: String,
+      value: String
+    }],
     ratings: {
       average: {
         type: Number,
@@ -131,5 +160,7 @@ productSchema.index({ category: 1 });
 productSchema.index({ price: 1 });
 productSchema.index({ featured: 1 });
 productSchema.index({ active: 1 });
+productSchema.index({ gender: 1 }); // Добавлен индекс по полу
+productSchema.index({ ageCategory: 1 }); // Добавлен индекс по возрастной категории
 
 export default mongoose.models.Product || mongoose.model<IProduct>('Product', productSchema);

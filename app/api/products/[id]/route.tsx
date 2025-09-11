@@ -1,10 +1,9 @@
-// app/api/products/[id]/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import dbConnect from '@/lib/dbConnect';
 import Product, { IProductLean } from '@/models/Product';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-config';
-import { toProductLean } from '@/lib/utils'; // импортируем функцию преобразования
+import { toProductLean } from '@/lib/utils';
 
 interface Params {
   params: { id: string };
@@ -14,7 +13,22 @@ export async function GET(request: NextRequest, { params }: Params) {
   try {
     await dbConnect();
 
-    const product = await Product.findById(params.id).lean();
+    // Проверяем, является ли params.id ObjectId (24 hex characters) или slug
+    const isObjectId = /^[0-9a-fA-F]{24}$/.test(params.id);
+    
+    let product;
+    
+    if (isObjectId) {
+      // Если это ObjectId, ищем по ID
+      product = await Product.findById(params.id).lean();
+    } else {
+      // Если это не ObjectId, ищем по slug
+      product = await Product.findOne({ 
+        slug: params.id, 
+        active: true 
+      }).lean();
+    }
+
     if (!product) {
       return NextResponse.json({ message: 'Product not found' }, { status: 404 });
     }
@@ -52,10 +66,22 @@ export async function PUT(request: NextRequest, { params }: Params) {
     await dbConnect();
 
     const body = await request.json();
-    const product = await Product.findByIdAndUpdate(params.id, body, {
-      new: true,
-      runValidators: true,
-    });
+    
+    // Проверяем, является ли params.id ObjectId или slug
+    const isObjectId = /^[0-9a-fA-F]{24}$/.test(params.id);
+    let product;
+    
+    if (isObjectId) {
+      product = await Product.findByIdAndUpdate(params.id, body, {
+        new: true,
+        runValidators: true,
+      });
+    } else {
+      product = await Product.findOneAndUpdate({ slug: params.id }, body, {
+        new: true,
+        runValidators: true,
+      });
+    }
 
     if (!product) {
       return NextResponse.json({ message: 'Product not found' }, { status: 404 });
@@ -80,7 +106,16 @@ export async function DELETE(request: NextRequest, { params }: Params) {
 
     await dbConnect();
 
-    const product = await Product.findByIdAndDelete(params.id);
+    // Проверяем, является ли params.id ObjectId или slug
+    const isObjectId = /^[0-9a-fA-F]{24}$/.test(params.id);
+    let product;
+    
+    if (isObjectId) {
+      product = await Product.findByIdAndDelete(params.id);
+    } else {
+      product = await Product.findOneAndDelete({ slug: params.id });
+    }
+
     if (!product) {
       return NextResponse.json({ message: 'Product not found' }, { status: 404 });
     }
@@ -105,10 +140,22 @@ export async function PATCH(request: NextRequest, { params }: Params) {
     await dbConnect();
 
     const body = await request.json();
-    const product = await Product.findByIdAndUpdate(params.id, body, {
-      new: true,
-      runValidators: true,
-    });
+    
+    // Проверяем, является ли params.id ObjectId или slug
+    const isObjectId = /^[0-9a-fA-F]{24}$/.test(params.id);
+    let product;
+    
+    if (isObjectId) {
+      product = await Product.findByIdAndUpdate(params.id, body, {
+        new: true,
+        runValidators: true,
+      });
+    } else {
+      product = await Product.findOneAndUpdate({ slug: params.id }, body, {
+        new: true,
+        runValidators: true,
+      });
+    }
 
     if (!product) {
       return NextResponse.json({ message: 'Product not found' }, { status: 404 });

@@ -3,24 +3,21 @@ import React from 'react';
 import Link from 'next/link';
 import { formatPrice } from '@/lib/utils';
 import Button from '@/components/ui/Button';
+import { useCart } from '@/context/CartContext';
 
 interface CartSummaryProps {
-  items: Array<{
-    price: number;
-    quantity: number;
-  }>;
-  shippingPrice: number;
   onCheckout: (e?: React.MouseEvent) => void;
   loading?: boolean;
 }
 
 const CartSummary: React.FC<CartSummaryProps> = ({
-  items,
-  shippingPrice,
   onCheckout,
   loading = false,
 }) => {
+  const { items } = useCart();
+  
   const subtotal = items.reduce((total, item) => total + item.price * item.quantity, 0);
+  const shippingPrice = subtotal >= 5000 ? 0 : 500;
   const total = subtotal + shippingPrice;
   const freeShippingThreshold = 5000;
   const remainingForFreeShipping = freeShippingThreshold - subtotal;
@@ -44,7 +41,7 @@ const CartSummary: React.FC<CartSummaryProps> = ({
             <div
               className="bg-blue-600 h-2 rounded-full transition-all"
               style={{
-                width: `${(subtotal / freeShippingThreshold) * 100}%`,
+                width: `${Math.min((subtotal / freeShippingThreshold) * 100, 100)}%`,
               }}
             />
           </div>

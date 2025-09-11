@@ -4,6 +4,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { formatPrice } from '@/lib/utils';
 import AddToCartButton from '@/components/cart/AddToCartButton';
+import AddToFavoritesButton from '@/components/favorites/AddToFavoritesButton';
 
 export interface Product {
   id: string;
@@ -11,7 +12,7 @@ export interface Product {
   price: number;
   originalPrice?: number;
   image: string;
-  slug: string;
+  slug: string; // Убедимся что slug есть
   stock: number;
   ratings: {
     average: number;
@@ -58,11 +59,16 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
 
           {/* Quick actions */}
           <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-            <button className="bg-white p-2 rounded-full shadow-md hover:bg-gray-50 transition-colors">
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-              </svg>
-            </button>
+            <AddToFavoritesButton
+              product={{
+                id: product.id,
+                name: product.name,
+                price: product.price,
+                image: product.image,
+                slug: product.slug,
+              }}
+              size="sm"
+            />
           </div>
 
           {/* Out of stock overlay */}

@@ -9,16 +9,16 @@ export interface IProduct {
   category: string;
   stock: number;
   active: boolean;
-  gender: 'men' | 'women' | 'kids' | 'unisex'; // Добавлено
-  ageCategory?: 'infant' | 'toddler' | 'child' | 'teen'; // Добавлено
+  gender: 'men' | 'women' | 'kids' | 'unisex';
+  ageCategory?: 'infant' | 'toddler' | 'child' | 'teen';
   specifications?: Record<string, string>;
-  sizes?: { size: string; inStock: boolean }[]; // Добавлено
-  colors?: { name: string; value: string }[]; // Добавлено
+  sizes?: { size: string; inStock: boolean }[];
+  colors?: { name: string; value: string }[];
   ratings: {
     average: number;
     count: number;
   };
-  slug: string;
+  slug: string; // Добавлено поле slug
   createdAt: Date;
   updatedAt: Date;
 }
@@ -34,15 +34,23 @@ export interface IProductLean {
   stock: number;
   active?: boolean;
   brand: string;
-  gender: 'men' | 'women' | 'kids' | 'unisex'; // Добавлено
-  ageCategory?: 'infant' | 'toddler' | 'child' | 'teen'; // Добавлено
+  gender: 'men' | 'women' | 'kids' | 'unisex';
+  ageCategory?: 'infant' | 'toddler' | 'child' | 'teen';
   ratings: {
     average: number;
     count: number;
   };
-  slug: string;
+  slug: string; // Добавлено поле slug
   createdAt?: Date; 
   updatedAt?: Date;
+}
+
+export interface ProductForFavorites {
+  id: string;
+  name: string;
+  price: number;
+  image: string;
+  slug: string;
 }
 
 export type ProductDocument = IProduct & Document;

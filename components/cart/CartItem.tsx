@@ -2,6 +2,7 @@
 import React from 'react';
 import Image from 'next/image';
 import { formatPrice } from '@/lib/utils';
+import { useCart } from '@/context/CartContext';
 
 interface CartItemProps {
   item: {
@@ -10,18 +11,23 @@ interface CartItemProps {
     price: number;
     image: string;
     quantity: number;
+    stock: number;
     size?: string;
     color?: string;
   };
-  onUpdateQuantity: (id: string, quantity: number) => void;
-  onRemove: (id: string) => void;
 }
 
-const CartItem: React.FC<CartItemProps> = ({ item, onUpdateQuantity, onRemove }) => {
+const CartItem: React.FC<CartItemProps> = ({ item }) => {
+  const { updateQuantity, removeItem } = useCart();
+
   const handleQuantityChange = (newQuantity: number) => {
-    if (newQuantity >= 1 && newQuantity <= 10) {
-      onUpdateQuantity(item.id, newQuantity);
+    if (newQuantity >= 1 && newQuantity <= item.stock) {
+      updateQuantity(item.id, newQuantity);
     }
+  };
+
+  const handleRemove = () => {
+    removeItem(item.id);
   };
 
   return (
@@ -71,7 +77,7 @@ const CartItem: React.FC<CartItemProps> = ({ item, onUpdateQuantity, onRemove })
             </span>
             <button
               onClick={() => handleQuantityChange(item.quantity + 1)}
-              disabled={item.quantity >= 10}
+              disabled={item.quantity >= item.stock}
               className="px-3 py-1 text-gray-600 hover:text-gray-900 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               +
@@ -80,7 +86,7 @@ const CartItem: React.FC<CartItemProps> = ({ item, onUpdateQuantity, onRemove })
 
           {/* Remove button */}
           <button
-            onClick={() => onRemove(item.id)}
+            onClick={handleRemove}
             className="ml-4 text-red-600 hover:text-red-800 text-sm font-medium"
           >
             Удалить
@@ -92,6 +98,9 @@ const CartItem: React.FC<CartItemProps> = ({ item, onUpdateQuantity, onRemove })
       <div className="ml-4 text-right">
         <div className="text-lg font-semibold text-gray-900">
           {formatPrice(item.price * item.quantity)}
+        </div>
+        <div className="text-xs text-gray-500 mt-1">
+          {item.quantity} × {formatPrice(item.price)}
         </div>
       </div>
     </div>

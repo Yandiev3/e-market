@@ -2,8 +2,14 @@
 import { type NextAuthOptions } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import dbConnect from './dbConnect';
-import User from '@/models/User';
+import User, { IUser } from '@/models/User';
 import { validateEmail } from './utils';
+import { Types } from 'mongoose';
+
+// Расширяем интерфейс IUser для добавления метода _id
+interface IUserWithId extends IUser {
+  _id: Types.ObjectId;
+}
 
 export const authOptions: NextAuthOptions = {
   providers: [
@@ -34,7 +40,7 @@ export const authOptions: NextAuthOptions = {
           const userEmail = credentials.email.toLowerCase();
           console.log('Searching for user with email:', userEmail);
 
-          const user = await User.findOne({ email: userEmail });
+          const user: IUserWithId | null = await User.findOne({ email: userEmail });
           console.log('User found:', user ? 'Yes' : 'No');
           
           if (!user) {
@@ -53,10 +59,10 @@ export const authOptions: NextAuthOptions = {
             throw new Error('Invalid password');
           }
 
-        //   if (!user.active) {
-        //     console.log('User account is not active');
-        //     throw new Error('Account is deactivated');
-        //   }
+          if (!user.active) {
+            console.log('User account is not active');
+            throw new Error('Account is deactivated');
+          }
 
           console.log('=== AUTHORIZE SUCCESS ===');
           return {

@@ -54,6 +54,7 @@ export function toProductLean(obj: any): IProductLean | null {
     brand: obj.brand,
     stock: obj.stock,
     sku: obj.sku,
+    gender: obj.gender,
     slug: obj.slug,
     featured: obj.featured,
     active: obj.active,
