@@ -1,14 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth';
+import { authOptions } from '@/lib/auth-config';
 import dbConnect from '@/lib/dbConnect';
 import Order from '@/models/Order';
 
-interface Params {
-  params: { id: string };
+interface RouteContext {
+  params: Promise<{ id: string }>;
 }
 
-export async function GET(request: NextRequest, { params }: Params) {
+export async function GET(request: NextRequest, context: RouteContext) {
   try {
     const session = await getServerSession(authOptions);
     if (!session) {
@@ -17,7 +17,9 @@ export async function GET(request: NextRequest, { params }: Params) {
 
     await dbConnect();
 
-    const order = await Order.findById(params.id)
+    const { id } = await context.params;
+
+    const order = await Order.findById(id)
       .populate('user', 'name email')
       .populate('orderItems.product', 'name images')
       .lean();
@@ -44,7 +46,7 @@ export async function GET(request: NextRequest, { params }: Params) {
   }
 }
 
-export async function PATCH(request: NextRequest, { params }: Params) {
+export async function PATCH(request: NextRequest, context: RouteContext) {
   try {
     const session = await getServerSession(authOptions);
     if (!session || session.user.role !== 'admin') {
@@ -53,8 +55,9 @@ export async function PATCH(request: NextRequest, { params }: Params) {
 
     await dbConnect();
 
+    const { id } = await context.params;
     const body = await request.json();
-    const order = await Order.findByIdAndUpdate(params.id, body, {
+    const order = await Order.findByIdAndUpdate(id, body, {
       new: true,
       runValidators: true,
     })

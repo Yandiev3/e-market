@@ -1,8 +1,8 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  experimental: {
-    serverComponentsExternalPackages: ['mongoose']
-  },
+
+    serverExternalPackages: ['mongoose'],
+  
   images: {
     domains: ['localhost'],
     remotePatterns: [

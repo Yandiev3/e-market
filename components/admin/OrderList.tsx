@@ -1,8 +1,16 @@
+"use client";
+
 // components/admin/OrderList.tsx
 import React from 'react';
 import { formatPrice, formatDate } from '@/lib/utils';
 
-interface Order {
+interface OrderItem {
+  name: string;
+  quantity: number;
+  price: number;
+}
+
+interface OrderData {
   _id: string;
   orderNumber: string;
   user: {
@@ -13,16 +21,12 @@ interface Order {
   status: 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
   paymentMethod: string;
   createdAt: string;
-  items: Array<{
-    name: string;
-    quantity: number;
-    price: number;
-  }>;
+  items: OrderItem[];
 }
 
 interface OrderListProps {
-  orders: Order[];
-  onStatusChange: (id: string, status: Order['status']) => void;
+  orders: OrderData[];
+  onStatusChange: (id: string, status: OrderData['status']) => void;
   loading?: boolean;
 }
 
@@ -128,7 +132,7 @@ const OrderList: React.FC<OrderListProps> = ({ orders, onStatusChange, loading =
               <td className="px-6 py-4">
                 <select
                   value={order.status}
-                  onChange={(e) => onStatusChange(order._id, e.target.value as Order['status'])}
+                  onChange={(e) => onStatusChange(order._id, e.target.value as OrderData['status'])}
                   className={`text-sm border-0 rounded-md focus:ring-blue-500 focus:border-blue-500 ${
                     statusColors[order.status]
                   } px-2 py-1`}

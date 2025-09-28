@@ -1,3 +1,5 @@
+"use client";
+
 // components/admin/UserList.tsx
 import React, { useState } from 'react';
 import { formatDate } from '@/lib/utils';

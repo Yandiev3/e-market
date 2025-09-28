@@ -1,3 +1,5 @@
+"use client";
+
 // components/admin/ProductList.tsx
 import React, { useState } from 'react';
 import Link from 'next/link';

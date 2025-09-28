@@ -5,26 +5,28 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-config';
 import { toProductLean } from '@/lib/utils';
 
-interface Params {
-  params: { id: string };
+interface RouteContext {
+  params: Promise<{ id: string }>;
 }
 
-export async function GET(request: NextRequest, { params }: Params) {
+export async function GET(request: NextRequest, context: RouteContext) {
   try {
     await dbConnect();
 
-    // Проверяем, является ли params.id ObjectId (24 hex characters) или slug
-    const isObjectId = /^[0-9a-fA-F]{24}$/.test(params.id);
+    const { id } = await context.params;
+
+    // Проверяем, является ли id ObjectId (24 hex characters) или slug
+    const isObjectId = /^[0-9a-fA-F]{24}$/.test(id);
     
     let product;
     
     if (isObjectId) {
       // Если это ObjectId, ищем по ID
-      product = await Product.findById(params.id).lean();
+      product = await Product.findById(id).lean();
     } else {
       // Если это не ObjectId, ищем по slug
       product = await Product.findOne({ 
-        slug: params.id, 
+        slug: id, 
         active: true 
       }).lean();
     }
@@ -56,7 +58,7 @@ export async function GET(request: NextRequest, { params }: Params) {
   }
 }
 
-export async function PUT(request: NextRequest, { params }: Params) {
+export async function PUT(request: NextRequest, context: RouteContext) {
   try {
     const session = await getServerSession(authOptions);
     if (!session || session.user.role !== 'admin') {
@@ -65,19 +67,20 @@ export async function PUT(request: NextRequest, { params }: Params) {
 
     await dbConnect();
 
+    const { id } = await context.params;
     const body = await request.json();
     
-    // Проверяем, является ли params.id ObjectId или slug
-    const isObjectId = /^[0-9a-fA-F]{24}$/.test(params.id);
+    // Проверяем, является ли id ObjectId или slug
+    const isObjectId = /^[0-9a-fA-F]{24}$/.test(id);
     let product;
     
     if (isObjectId) {
-      product = await Product.findByIdAndUpdate(params.id, body, {
+      product = await Product.findByIdAndUpdate(id, body, {
         new: true,
         runValidators: true,
       });
     } else {
-      product = await Product.findOneAndUpdate({ slug: params.id }, body, {
+      product = await Product.findOneAndUpdate({ slug: id }, body, {
         new: true,
         runValidators: true,
       });
@@ -97,7 +100,7 @@ export async function PUT(request: NextRequest, { params }: Params) {
   }
 }
 
-export async function DELETE(request: NextRequest, { params }: Params) {
+export async function DELETE(request: NextRequest, context: RouteContext) {
   try {
     const session = await getServerSession(authOptions);
     if (!session || session.user.role !== 'admin') {
@@ -106,14 +109,16 @@ export async function DELETE(request: NextRequest, { params }: Params) {
 
     await dbConnect();
 
-    // Проверяем, является ли params.id ObjectId или slug
-    const isObjectId = /^[0-9a-fA-F]{24}$/.test(params.id);
+    const { id } = await context.params;
+
+    // Проверяем, является ли id ObjectId или slug
+    const isObjectId = /^[0-9a-fA-F]{24}$/.test(id);
     let product;
     
     if (isObjectId) {
-      product = await Product.findByIdAndDelete(params.id);
+      product = await Product.findByIdAndDelete(id);
     } else {
-      product = await Product.findOneAndDelete({ slug: params.id });
+      product = await Product.findOneAndDelete({ slug: id });
     }
 
     if (!product) {
@@ -130,7 +135,7 @@ export async function DELETE(request: NextRequest, { params }: Params) {
   }
 }
 
-export async function PATCH(request: NextRequest, { params }: Params) {
+export async function PATCH(request: NextRequest, context: RouteContext) {
   try {
     const session = await getServerSession(authOptions);
     if (!session || session.user.role !== 'admin') {
@@ -139,19 +144,20 @@ export async function PATCH(request: NextRequest, { params }: Params) {
 
     await dbConnect();
 
+    const { id } = await context.params;
     const body = await request.json();
     
-    // Проверяем, является ли params.id ObjectId или slug
-    const isObjectId = /^[0-9a-fA-F]{24}$/.test(params.id);
+    // Проверяем, является ли id ObjectId или slug
+    const isObjectId = /^[0-9a-fA-F]{24}$/.test(id);
     let product;
     
     if (isObjectId) {
-      product = await Product.findByIdAndUpdate(params.id, body, {
+      product = await Product.findByIdAndUpdate(id, body, {
         new: true,
         runValidators: true,
       });
     } else {
-      product = await Product.findOneAndUpdate({ slug: params.id }, body, {
+      product = await Product.findOneAndUpdate({ slug: id }, body, {
         new: true,
         runValidators: true,
       });

@@ -5,9 +5,13 @@ import { authOptions } from '@/lib/auth-config';
 import dbConnect from '@/lib/dbConnect';
 import User from '@/models/User';
 
+interface RouteContext {
+  params: Promise<{ id: string }>;
+}
+
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: RouteContext
 ) {
   try {
     const session = await getServerSession(authOptions);
@@ -15,7 +19,7 @@ export async function DELETE(
       return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
     }
 
-    const productId = params.id;
+    const { id: productId } = await context.params;
     
     if (!productId) {
       return NextResponse.json(
