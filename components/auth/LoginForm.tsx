@@ -56,7 +56,7 @@ const LoginForm: React.FC = () => {
 
   return (
     <div className="max-w-md mx-auto bg-white p-6 rounded-lg shadow-md">
-      <h2 className="text-2xl font-bold text-center mb-6">Sign In</h2>
+      <h2 className="text-2xl font-bold text-center mb-6">Авторизация</h2>
       
       {error && (
         <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
@@ -72,17 +72,17 @@ const LoginForm: React.FC = () => {
           value={formData.email}
           onChange={handleChange}
           required
-          placeholder="Enter your email"
+          placeholder="email"
         />
 
         <Input
-          label="Password"
+          label="Пароль"
           type="password"
           name="password"
           value={formData.password}
           onChange={handleChange}
           required
-          placeholder="Enter your password"
+          placeholder="Введите пароль"
         />
 
         <Button
@@ -90,15 +90,15 @@ const LoginForm: React.FC = () => {
           loading={loading}
           className="w-full"
         >
-          Sign In
+          Авторизация
         </Button>
       </form>
 
       <div className="mt-4 text-center">
         <p className="text-sm text-gray-600">
-          Don't have an account?{' '}
+        У вас нет учетной записи?{' '}
           <a href="/register" className="text-blue-600 hover:underline">
-            Sign up
+            Зарегестрироваться
           </a>
         </p>
       </div>

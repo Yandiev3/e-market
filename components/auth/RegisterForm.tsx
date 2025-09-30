@@ -71,7 +71,7 @@ const RegisterForm: React.FC = () => {
 
   return (
     <div className="max-w-md mx-auto bg-white p-6 rounded-lg shadow-md">
-      <h2 className="text-2xl font-bold text-center mb-6">Create Account</h2>
+      <h2 className="text-2xl font-bold text-center mb-6">Создать аккаунт</h2>
       
       {error && (
         <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
@@ -81,13 +81,13 @@ const RegisterForm: React.FC = () => {
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <Input
-          label="Full Name"
+          label="Полное Имя"
           type="text"
           name="name"
           value={formData.name}
           onChange={handleChange}
           required
-          placeholder="Enter your full name"
+          placeholder="ФИО"
         />
 
         <Input
@@ -97,28 +97,28 @@ const RegisterForm: React.FC = () => {
           value={formData.email}
           onChange={handleChange}
           required
-          placeholder="Enter your email"
+          placeholder="Email"
         />
 
         <Input
-          label="Password"
+          label="Пароль"
           type="password"
           name="password"
           value={formData.password}
           onChange={handleChange}
           required
           minLength={6}
-          placeholder="Enter your password"
+          placeholder="Введите пароль"
         />
 
         <Input
-          label="Confirm Password"
+          label="Подтвердите пароль"
           type="password"
           name="confirmPassword"
           value={formData.confirmPassword}
           onChange={handleChange}
           required
-          placeholder="Confirm your password"
+          placeholder="Подтвердите пароль"
         />
 
         <Button
@@ -126,15 +126,15 @@ const RegisterForm: React.FC = () => {
           loading={loading}
           className="w-full"
         >
-          Create Account
+          Создать аккаунт
         </Button>
       </form>
 
       <div className="mt-4 text-center">
         <p className="text-sm text-gray-600">
-          Already have an account?{' '}
+        У вас уже есть аккаунт?{' '}
           <a href="/login" className="text-blue-600 hover:underline">
-            Sign in
+            Авторизоваться
           </a>
         </p>
       </div>

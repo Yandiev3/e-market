@@ -1,3 +1,4 @@
+// context/AuthContext.tsx
 'use client';
 
 import React, { createContext, useContext, useEffect, useState } from 'react';
@@ -8,6 +9,10 @@ interface User {
   email: string;
   name: string;
   role: string;
+  phone?: string;
+  address?: string;
+  city?: string;
+  country?: string;
 }
 
 interface AuthContextType {
@@ -15,6 +20,7 @@ interface AuthContextType {
   loading: boolean;
   isAuthenticated: boolean;
   isAdmin: boolean;
+  updateUser: (userData: Partial<User>) => void;
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -22,6 +28,7 @@ const AuthContext = createContext<AuthContextType>({
   loading: true,
   isAuthenticated: false,
   isAdmin: false,
+  updateUser: () => {},
 });
 
 export const useAuth = () => useContext(AuthContext);
@@ -40,6 +47,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         email: session.user.email!,
         name: session.user.name!,
         role: session.user.role || 'user',
+        phone: session.user.phone || '',
+        address: session.user.address || '',
+        city: session.user.city || '',
+        country: session.user.country || '',
       });
       setLoading(false);
     } else {
@@ -48,11 +59,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, [session, status]);
 
+  const updateUser = (userData: Partial<User>) => {
+    setUser(prev => prev ? { ...prev, ...userData } : null);
+  };
+
   const value: AuthContextType = {
     user,
     loading,
     isAuthenticated: !!user,
     isAdmin: user?.role === 'admin',
+    updateUser,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

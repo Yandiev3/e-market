@@ -11,7 +11,7 @@ import Footer from '@/components/layout/Footer';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'UGGHOUSE - Магазин угги',
+  title: 'E-Store',
   description: 'Качественные угги по лучшим ценам. Бесплатная доставка от 5000₽',
   keywords: 'угги, ugg, обувь, зимняя обувь, магазин угги',
 };

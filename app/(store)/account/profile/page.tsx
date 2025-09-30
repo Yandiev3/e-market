@@ -48,6 +48,7 @@ export default function ProfilePage() {
           name: formData.name,
           currentPassword: formData.currentPassword || undefined,
           newPassword: formData.newPassword || undefined,
+          
         }),
       });
 
@@ -81,7 +82,7 @@ export default function ProfilePage() {
   return (
     <ProtectedRoute>
       <div className="max-w-2xl mx-auto">
-        <h1 className="text-2xl font-bold text-gray-900 mb-8">Profile Settings</h1>
+        <h1 className="text-2xl font-bold text-gray-900 mb-8">Настройки профиля</h1>
 
         <form onSubmit={handleSubmit} className="bg-white p-6 rounded-lg shadow-md space-y-4">
           {message && (
@@ -95,7 +96,7 @@ export default function ProfilePage() {
           )}
 
           <Input
-            label="Full Name"
+            label="Полное имя"
             name="name"
             value={formData.name}
             onChange={handleChange}
@@ -113,10 +114,10 @@ export default function ProfilePage() {
           />
 
           <div className="border-t pt-4 mt-4">
-            <h3 className="text-lg font-semibold mb-4">Change Password</h3>
+            <h3 className="text-lg font-semibold mb-4">Поменять пароль</h3>
 
             <Input
-              label="Current Password"
+              label="Действующий пароль"
               type="password"
               name="currentPassword"
               value={formData.currentPassword}
@@ -125,7 +126,7 @@ export default function ProfilePage() {
             />
 
             <Input
-              label="New Password"
+              label="Новый пароль"
               type="password"
               name="newPassword"
               value={formData.newPassword}
@@ -134,7 +135,7 @@ export default function ProfilePage() {
             />
 
             <Input
-              label="Confirm New Password"
+              label="Подтвердите новый пароль"
               type="password"
               name="confirmPassword"
               value={formData.confirmPassword}
@@ -144,7 +145,7 @@ export default function ProfilePage() {
           </div>
 
           <Button type="submit" loading={loading} className="w-full">
-            Update Profile
+            Обновить профиль
           </Button>
         </form>
       </div>

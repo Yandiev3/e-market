@@ -17,6 +17,7 @@ export interface IUser extends Document {
   email: string;
   password: string;
   name: string;
+  phone: number;
   role: 'user' | 'admin';
   active: boolean;
   cart: ICartItem[];
@@ -51,6 +52,10 @@ const userSchema = new Schema<IUser>(
       type: String,
       required: true,
       minlength: 6,
+    },
+    phone:{
+      type: Number,
+      required: false,
     },
     name: {
       type: String,

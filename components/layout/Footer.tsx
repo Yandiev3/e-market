@@ -52,7 +52,8 @@ const Footer: React.FC = () => {
               </div>
               <div className="text-gray-300">
                 <p className="font-medium">Email:</p>
-                <p className="mt-1">info@ugghouse.ru</p>
+                <p className="mt-1">info@E-Store
+.ru</p>
               </div>
               <div className="text-gray-300">
                 <p className="font-medium">Часы работы:</p>
@@ -119,7 +120,8 @@ const Footer: React.FC = () => {
 
             {/* Copyright */}
             <div className="text-gray-400 text-sm">
-              © 2024 UggHouse. Все права защищены.
+              © 2024 E-Store
+. Все права защищены.
             </div>
           </div>
         </div>

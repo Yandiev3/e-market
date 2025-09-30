@@ -76,7 +76,7 @@ export default function AccountPage() {
           {/* Profile Form */}
           <div className="lg:col-span-2">
             <form onSubmit={handleSubmit} className="bg-white p-6 rounded-lg shadow-md space-y-4">
-              <h2 className="text-lg font-semibold mb-4">Personal Information</h2>
+              <h2 className="text-lg font-semibold mb-4">Личная информация</h2>
 
               <Input
                 label="Full Name"
@@ -104,7 +104,7 @@ export default function AccountPage() {
                 onChange={handleChange}
               />
 
-              <h3 className="text-lg font-semibold mt-6 mb-4">Shipping Address</h3>
+              <h3 className="text-lg font-semibold mt-6 mb-4">Адрес доставки</h3>
 
               <Input
                 label="Address"
@@ -145,3 +145,6 @@ export default function AccountPage() {
     </ProtectedRoute>
   );
 }
+
+
+
