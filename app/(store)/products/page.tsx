@@ -1,144 +1,240 @@
+// app/(store)/products/page.tsx
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useSearchParams } from 'next/navigation';
-import ProductList from '@/components/product/ProductList';
+import { Filter } from 'lucide-react';
+import { Card } from '@/components/ui/Card';
+import ProductCard from '@/components/product/ProductCard';
 import ProductFilter from '@/components/product/ProductFilter';
-import LoadingSpinner from '@/components/ui/LoadingSpinner';
-
-interface Product {
-  id: string;
-  name: string;
-  price: number;
-  originalPrice?: number;
-  image: string;
-  slug: string;
-  stock: number;
-  ratings: {
-    average: number;
-    count: number;
-  };
-}
+import { Product, IProductLean } from '@/types/product';
 
 export default function ProductsPage() {
-  const searchParams = useSearchParams();
   const [products, setProducts] = useState<Product[]>([]);
+  const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [categories, setCategories] = useState<string[]>([]);
-  const [brands, setBrands] = useState<string[]>([]); // Добавлено состояние для брендов
-  const [totalPages, setTotalPages] = useState(1);
-  const [currentPage, setCurrentPage] = useState(1);
+  const [brands, setBrands] = useState<string[]>([]);
+  const [filters, setFilters] = useState({
+    category: '',
+    priceRange: '',
+    sortBy: 'popular',
+    inStock: false,
+    featured: false,
+    brand: '',
+    size: '',
+    color: '',
+  });
 
   useEffect(() => {
-    fetchProducts();
-    fetchCategories();
-    fetchBrands(); // Добавлен вызов получения брендов
-  }, [searchParams]);
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        
+        // Fetch products
+        const productsResponse = await fetch('/api/products');
+        if (productsResponse.ok) {
+          const responseData = await productsResponse.json();
+          
+          // Обрабатываем разные форматы ответа
+          let productsData: IProductLean[] = [];
+          
+          if (Array.isArray(responseData)) {
+            productsData = responseData;
+          } else if (responseData && Array.isArray(responseData.products)) {
+            productsData = responseData.products;
+          } else if (responseData && responseData.data && Array.isArray(responseData.data)) {
+            productsData = responseData.data;
+          } else {
+            console.warn('Unexpected API response format:', responseData);
+            productsData = [];
+          }
+          
+          console.log('Products data received:', productsData);
+          
+          // Преобразуем IProductLean в Product
+          const formattedProducts: Product[] = productsData.map(product => ({
+            id: product._id?.toString() || '',
+            name: product.name || '',
+            price: product.price || 0,
+            originalPrice: product.originalPrice,
+            image: product.images?.[0] || '/images/placeholder.jpg',
+            images: product.images || [],
+            slug: product.slug || '',
+            category: product.category || '',
+            stock: product.stock || 0,
+            ratings: product.ratings || { average: 0, count: 0 },
+            brand: product.brand || '',
+            description: '',
+            sizes: [],
+            colors: []
+          }));
+          
+          setProducts(formattedProducts);
+          setFilteredProducts(formattedProducts);
+        } else {
+          console.error('Products API response not ok:', productsResponse.status);
+          setProducts([]);
+          setFilteredProducts([]);
+        }
 
-  const fetchProducts = async () => {
-    try {
-      setLoading(true);
-      const params = new URLSearchParams(searchParams.toString());
-      params.set('page', currentPage.toString());
-      
-      const response = await fetch(`/api/products?${params}`);
-      const data = await response.json();
-      
-      setProducts(data.products.map((product: any) => ({
-        id: product._id,
-        name: product.name,
-        price: product.price,
-        originalPrice: product.originalPrice,
-        image: product.images?.[0] || '/images/placeholder.jpg',
-        slug: product.slug,
-        stock: product.stock,
-        ratings: product.ratings,
-      })));
-      
-      setTotalPages(data.totalPages);
-      setCurrentPage(data.currentPage);
-    } catch (error) {
-      console.error('Error fetching products:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+        // Fetch categories
+        const categoriesResponse = await fetch('/api/products/categories');
+        if (categoriesResponse.ok) {
+          const categoriesData = await categoriesResponse.json();
+          setCategories(Array.isArray(categoriesData) ? categoriesData : []);
+        } else {
+          setCategories([]);
+        }
 
-  const fetchCategories = async () => {
-    try {
-      const response = await fetch('/api/products/categories');
-      const data = await response.json();
-      setCategories(data.categories);
-    } catch (error) {
-      console.error('Error fetching categories:', error);
-    }
-  };
-
-  const fetchBrands = async () => {
-    try {
-      const response = await fetch('/api/products/brands');
-      const data = await response.json();
-      setBrands(data.brands || []); // Добавлено получение брендов
-    } catch (error) {
-      console.error('Error fetching brands:', error);
-      setBrands([]);
-    }
-  };
-
-  const handleFilterChange = (filters: any) => {
-    const params = new URLSearchParams();
-    Object.entries(filters).forEach(([key, value]) => {
-      if (value) {
-        params.set(key, value.toString());
+        // Fetch brands
+        const brandsResponse = await fetch('/api/products/brands');
+        if (brandsResponse.ok) {
+          const brandsData = await brandsResponse.json();
+          setBrands(Array.isArray(brandsData) ? brandsData : []);
+        } else {
+          setBrands([]);
+        }
+      } catch (error) {
+        console.error('Error fetching data:', error);
+        setProducts([]);
+        setFilteredProducts([]);
+        setCategories([]);
+        setBrands([]);
+      } finally {
+        setLoading(false);
       }
-    });
-    window.history.replaceState({}, '', `?${params}`);
-    fetchProducts();
+    };
+
+    fetchData();
+  }, []);
+
+  useEffect(() => {
+    applyFilters();
+  }, [filters, products]);
+
+  const applyFilters = () => {
+    setLoading(true);
+    
+    let filtered = [...products];
+
+    // Apply category filter
+    if (filters.category) {
+      filtered = filtered.filter(product => product.category === filters.category);
+    }
+
+    // Apply brand filter
+    if (filters.brand) {
+      filtered = filtered.filter(product => product.brand === filters.brand);
+    }
+
+    // Apply in-stock filter
+    if (filters.inStock) {
+      filtered = filtered.filter(product => product.stock > 0);
+    }
+
+    // Apply featured filter
+    if (filters.featured) {
+      filtered = filtered.filter(product => product.isFeatured);
+    }
+
+    // Apply price range filter
+    if (filters.priceRange) {
+      const [min, max] = filters.priceRange.split('-').map(Number);
+      if (max) {
+        filtered = filtered.filter(product => product.price >= min && product.price <= max);
+      } else {
+        filtered = filtered.filter(product => product.price >= min);
+      }
+    }
+
+    // Apply sorting
+    switch (filters.sortBy) {
+      case 'price-asc':
+        filtered.sort((a, b) => a.price - b.price);
+        break;
+      case 'price-desc':
+        filtered.sort((a, b) => b.price - a.price);
+        break;
+      case 'newest':
+        filtered.sort((a, b) => (b.isNew ? 1 : 0) - (a.isNew ? 1 : 0));
+        break;
+      case 'rating':
+        filtered.sort((a, b) => b.ratings.average - a.ratings.average);
+        break;
+      default: // popular
+        filtered.sort((a, b) => b.ratings.count - a.ratings.count);
+    }
+
+    setFilteredProducts(filtered);
+    setLoading(false);
+  };
+
+  const handleFilterChange = (newFilters: any) => {
+    setFilters(newFilters);
   };
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-      {/* Sidebar */}
-      <div className="lg:col-span-1">
-        <ProductFilter
-          categories={categories}
-          brands={brands} // Передаем бренды в фильтр
-          onFilterChange={handleFilterChange}
-          loading={loading}
-        />
-      </div>
+    <div className="min-h-screen bg-background">
+      <div className="container mx-auto px-4 py-8">
+        <div className="flex flex-col md:flex-row gap-8">
+          {/* Filters */}
+          <aside className="w-full md:w-80 shrink-0">
+            <div className="sticky top-24">
+              <div className="flex items-center gap-2 mb-6">
+                <Filter className="h-5 w-5 text-primary" />
+                <h2 className="text-lg font-semibold">Фильтры</h2>
+              </div>
+              
+              <ProductFilter
+                categories={categories}
+                brands={brands}
+                onFilterChange={handleFilterChange}
+                loading={loading}
+              />
+            </div>
+          </aside>
 
-      {/* Main Content */}
-      <div className="lg:col-span-3">
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl font-bold text-gray-900">All Products</h1>
-          <span className="text-gray-600">
-            {products.length} products found
-          </span>
+          {/* Products Grid */}
+          <main className="flex-1">
+            <div className="mb-6">
+              <h2 className="text-3xl font-bold mb-2">Каталог товаров</h2>
+              <p className="text-muted-foreground">
+                Найдено товаров: {filteredProducts.length}
+              </p>
+            </div>
+
+            {loading ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                {[...Array(6)].map((_, i) => (
+                  <Card key={i} className="animate-pulse">
+                    <div className="aspect-square bg-muted rounded-t-lg"></div>
+                    <div className="p-4 space-y-3">
+                      <div className="h-4 bg-muted rounded"></div>
+                      <div className="h-4 bg-muted rounded w-2/3"></div>
+                      <div className="h-6 bg-muted rounded w-1/2"></div>
+                    </div>
+                  </Card>
+                ))}
+              </div>
+            ) : (
+              <>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {filteredProducts.map((product) => (
+                    <ProductCard key={product.id} product={product} />
+                  ))}
+                </div>
+
+                {filteredProducts.length === 0 && (
+                  <div className="text-center py-16">
+                    <p className="text-xl text-muted-foreground">
+                      Товары не найдены. Попробуйте изменить фильтры.
+                    </p>
+                  </div>
+                )}
+              </>
+            )}
+          </main>
         </div>
-
-        <ProductList products={products} loading={loading} />
-
-        {/* Pagination */}
-        {totalPages > 1 && (
-          <div className="flex justify-center mt-8">
-            <nav className="flex space-x-2">
-              {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                <button
-                  key={page}
-                  onClick={() => setCurrentPage(page)}
-                  className={`px-3 py-1 rounded-md ${
-                    currentPage === page
-                      ? 'bg-blue-600 text-white'
-                      : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                  }`}
-                >
-                  {page}
-                </button>
-              ))}
-            </nav>
-          </div>
-        )}
       </div>
     </div>
   );

@@ -18,7 +18,8 @@ export interface IProduct {
     average: number;
     count: number;
   };
-  slug: string; // Добавлено поле slug
+  slug: string;
+  brand: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -30,7 +31,7 @@ export interface IProductLean {
   price: number;
   originalPrice?: number;
   images: string[];
-  category?: string;
+  category: string;
   stock: number;
   active?: boolean;
   brand: string;
@@ -40,9 +41,27 @@ export interface IProductLean {
     average: number;
     count: number;
   };
-  slug: string; // Добавлено поле slug
+  slug: string;
   createdAt?: Date; 
   updatedAt?: Date;
+}
+
+export interface Product {
+  id: string;
+  name: string;
+  price: number;
+  originalPrice?: number;
+  image: string;
+  slug: string;
+  stock: number;
+  ratings: {
+    average: number;
+    count: number;
+  };
+  brand?: string;
+  isNew?: boolean;
+  isFeatured?: boolean;
+  category: string;
 }
 
 export interface ProductForFavorites {

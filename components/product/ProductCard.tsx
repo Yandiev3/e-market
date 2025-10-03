@@ -2,25 +2,11 @@
 import React from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { Card } from '@/components/ui/Card';
 import { formatPrice } from '@/lib/utils';
 import AddToCartButton from '@/components/cart/AddToCartButton';
 import AddToFavoritesButton from '@/components/favorites/AddToFavoritesButton';
-
-export interface Product {
-  id: string;
-  name: string;
-  price: number;
-  originalPrice?: number;
-  image: string;
-  slug: string; // Убедимся что slug есть
-  stock: number;
-  ratings: {
-    average: number;
-    count: number;
-  };
-  brand?: string;
-  isNew?: boolean;
-}
+import { Product } from '@/types/product';
 
 interface ProductCardProps {
   product: Product;
@@ -29,13 +15,13 @@ interface ProductCardProps {
 const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   const hasDiscount = product.originalPrice && product.originalPrice > product.price;
   const discountPercent = hasDiscount 
-    ? Math.round((1 - product.price / product.originalPrice!) * 100)
+    ? Math.round((1 - product.price / product.originalPrice) * 100)
     : 0;
 
   return (
-    <div className="group bg-white rounded-lg overflow-hidden hover:shadow-lg transition-all duration-300">
+    <Card className="group overflow-hidden hover:shadow-lg transition-all duration-300">
       <Link href={`/products/${product.slug}`} className="block relative">
-        <div className="relative aspect-square overflow-hidden bg-gray-100">
+        <div className="relative aspect-square overflow-hidden bg-secondary">
           <Image
             src={product.image || '/images/placeholder.jpg'}
             alt={product.name}
@@ -73,41 +59,29 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
 
           {/* Out of stock overlay */}
           {product.stock === 0 && (
-            <div className="absolute inset-0 bg-black bg-opacity-60 flex items-center justify-center">
-              <span className="text-white font-semibold">Нет в наличии</span>
+            <div className="absolute inset-0 bg-background/60 flex items-center justify-center">
+              <span className="text-foreground font-semibold bg-background/80 px-3 py-1 rounded">
+                Нет в наличии
+              </span>
             </div>
           )}
         </div>
       </Link>
 
-      <div className="p-3">
+      <div className="p-4">
         {/* Brand */}
         {product.brand && (
-          <p className="text-xs text-gray-500 mb-1 uppercase tracking-wide">
+          <p className="text-xs text-muted-foreground mb-1 uppercase tracking-wide">
             {product.brand}
           </p>
         )}
         
         {/* Product name */}
         <Link href={`/products/${product.slug}`}>
-          <h3 className="font-normal text-gray-900 mb-2 hover:text-blue-600 line-clamp-2 transition-colors text-sm leading-tight">
+          <h3 className="font-medium text-foreground mb-2 hover:text-primary line-clamp-2 transition-colors text-sm leading-tight">
             {product.name}
           </h3>
         </Link>
-
-        {/* Price */}
-        <div className="flex items-center justify-between mb-3">
-          <div className="flex items-center space-x-2">
-            <span className="text-lg font-bold text-gray-900">
-              {formatPrice(product.price)}
-            </span>
-            {hasDiscount && (
-              <span className="text-sm text-gray-500 line-through">
-                {formatPrice(product.originalPrice!)}
-              </span>
-            )}
-          </div>
-        </div>
 
         {/* Rating */}
         <div className="flex items-center mb-3">
@@ -118,18 +92,33 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
               </span>
             ))}
           </div>
-          <span className="text-xs text-gray-500 ml-2">
+          <span className="text-xs text-muted-foreground ml-2">
             ({product.ratings.count})
           </span>
+        </div>
+
+        {/* Price */}
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center space-x-2">
+            <span className="text-lg font-bold text-foreground">
+              {formatPrice(product.price)}
+            </span>
+            {hasDiscount && product.originalPrice && (
+              <span className="text-sm text-muted-foreground line-through">
+                {formatPrice(product.originalPrice)}
+              </span>
+            )}
+          </div>
         </div>
 
         {/* Add to cart button */}
         <AddToCartButton
           product={product}
           className="text-sm"
+          size="sm"
         />
       </div>
-    </div>
+    </Card>
   );
 };
 

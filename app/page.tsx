@@ -18,7 +18,7 @@ export default async function Home() {
     stock: { $gt: 0 },
   })
     .limit(8)
-    .select('name price images slug stock ratings brand')
+    .select('name price images slug stock ratings brand category')
     .lean() as unknown as IProductLean[];
 
   // Get new arrivals
@@ -28,7 +28,7 @@ export default async function Home() {
   })
     .sort({ createdAt: -1 })
     .limit(8)
-    .select('name price images slug stock ratings brand')
+    .select('name price images slug stock ratings brand category')
     .lean() as unknown as IProductLean[];
 
   const session = await getServerSession(authOptions);
@@ -43,7 +43,7 @@ export default async function Home() {
         <div className="container mx-auto px-4 text-center relative z-10">
           <div className="max-w-4xl mx-auto">
             <h1 className="text-6xl md:text-8xl font-bold mb-6 tracking-tight">
-              UGG<span className="text-primary">STORE</span>
+              <span className="text-primary">KASTOM</span>
             </h1>
             
             <p className="text-xl md:text-2xl text-muted-foreground mb-8 max-w-2xl mx-auto leading-relaxed">
@@ -53,7 +53,6 @@ export default async function Home() {
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
               <Link href="/products">
                 <Button size="lg" className="text-lg px-8 py-6 h-auto">
-                  {/* ShoppingBag icon removed */}
                   📦 Смотреть каталог
                 </Button>
               </Link>
@@ -82,7 +81,6 @@ export default async function Home() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
             <div className="text-center p-6 group hover:bg-card/50 rounded-lg transition-all duration-300">
               <div className="inline-flex items-center justify-center w-16 h-16 bg-primary/10 rounded-full mb-4 group-hover:bg-primary/20 transition-colors">
-                {/* Truck icon replaced */}
                 🚚
               </div>
               <h3 className="text-xl font-semibold mb-2">Быстрая доставка</h3>
@@ -93,7 +91,6 @@ export default async function Home() {
 
             <div className="text-center p-6 group hover:bg-card/50 rounded-lg transition-all duration-300">
               <div className="inline-flex items-center justify-center w-16 h-16 bg-primary/10 rounded-full mb-4 group-hover:bg-primary/20 transition-colors">
-                {/* Shield icon replaced */}
                 🛡️
               </div>
               <h3 className="text-xl font-semibold mb-2">Гарантия качества</h3>
@@ -104,7 +101,6 @@ export default async function Home() {
 
             <div className="text-center p-6 group hover:bg-card/50 rounded-lg transition-all duration-300">
               <div className="inline-flex items-center justify-center w-16 h-16 bg-primary/10 rounded-full mb-4 group-hover:bg-primary/20 transition-colors">
-                {/* Zap icon replaced */}
                 ⚡
               </div>
               <h3 className="text-xl font-semibold mb-2">Новые коллекции</h3>
@@ -141,6 +137,7 @@ export default async function Home() {
               originalPrice: product.originalPrice,
               image: product.images?.[0] || '/images/placeholder.jpg',
               slug: product.slug,
+              category: product.category || '',
               stock: product.stock,
               ratings: product.ratings,
               brand: product.brand,
@@ -175,6 +172,7 @@ export default async function Home() {
               originalPrice: product.originalPrice,
               image: product.images?.[0] || '/images/placeholder.jpg',
               slug: product.slug,
+              category: product.category || '',
               stock: product.stock,
               ratings: product.ratings,
               brand: product.brand,
