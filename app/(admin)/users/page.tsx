@@ -1,6 +1,6 @@
+// app/(admin)/users/page.tsx
 "use client";
 
-// app/(admin)/users/page.tsx
 import { useState, useEffect } from 'react';
 import UserList from '@/components/admin/UserList';
 
@@ -48,7 +48,6 @@ export default function UsersPage() {
       });
 
       if (response.ok) {
-        // Обновляем список пользователей после изменения роли
         fetchUsers();
       } else {
         console.error('Failed to update user role');
@@ -71,7 +70,6 @@ export default function UsersPage() {
       });
 
       if (response.ok) {
-        // Обновляем список пользователей после изменения статуса
         fetchUsers();
       } else {
         console.error('Failed to update user status');
@@ -90,7 +88,6 @@ export default function UsersPage() {
       });
 
       if (response.ok) {
-        // Обновляем список пользователей после удаления
         fetchUsers();
       } else {
         console.error('Failed to delete user');
@@ -108,7 +105,10 @@ export default function UsersPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold text-gray-900 mb-8">Управление пользователями</h1>
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold text-foreground">Управление пользователями</h1>
+        <p className="text-muted-foreground mt-2">Управление учетными записями пользователей</p>
+      </div>
       <UserList 
         users={users}
         onRoleChange={handleRoleChange}

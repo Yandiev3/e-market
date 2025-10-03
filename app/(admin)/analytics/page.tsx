@@ -1,9 +1,13 @@
+// app/(admin)/analytics/page.tsx
 import AnalyticsDashboard from '@/components/admin/AnalyticsDashboard';
 
 export default function AnalyticsPage() {
   return (
     <div>
-      <h1 className="text-2xl font-bold text-gray-900 mb-8">Analytics Dashboard</h1>
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold text-foreground">Аналитика</h1>
+        <p className="text-muted-foreground mt-2">Статистика продаж и активности магазина</p>
+      </div>
       <AnalyticsDashboard />
     </div>
   );

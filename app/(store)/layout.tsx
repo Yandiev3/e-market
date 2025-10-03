@@ -1,3 +1,4 @@
+// app/(store)/layout.tsx
 export default function StoreLayout({
   children,
 }: {

@@ -11,7 +11,7 @@ import Footer from '@/components/layout/Footer';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'E-Store',
+  title: 'UGG Store - Премиальные угги',
   description: 'Качественные угги по лучшим ценам. Бесплатная доставка от 5000₽',
   keywords: 'угги, ugg, обувь, зимняя обувь, магазин угги',
 };
@@ -22,12 +22,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="ru">
+    <html lang="ru" className="dark">
       <body className={inter.className}>
         <AppAuthProvider>
           <CartProvider>
             <FavoritesProvider>
-              <div className="min-h-screen flex flex-col">
+              <div className="min-h-screen flex flex-col bg-background text-foreground">
                 <Header />
                 <main className="flex-1">
                   {children}

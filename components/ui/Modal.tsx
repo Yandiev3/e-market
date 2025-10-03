@@ -41,7 +41,7 @@ const Modal: React.FC<ModalProps> = ({
     >
       <div className="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
         <div
-          className="fixed inset-0 transition-opacity bg-ugg-dark bg-opacity-75"
+          className="fixed inset-0 transition-opacity bg-background/80 backdrop-blur-sm"
           aria-hidden="true"
         ></div>
 
@@ -51,22 +51,22 @@ const Modal: React.FC<ModalProps> = ({
 
         <div
           className={`
-            inline-block w-full align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle
+            inline-block w-full align-bottom bg-card rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle border border-border
             ${sizeClasses[size]}
           `}
         >
           {/* Header */}
           {(title || showCloseButton) && (
-            <div className="flex items-center justify-between px-6 py-4 border-b border-ugg-gray">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-border">
               {title && (
-                <h3 className="text-lg font-semibold text-ugg-dark">{title}</h3>
+                <h3 className="text-lg font-semibold text-foreground">{title}</h3>
               )}
               {showCloseButton && (
                 <button
                   onClick={onClose}
-                  className="text-ugg-dark/60 hover:text-ugg-dark transition-colors"
+                  className="text-muted-foreground hover:text-foreground transition-colors p-1 rounded-lg hover:bg-accent"
                 >
-                  <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                   </svg>
                 </button>

@@ -1,6 +1,6 @@
+// app/(admin)/orders/page.tsx
 "use client";
 
-// app/(admin)/orders/page.tsx
 import { useState, useEffect } from 'react';
 import OrderList from '@/components/admin/OrderList';
 
@@ -61,7 +61,6 @@ export default function OrdersPage() {
       });
 
       if (response.ok) {
-        // Обновляем список заказов после изменения статуса
         fetchOrders();
       } else {
         console.error('Failed to update order status');
@@ -73,7 +72,6 @@ export default function OrdersPage() {
     }
   };
 
-  // Преобразуем данные из API в формат для OrderList
   const transformedOrders = orders.map(order => ({
     _id: order._id,
     orderNumber: order.orderNumber,
@@ -98,7 +96,10 @@ export default function OrdersPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold text-gray-900 mb-8">Управление заказами</h1>
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold text-foreground">Управление заказами</h1>
+        <p className="text-muted-foreground mt-2">Просмотр и управление заказами клиентов</p>
+      </div>
       <OrderList 
         orders={transformedOrders}
         onStatusChange={handleStatusChange}

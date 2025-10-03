@@ -4,41 +4,41 @@ import Link from 'next/link';
 
 const Footer: React.FC = () => {
   return (
-    <footer className="bg-gray-900 text-white">
+    <footer className="bg-card border-t border-border">
       <div className="max-w-7xl mx-auto px-4 py-12">
         {/* Main footer content */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* Company */}
           <div>
             <h3 className="font-semibold text-lg mb-4">Магазин</h3>
-            <ul className="space-y-2 text-gray-300">
-              <li><Link href="/about" className="hover:text-white transition-colors">О нас</Link></li>
-              <li><Link href="/contact" className="hover:text-white transition-colors">Контакты</Link></li>
-              <li><Link href="/careers" className="hover:text-white transition-colors">Вакансии</Link></li>
-              <li><Link href="/stores" className="hover:text-white transition-colors">Магазины</Link></li>
+            <ul className="space-y-2 text-muted-foreground">
+              <li><Link href="/about" className="hover:text-foreground transition-colors">О нас</Link></li>
+              <li><Link href="/contact" className="hover:text-foreground transition-colors">Контакты</Link></li>
+              <li><Link href="/careers" className="hover:text-foreground transition-colors">Вакансии</Link></li>
+              <li><Link href="/stores" className="hover:text-foreground transition-colors">Магазины</Link></li>
             </ul>
           </div>
 
           {/* Help */}
           <div>
             <h3 className="font-semibold text-lg mb-4">Помощь</h3>
-            <ul className="space-y-2 text-gray-300">
-              <li><Link href="/help" className="hover:text-white transition-colors">FAQ</Link></li>
-              <li><Link href="/delivery" className="hover:text-white transition-colors">Доставка</Link></li>
-              <li><Link href="/returns" className="hover:text-white transition-colors">Возврат</Link></li>
-              <li><Link href="/sizes" className="hover:text-white transition-colors">Размеры</Link></li>
-              <li><Link href="/care" className="hover:text-white transition-colors">Уход за обувью</Link></li>
+            <ul className="space-y-2 text-muted-foreground">
+              <li><Link href="/help" className="hover:text-foreground transition-colors">FAQ</Link></li>
+              <li><Link href="/delivery" className="hover:text-foreground transition-colors">Доставка</Link></li>
+              <li><Link href="/returns" className="hover:text-foreground transition-colors">Возврат</Link></li>
+              <li><Link href="/sizes" className="hover:text-foreground transition-colors">Размеры</Link></li>
+              <li><Link href="/care" className="hover:text-foreground transition-colors">Уход за обувью</Link></li>
             </ul>
           </div>
 
           {/* Legal */}
           <div>
             <h3 className="font-semibold text-lg mb-4">Правовая информация</h3>
-            <ul className="space-y-2 text-gray-300">
-              <li><Link href="/privacy" className="hover:text-white transition-colors">Политика конфиденциальности</Link></li>
-              <li><Link href="/terms" className="hover:text-white transition-colors">Условия использования</Link></li>
-              <li><Link href="/cookies" className="hover:text-white transition-colors">Cookie-файлы</Link></li>
-              <li><Link href="/legal" className="hover:text-white transition-colors">Юридическая информация</Link></li>
+            <ul className="space-y-2 text-muted-foreground">
+              <li><Link href="/privacy" className="hover:text-foreground transition-colors">Политика конфиденциальности</Link></li>
+              <li><Link href="/terms" className="hover:text-foreground transition-colors">Условия использования</Link></li>
+              <li><Link href="/cookies" className="hover:text-foreground transition-colors">Cookie-файлы</Link></li>
+              <li><Link href="/legal" className="hover:text-foreground transition-colors">Юридическая информация</Link></li>
             </ul>
           </div>
 
@@ -46,16 +46,15 @@ const Footer: React.FC = () => {
           <div>
             <h3 className="font-semibold text-lg mb-4">Свяжитесь с нами</h3>
             <div className="space-y-4">
-              <div className="text-gray-300">
+              <div className="text-muted-foreground">
                 <p className="font-medium">Телефон:</p>
                 <p className="mt-1">8 (800) 555-35-35</p>
               </div>
-              <div className="text-gray-300">
+              <div className="text-muted-foreground">
                 <p className="font-medium">Email:</p>
-                <p className="mt-1">info@E-Store
-.ru</p>
+                <p className="mt-1">info@uggstore.ru</p>
               </div>
-              <div className="text-gray-300">
+              <div className="text-muted-foreground">
                 <p className="font-medium">Часы работы:</p>
                 <p className="mt-1">Пн-Вс: 9:00-21:00</p>
               </div>
@@ -64,11 +63,11 @@ const Footer: React.FC = () => {
         </div>
 
         {/* Newsletter */}
-        <div className="border-t border-gray-800 mt-8 pt-8">
+        <div className="border-t border-border mt-8 pt-8">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
             <div>
               <h4 className="font-semibold text-lg mb-2">Подпишитесь на рассылку</h4>
-              <p className="text-gray-300 text-sm">
+              <p className="text-muted-foreground text-sm">
                 Узнавайте первыми о новых коллекциях и акциях
               </p>
             </div>
@@ -76,9 +75,9 @@ const Footer: React.FC = () => {
               <input
                 type="email"
                 placeholder="Ваш email"
-                className="flex-1 px-4 py-2 bg-gray-800 border border-gray-700 rounded text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="flex-1 px-4 py-2 bg-input border border-input rounded text-foreground placeholder-muted-foreground focus:ring-2 focus:ring-primary focus:border-transparent"
               />
-              <button className="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 transition-colors">
+              <button className="btn-primary px-6 py-2">
                 Подписаться
               </button>
             </div>
@@ -86,7 +85,7 @@ const Footer: React.FC = () => {
         </div>
 
         {/* Social & Payment */}
-        <div className="border-t border-gray-800 mt-8 pt-8">
+        <div className="border-t border-border mt-8 pt-8">
           <div className="flex flex-col md:flex-row justify-between items-center gap-6">
             {/* Social media */}
             <div className="flex space-x-4">
@@ -98,7 +97,7 @@ const Footer: React.FC = () => {
                 <a
                   key={social.name}
                   href={social.href}
-                  className="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center hover:bg-gray-700 transition-colors"
+                  className="w-10 h-10 bg-secondary rounded-full flex items-center justify-center hover:bg-accent hover:text-accent-foreground transition-colors"
                   title={social.name}
                 >
                   <span className="text-sm font-medium">{social.icon}</span>
@@ -111,7 +110,7 @@ const Footer: React.FC = () => {
               {['Visa', 'Mastercard', 'МИР'].map((method) => (
                 <div
                   key={method}
-                  className="w-12 h-8 bg-gray-800 rounded flex items-center justify-center"
+                  className="w-12 h-8 bg-secondary rounded flex items-center justify-center"
                 >
                   <span className="text-xs font-medium">{method}</span>
                 </div>
@@ -119,9 +118,8 @@ const Footer: React.FC = () => {
             </div>
 
             {/* Copyright */}
-            <div className="text-gray-400 text-sm">
-              © 2024 E-Store
-. Все права защищены.
+            <div className="text-muted-foreground text-sm">
+              © 2024 UGGSTORE. Все права защищены.
             </div>
           </div>
         </div>

@@ -17,7 +17,7 @@ export default async function Home() {
     active: true,
     stock: { $gt: 0 },
   })
-    .limit(12)
+    .limit(8)
     .select('name price images slug stock ratings brand')
     .lean() as unknown as IProductLean[];
 
@@ -27,81 +27,112 @@ export default async function Home() {
     stock: { $gt: 0 },
   })
     .sort({ createdAt: -1 })
-    .limit(12)
+    .limit(8)
     .select('name price images slug stock ratings brand')
     .lean() as unknown as IProductLean[];
 
   const session = await getServerSession(authOptions);
 
   return (
-    <div className="min-h-screen bg-white">
-      {/* Hero Banner */}
-      <section className="relative h-96 bg-gradient-to-r from-gray-900 to-gray-700">
-        <div className="absolute inset-0 bg-black/40"></div>
-        <div className="relative h-full max-w-7xl mx-auto px-4 flex items-center">
-          <div className="text-white max-w-2xl">
-            <h1 className="text-4xl md:text-6xl font-bold mb-4">
-              Стильные угги
-              <br />
-              для вашего комфорта
+    <div className="min-h-screen bg-background">
+      {/* Hero Section */}
+      <section className="relative overflow-hidden min-h-screen flex items-center justify-center">
+        <div className="absolute inset-0 bg-gradient-to-b from-primary/10 via-background to-background"></div>
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-primary/5 via-transparent to-transparent"></div>
+        
+        <div className="container mx-auto px-4 text-center relative z-10">
+          <div className="max-w-4xl mx-auto">
+            <h1 className="text-6xl md:text-8xl font-bold mb-6 tracking-tight">
+              UGG<span className="text-primary">STORE</span>
             </h1>
-            <p className="text-lg md:text-xl mb-8 opacity-90">
-              Откройте мир уюта и стиля с нашей коллекцией угг
+            
+            <p className="text-xl md:text-2xl text-muted-foreground mb-8 max-w-2xl mx-auto leading-relaxed">
+              Премиальные угги для максимального комфорта в городской жизни
             </p>
-            <div className="flex gap-4">
+            
+            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
               <Link href="/products">
-                <Button size="lg" className="bg-white text-gray-900 hover:bg-gray-100">
-                  Смотреть коллекцию
+                <Button size="lg" className="text-lg px-8 py-6 h-auto">
+                  {/* ShoppingBag icon removed */}
+                  📦 Смотреть каталог
                 </Button>
               </Link>
               {!session && (
                 <Link href="/register">
-                  <Button variant="outline" size="lg" className="border-white text-white hover:bg-white hover:text-gray-900">
-                    Создать аккаунт
+                  <Button variant="outline" size="lg" className="text-lg px-8 py-6 h-auto border-2">
+                    👤 Создать аккаунт
                   </Button>
                 </Link>
               )}
             </div>
           </div>
         </div>
+
+        {/* Scroll indicator */}
+        <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce">
+          <div className="w-6 h-10 border-2 border-border rounded-full flex justify-center">
+            <div className="w-1 h-3 bg-muted-foreground rounded-full mt-2"></div>
+          </div>
+        </div>
       </section>
 
-      {/* Categories Grid */}
-      <section className="py-16">
-        <div className="max-w-7xl mx-auto px-4">
-          <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-8 text-center">
-            Категории
-          </h2>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {[
-              { name: 'Женские угги', href: '/products?category=women', image: '/women.jpg' },
-              { name: 'Мужские угги', href: '/products?category=men', image: '/men.jpg' },
-              { name: 'Детские угги', href: '/products?category=kids', image: '/kids.jpg' },
-              { name: 'Аксессуары', href: '/products?category=accessories', image: '/accessories.jpg' },
-            ].map((category, index) => (
-              <Link key={index} href={category.href} className="group">
-                <div className="relative aspect-square overflow-hidden rounded-lg bg-gray-200">
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
-                  <div className="absolute bottom-4 left-4 text-white">
-                    <h3 className="font-semibold text-lg">{category.name}</h3>
-                    <p className="text-sm opacity-90 group-hover:underline">Смотреть все</p>
-                  </div>
-                </div>
-              </Link>
-            ))}
+      {/* Features Section */}
+      <section className="py-20 border-t border-border">
+        <div className="container mx-auto px-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+            <div className="text-center p-6 group hover:bg-card/50 rounded-lg transition-all duration-300">
+              <div className="inline-flex items-center justify-center w-16 h-16 bg-primary/10 rounded-full mb-4 group-hover:bg-primary/20 transition-colors">
+                {/* Truck icon replaced */}
+                🚚
+              </div>
+              <h3 className="text-xl font-semibold mb-2">Быстрая доставка</h3>
+              <p className="text-muted-foreground">
+                Бесплатная доставка по России от 5000₽
+              </p>
+            </div>
+
+            <div className="text-center p-6 group hover:bg-card/50 rounded-lg transition-all duration-300">
+              <div className="inline-flex items-center justify-center w-16 h-16 bg-primary/10 rounded-full mb-4 group-hover:bg-primary/20 transition-colors">
+                {/* Shield icon replaced */}
+                🛡️
+              </div>
+              <h3 className="text-xl font-semibold mb-2">Гарантия качества</h3>
+              <p className="text-muted-foreground">
+                Оригинальная продукция с гарантией
+              </p>
+            </div>
+
+            <div className="text-center p-6 group hover:bg-card/50 rounded-lg transition-all duration-300">
+              <div className="inline-flex items-center justify-center w-16 h-16 bg-primary/10 rounded-full mb-4 group-hover:bg-primary/20 transition-colors">
+                {/* Zap icon replaced */}
+                ⚡
+              </div>
+              <h3 className="text-xl font-semibold mb-2">Новые коллекции</h3>
+              <p className="text-muted-foreground">
+                Следите за последними трендами
+              </p>
+            </div>
           </div>
         </div>
       </section>
 
       {/* New Arrivals */}
-      <section className="py-16 bg-gray-50">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="flex justify-between items-center mb-8">
-            <h2 className="text-2xl md:text-3xl font-bold text-gray-900">Новинки</h2>
-            <Link href="/products?sort=newest" className="text-gray-600 hover:text-gray-900 font-semibold">
-              Смотреть все →
+      <section className="py-20 border-t border-border">
+        <div className="container mx-auto px-4">
+          <div className="flex justify-between items-center mb-12">
+            <div>
+              <h2 className="text-3xl md:text-4xl font-bold mb-2">Новинки</h2>
+              <p className="text-muted-foreground">Самые свежие поступления в коллекции</p>
+            </div>
+            <Link 
+              href="/products?sort=newest" 
+              className="group flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors"
+            >
+              Смотреть все
+              <span className="group-hover:translate-x-1 transition-transform">→</span>
             </Link>
           </div>
+          
           <ProductGrid 
             products={newProducts.map(product => ({
               id: product._id?.toString() || '',
@@ -120,14 +151,22 @@ export default async function Home() {
       </section>
 
       {/* Featured Products */}
-      <section className="py-16">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="flex justify-between items-center mb-8">
-            <h2 className="text-2xl md:text-3xl font-bold text-gray-900">Популярные товары</h2>
-            <Link href="/products?sort=popular" className="text-gray-600 hover:text-gray-900 font-semibold">
-              Смотреть все →
+      <section className="py-20 border-t border-border bg-card/30">
+        <div className="container mx-auto px-4">
+          <div className="flex justify-between items-center mb-12">
+            <div>
+              <h2 className="text-3xl md:text-4xl font-bold mb-2">Популярные товары</h2>
+              <p className="text-muted-foreground">Выбор наших покупателей</p>
+            </div>
+            <Link 
+              href="/products?sort=popular" 
+              className="group flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors"
+            >
+              Смотреть все
+              <span className="group-hover:translate-x-1 transition-transform">→</span>
             </Link>
           </div>
+          
           <ProductGrid 
             products={featuredProducts.map(product => ({
               id: product._id?.toString() || '',
@@ -138,28 +177,60 @@ export default async function Home() {
               slug: product.slug,
               stock: product.stock,
               ratings: product.ratings,
-              brand: product.brand
+              brand: product.brand,
+              isFeatured: true
             }))} 
           />
         </div>
       </section>
 
-      {/* Benefits */}
-      <section className="py-16 bg-gray-900 text-white">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+      {/* Categories Preview */}
+      <section className="py-20 border-t border-border">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl md:text-4xl font-bold mb-2">Коллекции</h2>
+            <p className="text-muted-foreground max-w-2xl mx-auto">
+              Откройте для себя разнообразие стилей и моделей
+            </p>
+          </div>
+          
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto">
             {[
-              { icon: '🚚', title: 'Бесплатная доставка', desc: 'При заказе от 5000₽' },
-              { icon: '↩️', title: 'Возврат', desc: 'В течение 30 дней' },
-              { icon: '🔒', title: 'Безопасная оплата', desc: 'Разные способы оплаты' },
-              { icon: '⭐', title: 'Гарантия качества', desc: 'Оригинальная продукция' },
-            ].map((benefit, index) => (
-              <div key={index} className="text-center">
-                <div className="text-3xl mb-4">{benefit.icon}</div>
-                <h3 className="font-semibold mb-2">{benefit.title}</h3>
-                <p className="text-gray-400 text-sm">{benefit.desc}</p>
-              </div>
+              { name: 'Женские', href: '/products?category=women', count: '24 товара' },
+              { name: 'Мужские', href: '/products?category=men', count: '18 товаров' },
+              { name: 'Детские', href: '/products?category=kids', count: '12 товаров' },
+              { name: 'Аксессуары', href: '/products?category=accessories', count: '8 товаров' },
+            ].map((category, index) => (
+              <Link 
+                key={index} 
+                href={category.href}
+                className="group p-6 bg-card border border-border rounded-lg hover:bg-primary/5 hover:border-primary/20 transition-all duration-300 text-center"
+              >
+                <h3 className="font-semibold text-lg mb-1 group-hover:text-primary transition-colors">
+                  {category.name}
+                </h3>
+                <p className="text-sm text-muted-foreground">{category.count}</p>
+              </Link>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Final CTA */}
+      <section className="py-20 border-t border-border">
+        <div className="container mx-auto px-4">
+          <div className="max-w-3xl mx-auto text-center">
+            <h2 className="text-4xl font-bold mb-6">
+              Готовы к максимальному комфорту?
+            </h2>
+            <p className="text-xl text-muted-foreground mb-8">
+              Откройте для себя коллекцию премиальных угг для любого сезона
+            </p>
+            <Link href="/products">
+              <Button size="lg" className="text-lg px-8 py-6 h-auto">
+                📦 Перейти в каталог
+              </Button>
+            </Link>
           </div>
         </div>
       </section>

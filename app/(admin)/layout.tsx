@@ -1,3 +1,4 @@
+// app/(admin)/layout.tsx
 import AdminLayout from '@/components/layout/AdminLayout';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-config';

@@ -28,7 +28,7 @@ export default function CartPage() {
               ))}
             </div>
             <div className="lg:col-span-1">
-              <div className="bg-white p-6 rounded-lg h-64 bg-gray-200"></div>
+              <div className="p-6 rounded-lg h-64 bg-gray-200"></div>
             </div>
           </div>
         </div>

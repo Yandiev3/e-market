@@ -1,8 +1,9 @@
+// app/(admin)/manage-products/page.tsx
 "use client";
 
-// app/(admin)/manage-products/page.tsx
 import { useState, useEffect } from 'react';
 import ProductList from '@/components/admin/ProductList';
+import Button from '@/components/ui/Button';
 
 interface Product {
   _id: string;
@@ -47,7 +48,6 @@ export default function ManageProductsPage() {
       });
 
       if (response.ok) {
-        // Обновляем список продуктов после удаления
         fetchProducts();
       } else {
         console.error('Failed to delete product');
@@ -70,7 +70,6 @@ export default function ManageProductsPage() {
       });
 
       if (response.ok) {
-        // Обновляем список продуктов после изменения статуса
         fetchProducts();
       } else {
         console.error('Failed to update product status');
@@ -88,14 +87,14 @@ export default function ManageProductsPage() {
 
   return (
     <div>
-      <div className="flex justify-between items-center mb-8">
-        <h1 className="text-2xl font-bold text-gray-900">Управление товарами</h1>
-        <button
-          onClick={() => window.location.href = '/admin/manage-products/new'}
-          className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
-        >
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
+        <div>
+          <h1 className="text-3xl font-bold text-foreground">Управление товарами</h1>
+          <p className="text-muted-foreground mt-2">Создание и редактирование товаров магазина</p>
+        </div>
+        <Button href="/admin/manage-products/new">
           Добавить товар
-        </button>
+        </Button>
       </div>
       <ProductList 
         products={products}

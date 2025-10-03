@@ -1,3 +1,4 @@
+// components/admin/AnalyticsDashboard.tsx
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -45,14 +46,36 @@ const AnalyticsDashboard: React.FC = () => {
     }
   };
 
+  const StatCard = ({ title, value, description, trend }: { title: string; value: string; description?: string; trend?: number }) => (
+    <div className="card p-6">
+      <div>
+        <p className="text-sm font-medium text-muted-foreground">{title}</p>
+        <p className="text-3xl font-bold text-foreground mt-2">{value}</p>
+        {description && (
+          <p className="text-sm text-muted-foreground mt-1">{description}</p>
+        )}
+        {trend !== undefined && (
+          <div className={`flex items-center mt-2 text-sm ${
+            trend >= 0 ? 'text-green-600' : 'text-red-600'
+          }`}>
+            <svg className={`w-4 h-4 mr-1 ${trend >= 0 ? '' : 'rotate-180'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 10l7-7m0 0l7 7m-7-7v18" />
+            </svg>
+            {Math.abs(trend)}%
+          </div>
+        )}
+      </div>
+    </div>
+  );
+
   if (loading) {
     return (
       <div className="animate-pulse space-y-8">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {[...Array(4)].map((_, i) => (
-            <div key={i} className="bg-white p-6 rounded-lg shadow-md">
-              <div className="h-4 bg-gray-300 rounded w-1/3 mb-4"></div>
-              <div className="h-8 bg-gray-300 rounded w-2/3"></div>
+            <div key={i} className="card p-6">
+              <div className="h-4 bg-muted rounded w-1/3 mb-4"></div>
+              <div className="h-8 bg-muted rounded w-2/3"></div>
             </div>
           ))}
         </div>
@@ -63,72 +86,83 @@ const AnalyticsDashboard: React.FC = () => {
   if (!data) {
     return (
       <div className="text-center py-12">
-        <p className="text-gray-500">Failed to load analytics data</p>
+        <p className="text-muted-foreground">Не удалось загрузить данные аналитики</p>
       </div>
     );
   }
 
+  const maxSales = Math.max(...data.monthlySales.map(m => m.sales));
+
   return (
     <div className="space-y-8">
       {/* Header */}
-      <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold text-gray-900">Analytics Dashboard</h2>
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div>
+          <h2 className="text-2xl font-bold text-foreground">Аналитика</h2>
+          <p className="text-muted-foreground mt-1">Статистика продаж и активности</p>
+        </div>
         <select
           value={timeRange}
           onChange={(e) => setTimeRange(e.target.value)}
-          className="border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="border border-input rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent bg-background text-foreground"
         >
-          <option value="7d">Last 7 days</option>
-          <option value="30d">Last 30 days</option>
-          <option value="90d">Last 90 days</option>
-          <option value="1y">Last year</option>
+          <option value="7d">Последние 7 дней</option>
+          <option value="30d">Последние 30 дней</option>
+          <option value="90d">Последние 90 дней</option>
+          <option value="1y">Последний год</option>
         </select>
       </div>
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <div className="bg-white p-6 rounded-lg shadow-md">
-          <h3 className="text-sm font-medium text-gray-500">Total Sales</h3>
-          <p className="text-3xl font-bold text-gray-900">
-            {formatPrice(data.totalSales)}
-          </p>
-        </div>
+        <StatCard
+          title="Общие продажи"
+          value={formatPrice(data.totalSales)}
+          description={`За ${timeRange === '7d' ? '7 дней' : timeRange === '30d' ? '30 дней' : timeRange === '90d' ? '90 дней' : 'год'}`}
+          trend={12.5}
+        />
 
-        <div className="bg-white p-6 rounded-lg shadow-md">
-          <h3 className="text-sm font-medium text-gray-500">Total Orders</h3>
-          <p className="text-3xl font-bold text-gray-900">{data.totalOrders}</p>
-        </div>
+        <StatCard
+          title="Всего заказов"
+          value={data.totalOrders.toString()}
+          description="За все время"
+          trend={8.2}
+        />
 
-        <div className="bg-white p-6 rounded-lg shadow-md">
-          <h3 className="text-sm font-medium text-gray-500">Total Products</h3>
-          <p className="text-3xl font-bold text-gray-900">{data.totalProducts}</p>
-        </div>
+        <StatCard
+          title="Товары"
+          value={data.totalProducts.toString()}
+          description="Активные товары"
+          trend={3.1}
+        />
 
-        <div className="bg-white p-6 rounded-lg shadow-md">
-          <h3 className="text-sm font-medium text-gray-500">Total Users</h3>
-          <p className="text-3xl font-bold text-gray-900">{data.totalUsers}</p>
-        </div>
+        <StatCard
+          title="Пользователи"
+          value={data.totalUsers.toString()}
+          description="Зарегистрировано"
+          trend={15.7}
+        />
       </div>
 
       {/* Charts Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Monthly Sales Chart */}
-        <div className="bg-white p-6 rounded-lg shadow-md">
-          <h3 className="text-lg font-medium text-gray-900 mb-4">Sales Trend</h3>
-          <div className="space-y-3">
+        <div className="card p-6">
+          <h3 className="text-lg font-medium text-foreground mb-4">Динамика продаж</h3>
+          <div className="space-y-4">
             {data.monthlySales.map((item) => (
               <div key={item.month} className="flex items-center justify-between">
-                <span className="text-sm text-gray-600">{item.month}</span>
-                <div className="flex items-center space-x-2">
-                  <div className="w-32 bg-gray-200 rounded-full h-2">
+                <span className="text-sm text-muted-foreground min-w-16">{item.month}</span>
+                <div className="flex items-center space-x-3 flex-1 max-w-md">
+                  <div className="flex-1 bg-muted rounded-full h-2">
                     <div
-                      className="bg-blue-600 h-2 rounded-full"
+                      className="bg-primary h-2 rounded-full transition-all duration-500"
                       style={{
-                        width: `${(item.sales / Math.max(...data.monthlySales.map(m => m.sales))) * 100}%`,
+                        width: `${maxSales > 0 ? (item.sales / maxSales) * 100 : 0}%`,
                       }}
                     ></div>
                   </div>
-                  <span className="text-sm font-medium text-gray-900 w-16 text-right">
+                  <span className="text-sm font-medium text-foreground min-w-20 text-right">
                     {formatPrice(item.sales)}
                   </span>
                 </div>
@@ -138,18 +172,18 @@ const AnalyticsDashboard: React.FC = () => {
         </div>
 
         {/* Top Categories */}
-        <div className="bg-white p-6 rounded-lg shadow-md">
-          <h3 className="text-lg font-medium text-gray-900 mb-4">Top Categories</h3>
-          <div className="space-y-3">
+        <div className="card p-6">
+          <h3 className="text-lg font-medium text-foreground mb-4">Топ категории</h3>
+          <div className="space-y-4">
             {data.topCategories.map((category) => (
-              <div key={category.category} className="flex items-center justify-between">
-                <span className="text-sm text-gray-600">{category.category}</span>
-                <div className="flex items-center space-x-4">
-                  <span className="text-sm text-gray-500">{category.count} orders</span>
-                  <span className="text-sm font-medium text-gray-900">
-                    {formatPrice(category.revenue)}
-                  </span>
+              <div key={category.category} className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
+                <div>
+                  <span className="text-sm font-medium text-foreground">{category.category}</span>
+                  <p className="text-xs text-muted-foreground mt-1">{category.count} заказов</p>
                 </div>
+                <span className="text-sm font-medium text-foreground">
+                  {formatPrice(category.revenue)}
+                </span>
               </div>
             ))}
           </div>
@@ -157,43 +191,26 @@ const AnalyticsDashboard: React.FC = () => {
       </div>
 
       {/* Recent Activity */}
-      <div className="bg-white rounded-lg shadow-md">
-        <div className="px-6 py-4 border-b border-gray-200">
-          <h3 className="text-lg font-medium text-gray-900">Recent Activity</h3>
+      <div className="card">
+        <div className="px-6 py-4 border-b border-border">
+          <h3 className="text-lg font-medium text-foreground">Последняя активность</h3>
         </div>
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Activity
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Description
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Time
-                </th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {data.recentActivity.map((activity, index) => (
-                <tr key={index}>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span className="px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-800">
-                      {activity.type}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 text-sm text-gray-900">
-                    {activity.description}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {new Date(activity.timestamp).toLocaleString()}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+        <div className="p-6">
+          <div className="space-y-4">
+            {data.recentActivity.map((activity, index) => (
+              <div key={index} className="flex items-center space-x-4 p-3 rounded-lg bg-muted/30">
+                <div className={`w-2 h-2 rounded-full ${
+                  activity.type === 'order' ? 'bg-primary' : 'bg-green-500'
+                }`}></div>
+                <div className="flex-1">
+                  <p className="text-sm font-medium text-foreground">{activity.description}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {new Date(activity.timestamp).toLocaleString('ru-RU')}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     </div>
