@@ -12,6 +12,7 @@ import { Separator } from '@/components/ui/Separator';
 import Button from '@/components/ui/Button';
 import { User, Mail, Phone, MapPin, Save, ChevronDown, ChevronUp } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { Toaster } from 'react-hot-toast';
 
 export default function ProfilePage() {
   const { user, updateUser } = useAuth();
@@ -22,9 +23,6 @@ export default function ProfilePage() {
     email: '',
     phone: '',
     address: '',
-    city: '',
-    postalCode: '',
-    country: '',
     currentPassword: '',
     newPassword: '',
     confirmPassword: '',
@@ -38,8 +36,6 @@ export default function ProfilePage() {
         email: user.email || '',
         phone: user.phone || '',
         address: user.address || '',
-        city: user.city || '',
-        country: user.country || '',
       }));
     }
   }, [user]);
@@ -49,8 +45,15 @@ export default function ProfilePage() {
     setLoading(true);
 
     try {
+      // Валидация паролей
       if (formData.newPassword && formData.newPassword !== formData.confirmPassword) {
         toast.error('Новые пароли не совпадают');
+        setLoading(false);
+        return;
+      }
+
+      if (formData.newPassword && !formData.currentPassword) {
+        toast.error('Для смены пароля необходимо указать текущий пароль');
         setLoading(false);
         return;
       }
@@ -64,9 +67,6 @@ export default function ProfilePage() {
           name: formData.name,
           phone: formData.phone,
           address: formData.address,
-          city: formData.city,
-          postalCode: formData.postalCode,
-          country: formData.country,
           currentPassword: formData.currentPassword || undefined,
           newPassword: formData.newPassword || undefined,
         }),
@@ -75,15 +75,14 @@ export default function ProfilePage() {
       const data = await response.json();
 
       if (response.ok) {
+        // Показываем успешный тостер
         toast.success('Профиль успешно обновлен');
         
-        // Обновляем данные в контексте
+        // Реактивное обновление данных в контексте без перезагрузки страницы
         updateUser({
           name: formData.name,
           phone: formData.phone,
           address: formData.address,
-          city: formData.city,
-          country: formData.country,
         });
 
         // Очищаем поля паролей и закрываем секцию
@@ -95,9 +94,14 @@ export default function ProfilePage() {
         }));
         setShowPasswordSection(false);
       } else {
-        toast.error(data.message || 'Не удалось обновить профиль');
+        // Показываем ошибку с деталями из API
+        const errorMessage = data.errors 
+          ? data.errors.join(', ') 
+          : data.message || 'Не удалось обновить профиль';
+        toast.error(errorMessage);
       }
     } catch (error) {
+      console.error('Profile update error:', error);
       toast.error('Произошла ошибка при обновлении профиля');
     } finally {
       setLoading(false);
@@ -118,6 +122,30 @@ export default function ProfilePage() {
   return (
     <ProtectedRoute>
       <div className="min-h-screen bg-background">
+        {/* Добавляем Toaster компонент */}
+        <Toaster 
+          position="top-right"
+          toastOptions={{
+            duration: 4000,
+            style: {
+              background: '#363636',
+              color: '#fff',
+            },
+            success: {
+              duration: 4000,
+              style: {
+                background: '#10b981',
+              },
+            },
+            error: {
+              duration: 5000,
+              style: {
+                background: '#ef4444',
+              },
+            },
+          }}
+        />
+        
         <div className="container mx-auto px-4 py-8">
           <div className="max-w-6xl mx-auto">
             <h1 className="text-3xl font-bold mb-8">Редактирование профиля</h1>

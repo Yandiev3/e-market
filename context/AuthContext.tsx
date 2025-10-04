@@ -13,6 +13,7 @@ interface User {
   address?: string;
   city?: string;
   country?: string;
+  postalCode?: string;
 }
 
 interface AuthContextType {
@@ -21,6 +22,7 @@ interface AuthContextType {
   isAuthenticated: boolean;
   isAdmin: boolean;
   updateUser: (userData: Partial<User>) => void;
+  refreshUser: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -29,35 +31,84 @@ const AuthContext = createContext<AuthContextType>({
   isAuthenticated: false,
   isAdmin: false,
   updateUser: () => {},
+  refreshUser: async () => {},
 });
 
 export const useAuth = () => useContext(AuthContext);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { data: session, status } = useSession();
+  const { data: session, status, update } = useSession();
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    if (status === 'loading') {
-      setLoading(true);
-    } else if (session?.user) {
-      setUser({
-        id: session.user.id,
-        email: session.user.email!,
-        name: session.user.name!,
-        role: session.user.role || 'user',
-        phone: session.user.phone || '',
-        address: session.user.address || '',
-        city: session.user.city || '',
-        country: session.user.country || '',
-      });
-      setLoading(false);
-    } else {
-      setUser(null);
-      setLoading(false);
+  // Функция для обновления данных пользователя из API
+  const refreshUser = async () => {
+    try {
+      const response = await fetch('/api/account/profile');
+      if (response.ok) {
+        const data = await response.json();
+        if (data.user) {
+          setUser(data.user);
+          // Обновляем сессию NextAuth
+          await update({
+            ...session,
+            user: {
+              ...session?.user,
+              ...data.user
+            }
+          });
+        }
+      }
+    } catch (error) {
+      console.error('Failed to refresh user data:', error);
     }
-  }, [session, status]);
+  };
+
+  useEffect(() => {
+    const initializeUser = async () => {
+      if (status === 'loading') {
+        setLoading(true);
+      } else if (session?.user) {
+        try {
+          // При загрузке получаем актуальные данные из API
+          const response = await fetch('/api/account/profile');
+          if (response.ok) {
+            const data = await response.json();
+            if (data.user) {
+              setUser(data.user);
+            }
+          } else {
+            // Fallback на данные из сессии
+            setUser({
+              id: session.user.id,
+              email: session.user.email!,
+              name: session.user.name!,
+              role: session.user.role || 'user',
+              phone: session.user.phone || '',
+              address: session.user.address || '',
+            });
+          }
+        } catch (error) {
+          console.error('Failed to fetch user profile:', error);
+          // Fallback на данные из сессии
+          setUser({
+            id: session.user.id,
+            email: session.user.email!,
+            name: session.user.name!,
+            role: session.user.role || 'user',
+            phone: session.user.phone || '',
+            address: session.user.address || '',
+          });
+        }
+        setLoading(false);
+      } else {
+        setUser(null);
+        setLoading(false);
+      }
+    };
+
+    initializeUser();
+  }, [session, status, update]);
 
   const updateUser = (userData: Partial<User>) => {
     setUser(prev => prev ? { ...prev, ...userData } : null);
@@ -69,6 +120,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     isAuthenticated: !!user,
     isAdmin: user?.role === 'admin',
     updateUser,
+    refreshUser,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

@@ -70,11 +70,11 @@ export const authOptions: NextAuthOptions = {
             email: user.email,
             name: user.name,
             role: user.role,
-            phone: user.phone,
+            phone: user.phone || '', // ← Убедитесь, что это строка
           };
         } catch (error) {
           console.error('Authorize error:', error);
-          throw error;
+          return null; // ← Возвращаем null вместо throw error
         }
       },
     }),
@@ -84,6 +84,7 @@ export const authOptions: NextAuthOptions = {
       if (user) {
         token.role = user.role;
         token.id = user.id;
+        token.phone = user.phone;
       }
       return token;
     },
@@ -91,6 +92,7 @@ export const authOptions: NextAuthOptions = {
       if (session.user) {
         session.user.id = token.id as string;
         session.user.role = token.role as string;
+        session.user.phone = token.phone as string;
       }
       return session;
     },

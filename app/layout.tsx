@@ -5,7 +5,6 @@ import './globals.css';
 import { AppAuthProvider } from '@/context/AuthContext';
 import { CartProvider } from '@/context/CartContext';
 import { FavoritesProvider } from '@/context/FavoritesContext';
-import { ToastProvider } from '@/hooks/use-toast';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 
@@ -25,21 +24,19 @@ export default function RootLayout({
   return (
     <html lang="ru" className="dark">
       <body className={inter.className}>
-        <ToastProvider>
-          <AppAuthProvider>
-            <CartProvider>
-              <FavoritesProvider>
-                <div className="min-h-screen flex flex-col bg-background text-foreground">
-                  <Header />
-                  <main className="flex-1">
-                    {children}
-                  </main>
-                  <Footer />
-                </div>
-              </FavoritesProvider>
-            </CartProvider>
-          </AppAuthProvider>
-        </ToastProvider>
+        <AppAuthProvider>
+          <CartProvider>
+            <FavoritesProvider>
+              <div className="min-h-screen flex flex-col bg-background text-foreground">
+                <Header />
+                <main className="flex-1">
+                  {children}
+                </main>
+                <Footer />
+              </div>
+            </FavoritesProvider>
+          </CartProvider>
+        </AppAuthProvider>
       </body>
     </html>
   );

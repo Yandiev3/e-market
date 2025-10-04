@@ -31,12 +31,6 @@ export default function ProfileNavigation({ className = '' }: ProfileNavigationP
       icon: Settings,
       active: pathname === '/account/profile'
     },
-    {
-      href: '/favorites',
-      label: 'Избранное',
-      icon: Heart,
-      active: pathname === '/favorites'
-    }
   ];
 
   return (
