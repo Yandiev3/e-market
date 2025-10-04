@@ -1,150 +1,193 @@
+// app/(store)/account/page.tsx
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import ProtectedRoute from '@/components/auth/ProtectedRoute';
-import Input from '@/components/ui/Input';
-import Button from '@/components/ui/Button';
+import ProfileNavigation from '@/components/account/ProfileNavigation';
+import { Card, CardContent } from '@/components/ui/Card';
+import { User, Mail, Phone, MapPin, Package, Calendar } from 'lucide-react';
+import { formatDate } from '@/lib/utils';
+
+interface Order {
+  _id: string;
+  totalPrice: number;
+  status: string;
+  createdAt: string;
+  orderItems: Array<{
+    name: string;
+    quantity: number;
+  }>;
+}
 
 export default function AccountPage() {
   const { user } = useAuth();
-  const [loading, setLoading] = useState(false);
-  const [formData, setFormData] = useState({
-    name: user?.name || '',
-    email: user?.email || '',
-    phone: '',
-    address: '',
-    city: '',
-    postalCode: '',
-    country: '',
-  });
+  const [recentOrders, setRecentOrders] = useState<Order[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
+  useEffect(() => {
+    fetchRecentOrders();
+  }, []);
 
+  const fetchRecentOrders = async () => {
     try {
-      const response = await fetch('/api/account/profile', {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
-      });
-
-      if (response.ok) {
-        alert('Profile updated successfully');
-      } else {
-        throw new Error('Profile update failed');
-      }
+      const response = await fetch('/api/orders?limit=3');
+      const data = await response.json();
+      setRecentOrders(data.orders || []);
     } catch (error) {
-      console.error('Profile update error:', error);
-      alert('Failed to update profile');
+      console.error('Error fetching orders:', error);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData(prev => ({
-      ...prev,
-      [e.target.name]: e.target.value,
-    }));
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'delivered':
+        return 'text-green-600 bg-green-100';
+      case 'processing':
+        return 'text-blue-600 bg-blue-100';
+      case 'shipped':
+        return 'text-yellow-600 bg-yellow-100';
+      default:
+        return 'text-gray-600 bg-gray-100';
+    }
   };
 
   return (
     <ProtectedRoute>
-      <div className="max-w-4xl mx-auto">
-        <h1 className="text-2xl font-bold text-gray-900 mb-8">My Account</h1>
+      <div className="min-h-screen bg-background">
+        <div className="container mx-auto px-4 py-8">
+          <div className="max-w-6xl mx-auto">
+            <h1 className="text-3xl font-bold mb-8">Навигация</h1>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Navigation */}
-          <div className="lg:col-span-1">
-            <nav className="space-y-1">
-              <a href="/account" className="bg-gray-100 text-gray-900 group flex items-center px-3 py-2 text-sm font-medium rounded-md">
-                Profile
-              </a>
-              <a href="/account/orders" className="text-gray-600 hover:text-gray-900 hover:bg-gray-50 group flex items-center px-3 py-2 text-sm font-medium rounded-md">
-                Orders
-              </a>
-              <a href="/account/profile" className="text-gray-600 hover:text-gray-900 hover:bg-gray-50 group flex items-center px-3 py-2 text-sm font-medium rounded-md">
-                Settings
-              </a>
-            </nav>
-          </div>
-
-          {/* Profile Form */}
-          <div className="lg:col-span-2">
-            <form onSubmit={handleSubmit} className="bg-white p-6 rounded-lg shadow-md space-y-4">
-              <h2 className="text-lg font-semibold mb-4">Личная информация</h2>
-
-              <Input
-                label="Full Name"
-                name="name"
-                value={formData.name}
-                onChange={handleChange}
-                required
-              />
-
-              <Input
-                label="Email"
-                type="email"
-                name="email"
-                value={formData.email}
-                onChange={handleChange}
-                required
-                disabled
-              />
-
-              <Input
-                label="Phone"
-                type="tel"
-                name="phone"
-                value={formData.phone}
-                onChange={handleChange}
-              />
-
-              <h3 className="text-lg font-semibold mt-6 mb-4">Адрес доставки</h3>
-
-              <Input
-                label="Address"
-                name="address"
-                value={formData.address}
-                onChange={handleChange}
-              />
-
-              <div className="grid grid-cols-2 gap-4">
-                <Input
-                  label="City"
-                  name="city"
-                  value={formData.city}
-                  onChange={handleChange}
-                />
-                <Input
-                  label="Postal Code"
-                  name="postalCode"
-                  value={formData.postalCode}
-                  onChange={handleChange}
-                />
+            <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+              {/* Навигация */}
+              <div className="lg:col-span-1">
+                <ProfileNavigation />
               </div>
 
-              <Input
-                label="Country"
-                name="country"
-                value={formData.country}
-                onChange={handleChange}
-              />
+              {/* Основной контент */}
+              <div className="lg:col-span-3 space-y-6">
+                {/* Информация о пользователе */}
+                <Card className="p-6">
+                  <div className="flex items-center gap-4 mb-6">
+                    <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
+                      <User className="h-8 w-8 text-primary" />
+                    </div>
+                    <div>
+                      <h2 className="text-xl font-semibold">{user?.name || 'Пользователь'}</h2>
+                      <p className="text-muted-foreground">{user?.email}</p>
+                    </div>
+                  </div>
 
-              <Button type="submit" loading={loading} className="w-full">
-                Update Profile
-              </Button>
-            </form>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                    <div className="flex items-center gap-2">
+                      <Phone className="h-4 w-4 text-muted-foreground" />
+                      <span>{user?.phone || 'Не указан'}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Mail className="h-4 w-4 text-muted-foreground" />
+                      <span>{user?.email}</span>
+                    </div>
+                    {user?.address && (
+                      <div className="flex items-center gap-2 md:col-span-2">
+                        <MapPin className="h-4 w-4 text-muted-foreground" />
+                        <span>{user.address}, {user.city}, {user.country}</span>
+                      </div>
+                    )}
+                  </div>
+                </Card>
+
+                {/* Последние заказы */}
+                <Card className="p-6">
+                  <div className="flex items-center justify-between mb-6">
+                    <h3 className="text-lg font-semibold flex items-center gap-2">
+                      <Package className="h-5 w-5" />
+                      Последние заказы
+                    </h3>
+                    <a 
+                      href="/account/orders" 
+                      className="text-primary hover:text-primary/80 text-sm font-medium"
+                    >
+                      Все заказы →
+                    </a>
+                  </div>
+
+                  {loading ? (
+                    <div className="space-y-3">
+                      {[...Array(3)].map((_, i) => (
+                        <div key={i} className="animate-pulse flex justify-between items-center p-3 border rounded-lg">
+                          <div className="space-y-2">
+                            <div className="h-4 bg-gray-200 rounded w-32"></div>
+                            <div className="h-3 bg-gray-200 rounded w-24"></div>
+                          </div>
+                          <div className="h-6 bg-gray-200 rounded w-20"></div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : recentOrders.length === 0 ? (
+                    <div className="text-center py-8">
+                      <Package className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                      <p className="text-muted-foreground">У вас пока нет заказов</p>
+                      <a 
+                        href="/products" 
+                        className="text-primary hover:text-primary/80 text-sm font-medium mt-2 inline-block"
+                      >
+                        Начать покупки →
+                      </a>
+                    </div>
+                  ) : (
+                    <div className="space-y-3">
+                      {recentOrders.map((order) => (
+                        <div key={order._id} className="flex justify-between items-center p-3 border rounded-lg hover:bg-accent/50 transition-colors">
+                          <div>
+                            <div className="font-medium flex items-center gap-2">
+                              <Calendar className="h-4 w-4 text-muted-foreground" />
+                              Заказ #{order._id.slice(-6)}
+                            </div>
+                            <div className="text-sm text-muted-foreground">
+                              {formatDate(new Date(order.createdAt))} • 
+                              {order.orderItems.length} товар(ов)
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <div className="font-semibold">{order.totalPrice} ₽</div>
+                            <span className={`text-xs px-2 py-1 rounded-full ${getStatusColor(order.status)}`}>
+                              {order.status}
+                            </span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </Card>
+
+                {/* Быстрые действия */}
+                <Card className="p-6">
+                  <h3 className="text-lg font-semibold mb-4">Быстрые действия</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <a 
+                      href="/products" 
+                      className="p-4 border rounded-lg hover:bg-accent/50 transition-colors text-center"
+                    >
+                      <div className="font-medium">Продолжить покупки</div>
+                      <div className="text-sm text-muted-foreground">Найти новые товары</div>
+                    </a>
+                    <a 
+                      href="/favorites" 
+                      className="p-4 border rounded-lg hover:bg-accent/50 transition-colors text-center"
+                    >
+                      <div className="font-medium">Избранное</div>
+                      <div className="text-sm text-muted-foreground">Ваши сохраненные товары</div>
+                    </a>
+                  </div>
+                </Card>
+              </div>
+            </div>
           </div>
         </div>
       </div>
     </ProtectedRoute>
   );
 }
-
-
-

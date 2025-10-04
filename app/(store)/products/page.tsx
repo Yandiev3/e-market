@@ -3,7 +3,6 @@
 
 import { useState, useEffect } from 'react';
 import { Filter } from 'lucide-react';
-import { Card } from '@/components/ui/Card';
 import ProductCard from '@/components/product/ProductCard';
 import ProductFilter from '@/components/product/ProductFilter';
 import { Product, IProductLean } from '@/types/product';
@@ -176,13 +175,13 @@ export default function ProductsPage() {
   return (
     <div className="min-h-screen bg-background">
       <div className="container mx-auto px-4 py-8">
-        <div className="flex flex-col md:flex-row gap-8">
+        <div className="flex flex-col lg:flex-row gap-8">
           {/* Filters */}
-          <aside className="w-full md:w-80 shrink-0">
+          <aside className="w-full lg:w-80 shrink-0">
             <div className="sticky top-24">
               <div className="flex items-center gap-2 mb-6">
                 <Filter className="h-5 w-5 text-primary" />
-                <h2 className="text-lg font-semibold">Фильтры</h2>
+                <h2 className="text-lg font-semibold text-foreground">Фильтры</h2>
               </div>
               
               <ProductFilter
@@ -196,9 +195,9 @@ export default function ProductsPage() {
 
           {/* Products Grid */}
           <main className="flex-1">
-            <div className="mb-6">
-              <h2 className="text-3xl font-bold mb-2">Каталог товаров</h2>
-              <p className="text-muted-foreground">
+            <div className="mb-8">
+              <h2 className="text-3xl font-bold text-foreground mb-2">Каталог товаров</h2>
+              <p className="text-muted-foreground text-lg">
                 Найдено товаров: {filteredProducts.length}
               </p>
             </div>
@@ -206,14 +205,14 @@ export default function ProductsPage() {
             {loading ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 {[...Array(6)].map((_, i) => (
-                  <Card key={i} className="animate-pulse">
+                  <div key={i} className="bg-card rounded-lg border border-border animate-pulse">
                     <div className="aspect-square bg-muted rounded-t-lg"></div>
                     <div className="p-4 space-y-3">
                       <div className="h-4 bg-muted rounded"></div>
                       <div className="h-4 bg-muted rounded w-2/3"></div>
                       <div className="h-6 bg-muted rounded w-1/2"></div>
                     </div>
-                  </Card>
+                  </div>
                 ))}
               </div>
             ) : (

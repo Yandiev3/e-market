@@ -16,7 +16,7 @@ export const Label: React.FC<LabelProps> = ({
   return (
     <label
       htmlFor={htmlFor}
-      className={`text-sm font-medium text-foreground leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 ${className}`}
+      className={`text-sm font-semibold text-foreground leading-none cursor-pointer ${className}`}
       {...props}
     >
       {children}

@@ -2,6 +2,9 @@
 'use client';
 
 import React, { useState } from 'react';
+import { Label } from '@/components/ui/Label';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/Radio-group';
+import { Slider } from '@/components/ui/Slider';
 
 interface FilterOptions {
   category: string;
@@ -22,8 +25,8 @@ interface ProductFilterProps {
 }
 
 const ProductFilter: React.FC<ProductFilterProps> = ({
-  categories = [], // Добавлено значение по умолчанию
-  brands = [], // Добавлено значение по умолчанию
+  categories = [],
+  brands = [],
   onFilterChange,
   loading = false,
 }) => {
@@ -38,10 +41,22 @@ const ProductFilter: React.FC<ProductFilterProps> = ({
     color: '',
   });
 
+  const [priceRange, setPriceRange] = useState<[number, number]>([0, 20000]);
+
   const handleFilterChange = (key: keyof FilterOptions, value: any) => {
     const newFilters = { ...filters, [key]: value };
     setFilters(newFilters);
     onFilterChange(newFilters);
+  };
+
+  const handlePriceRangeChange = (range: [number, number]) => {
+    setPriceRange(range);
+    const priceRangeString = `${range[0]}-${range[1]}`;
+    handleFilterChange('priceRange', priceRangeString);
+  };
+
+  const handleCategoryChange = (category: string) => {
+    handleFilterChange('category', category);
   };
 
   const clearFilters = () => {
@@ -56,15 +71,9 @@ const ProductFilter: React.FC<ProductFilterProps> = ({
       color: '',
     };
     setFilters(defaultFilters);
+    setPriceRange([0, 20000]);
     onFilterChange(defaultFilters);
   };
-
-  const priceRanges = [
-    { value: '0-5000', label: 'до 5 000₽' },
-    { value: '5000-10000', label: '5 000 - 10 000₽' },
-    { value: '10000-15000', label: '10 000 - 15 000₽' },
-    { value: '15000+', label: 'от 15 000₽' },
-  ];
 
   const sortOptions = [
     { value: 'popular', label: 'По популярности' },
@@ -78,12 +87,13 @@ const ProductFilter: React.FC<ProductFilterProps> = ({
   const colors = ['Черный', 'Коричневый', 'Серый', 'Бежевый', 'Розовый', 'Синий'];
 
   return (
-    <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+    <div className="bg-card p-6 rounded-lg border border-border">
       <div className="flex items-center justify-between mb-6">
-        <h3 className="text-lg font-semibold text-gray-900">Фильтры</h3>
+        <h3 className="text-lg font-semibold text-foreground">Фильтры</h3>
         <button
           onClick={clearFilters}
-          className="text-blue-600 hover:text-blue-700 text-sm font-medium"
+          className="text-primary hover:text-primary/80 text-sm font-medium transition-colors"
+          disabled={loading}
         >
           Сбросить все
         </button>
@@ -92,12 +102,17 @@ const ProductFilter: React.FC<ProductFilterProps> = ({
       <div className="space-y-6">
         {/* Sort by */}
         <div>
-          <h4 className="font-medium text-gray-900 mb-3">Сортировка</h4>
+          <Label className="text-base font-semibold mb-3 block">Сортировка</Label>
           <select
             value={filters.sortBy}
             onChange={(e) => handleFilterChange('sortBy', e.target.value)}
             disabled={loading}
-            className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+            className="
+              w-full p-3 bg-input border border-border rounded-lg 
+              focus:ring-2 focus:ring-primary focus:border-transparent 
+              text-foreground text-sm transition-all
+              disabled:opacity-50 disabled:cursor-not-allowed
+            "
           >
             {sortOptions.map((option) => (
               <option key={option.value} value={option.value}>
@@ -107,53 +122,63 @@ const ProductFilter: React.FC<ProductFilterProps> = ({
           </select>
         </div>
 
-        {/* Price range */}
+        {/* Category Filter */}
         <div>
-          <h4 className="font-medium text-gray-900 mb-3">Цена</h4>
-          <select
-            value={filters.priceRange}
-            onChange={(e) => handleFilterChange('priceRange', e.target.value)}
-            disabled={loading}
-            className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
-          >
-            <option value="">Все цены</option>
-            {priceRanges.map((range) => (
-              <option key={range.value} value={range.value}>
-                {range.label}
-              </option>
+          <Label className="text-base font-semibold mb-3 block">Категория</Label>
+          <RadioGroup value={filters.category} onValueChange={handleCategoryChange}>
+            <div className="flex items-center space-x-2 mb-3">
+              <RadioGroupItem value="" id="all-categories">
+                <Label htmlFor="all-categories" className="cursor-pointer text-foreground">
+                  Все категории
+                </Label>
+              </RadioGroupItem>
+            </div>
+            {categories.map((category) => (
+              <div key={category} className="flex items-center space-x-2 mb-3">
+                <RadioGroupItem value={category} id={category}>
+                  <Label htmlFor={category} className="cursor-pointer text-foreground">
+                    {category}
+                  </Label>
+                </RadioGroupItem>
+              </div>
             ))}
-          </select>
+          </RadioGroup>
         </div>
 
-        {/* Category */}
+        {/* Price Range Filter */}
         <div>
-          <h4 className="font-medium text-gray-900 mb-3">Категория</h4>
-          <select
-            value={filters.category}
-            onChange={(e) => handleFilterChange('category', e.target.value)}
-            disabled={loading}
-            className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
-          >
-            <option value="">Все категории</option>
-            {categories.map((category) => ( // Теперь categories гарантированно массив
-              <option key={category} value={category}>
-                {category}
-              </option>
-            ))}
-          </select>
+          <Label className="text-base font-semibold mb-3 block">
+            Цена: {priceRange[0].toLocaleString()} - {priceRange[1].toLocaleString()} ₽
+          </Label>
+          <Slider
+            value={[priceRange[1]]}
+            onValueChange={(value) => handlePriceRangeChange([priceRange[0], value[0]])}
+            max={20000}
+            step={1000}
+            className="mt-4"
+          />
+          <div className="flex justify-between text-sm text-muted-foreground mt-2">
+            <span>0 ₽</span>
+            <span>20 000 ₽</span>
+          </div>
         </div>
 
         {/* Brand */}
         <div>
-          <h4 className="font-medium text-gray-900 mb-3">Бренд</h4>
+          <Label className="text-base font-semibold mb-3 block">Бренд</Label>
           <select
             value={filters.brand}
             onChange={(e) => handleFilterChange('brand', e.target.value)}
             disabled={loading}
-            className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+            className="
+              w-full p-3 bg-input border border-border rounded-lg 
+              focus:ring-2 focus:ring-primary focus:border-transparent 
+              text-foreground text-sm transition-all
+              disabled:opacity-50 disabled:cursor-not-allowed
+            "
           >
             <option value="">Все бренды</option>
-            {brands.map((brand) => ( // Теперь brands гарантированно массив
+            {brands.map((brand) => (
               <option key={brand} value={brand}>
                 {brand}
               </option>
@@ -163,17 +188,21 @@ const ProductFilter: React.FC<ProductFilterProps> = ({
 
         {/* Size */}
         <div>
-          <h4 className="font-medium text-gray-900 mb-3">Размер</h4>
+          <Label className="text-base font-semibold mb-3 block">Размер</Label>
           <div className="grid grid-cols-3 gap-2">
             {sizes.map((size) => (
               <button
                 key={size}
                 onClick={() => handleFilterChange('size', filters.size === size ? '' : size)}
-                className={`p-2 border rounded text-center text-sm ${
-                  filters.size === size
-                    ? 'border-blue-500 bg-blue-50 text-blue-700'
-                    : 'border-gray-300 text-gray-700 hover:border-gray-400'
-                }`}
+                disabled={loading}
+                className={`
+                  p-2 border rounded-lg text-center text-sm font-medium transition-all
+                  ${filters.size === size
+                    ? 'border-primary text-primary'
+                    : 'border-border text-foreground hover:border-primary/50 2px'
+                  }
+                  disabled:opacity-50 disabled:cursor-not-allowed
+                `}
               >
                 {size}
               </button>
@@ -183,17 +212,21 @@ const ProductFilter: React.FC<ProductFilterProps> = ({
 
         {/* Color */}
         <div>
-          <h4 className="font-medium text-gray-900 mb-3">Цвет</h4>
+          <Label className="text-base font-semibold mb-3 block">Цвет</Label>
           <div className="grid grid-cols-2 gap-2">
             {colors.map((color) => (
               <button
                 key={color}
                 onClick={() => handleFilterChange('color', filters.color === color ? '' : color)}
-                className={`p-2 border rounded text-center text-sm ${
-                  filters.color === color
-                    ? 'border-blue-500 bg-blue-50 text-blue-700'
-                    : 'border-gray-300 text-gray-700 hover:border-gray-400'
-                }`}
+                disabled={loading}
+                className={`
+                  p-2 border rounded-lg text-center text-sm font-medium transition-all
+                  ${filters.color === color
+                    ? 'border-primary bg-primary/10 text-primary'
+                    : 'border-border text-foreground hover:border-primary/50'
+                  }
+                  disabled:opacity-50 disabled:cursor-not-allowed
+                `}
               >
                 {color}
               </button>
@@ -202,27 +235,35 @@ const ProductFilter: React.FC<ProductFilterProps> = ({
         </div>
 
         {/* Checkbox filters */}
-        <div className="space-y-3">
-          <label className="flex items-center">
+        <div className="space-y-4">
+          <label className="flex items-center space-x-3">
             <input
               type="checkbox"
               checked={filters.inStock}
               onChange={(e) => handleFilterChange('inStock', e.target.checked)}
               disabled={loading}
-              className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+              className="
+                h-4 w-4 text-primary border-border rounded 
+                focus:ring-primary focus:ring-2
+                disabled:opacity-50 disabled:cursor-not-allowed
+              "
             />
-            <span className="ml-2 text-sm text-gray-700">Только в наличии</span>
+            <span className="text-sm text-foreground font-medium">Только в наличии</span>
           </label>
 
-          <label className="flex items-center">
+          <label className="flex items-center space-x-3">
             <input
               type="checkbox"
               checked={filters.featured}
               onChange={(e) => handleFilterChange('featured', e.target.checked)}
               disabled={loading}
-              className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+              className="
+                h-4 w-4 text-primary border-border rounded 
+                focus:ring-primary focus:ring-2
+                disabled:opacity-50 disabled:cursor-not-allowed
+              "
             />
-            <span className="ml-2 text-sm text-gray-700">Хиты продаж</span>
+            <span className="text-sm text-foreground font-medium">Хиты продаж</span>
           </label>
         </div>
       </div>
