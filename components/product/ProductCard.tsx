@@ -18,55 +18,67 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
     ? Math.round((1 - product.price / product.originalPrice) * 100)
     : 0;
 
+  // Безопасное получение данных рейтинга
+  const ratings = product.ratings || { average: 0, count: 0 };
+  const averageRating = Math.max(0, Math.min(5, ratings.average || 0));
+  const ratingCount = ratings.count || 0;
+
   return (
     <Card className="group overflow-hidden hover:shadow-lg transition-all duration-300">
-      <Link href={`/products/${product.slug}`} className="block relative">
-        <div className="relative aspect-square overflow-hidden bg-secondary">
-          <Image
-            src={product.image || '/images/placeholder.jpg'}
-            alt={product.name}
-            fill
-            className="object-cover group-hover:scale-105 transition-transform duration-300"
-          />
-          
-          {/* Badges */}
-          <div className="absolute top-2 left-2 flex flex-col space-y-1">
-            {hasDiscount && (
-              <div className="bg-red-500 text-white px-2 py-1 rounded text-xs font-bold">
-                -{discountPercent}%
-              </div>
-            )}
-            {product.isNew && (
-              <div className="bg-blue-500 text-white px-2 py-1 rounded text-xs font-bold">
-                NEW
-              </div>
-            )}
-          </div>
-
-          {/* Quick actions */}
-          <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-            <AddToFavoritesButton
-              product={{
-                id: product.id,
-                name: product.name,
-                price: product.price,
-                image: product.image,
-                slug: product.slug,
-              }}
-              size="sm"
+      <div className="relative">
+        <Link href={`/products/${product.slug}`} className="block relative">
+          <div className="relative aspect-square overflow-hidden bg-secondary">
+            <Image
+              src={product.image || '/images/placeholder.jpg'}
+              alt={product.name}
+              fill
+              className="object-cover group-hover:scale-105 transition-transform duration-300"
             />
-          </div>
-
-          {/* Out of stock overlay */}
-          {product.stock === 0 && (
-            <div className="absolute inset-0 bg-background/60 flex items-center justify-center">
-              <span className="text-foreground font-semibold bg-background/80 px-3 py-1 rounded">
-                Нет в наличии
-              </span>
+            
+            {/* Badges */}
+            <div className="absolute top-2 left-2 flex flex-col space-y-1">
+              {hasDiscount && (
+                <div className="bg-red-500 text-white px-2 py-1 rounded text-xs font-bold">
+                  -{discountPercent}%
+                </div>
+              )}
+              {product.isNew && (
+                <div className="bg-blue-500 text-white px-2 py-1 rounded text-xs font-bold">
+                  NEW
+                </div>
+              )}
             </div>
-          )}
+
+            {/* Out of stock overlay */}
+            {product.stock === 0 && (
+              <div className="absolute inset-0 bg-background/60 flex items-center justify-center">
+                <span className="text-foreground font-semibold bg-background/80 px-3 py-1 rounded">
+                  Нет в наличии
+                </span>
+              </div>
+            )}
+          </div>
+        </Link>
+
+        {/* Quick actions - ВНЕ элемента Link */}
+        <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+          <AddToFavoritesButton
+            product={{
+              id: product.id,
+              name: product.name,
+              price: product.price,
+              originalPrice: product.originalPrice,
+              image: product.image,
+              slug: product.slug,
+              stock: product.stock,
+              ratings: product.ratings,
+              brand: product.brand,
+              category: product.category,
+            }}
+            size="sm"
+          />
         </div>
-      </Link>
+      </div>
 
       <div className="p-4">
         {/* Brand */}
@@ -83,19 +95,21 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           </h3>
         </Link>
 
-        {/* Rating */}
-        <div className="flex items-center mb-3">
-          <div className="flex text-yellow-400">
-            {[...Array(5)].map((_, i) => (
-              <span key={i} className="text-xs">
-                {i < Math.floor(product.ratings.average) ? '★' : '☆'}
-              </span>
-            ))}
+        {/* Rating - только если есть отзывы */}
+        {ratingCount > 0 && (
+          <div className="flex items-center mb-3">
+            <div className="flex text-yellow-400">
+              {[...Array(5)].map((_, i) => (
+                <span key={i} className="text-xs">
+                  {i < Math.floor(averageRating) ? '★' : '☆'}
+                </span>
+              ))}
+            </div>
+            <span className="text-xs text-muted-foreground ml-2">
+              ({ratingCount})
+            </span>
           </div>
-          <span className="text-xs text-muted-foreground ml-2">
-            ({product.ratings.count})
-          </span>
-        </div>
+        )}
 
         {/* Price */}
         <div className="flex items-center justify-between mb-3">

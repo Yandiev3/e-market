@@ -4,10 +4,10 @@
 import React, { useState } from 'react';
 import { useFavorites } from '@/context/FavoritesContext';
 import { useAuth } from '@/context/AuthContext';
-import { Product } from '@/types/product';
+import { FavoriteProduct } from '@/types/product';
 
 interface AddToFavoritesButtonProps {
-  product: Product;
+  product: FavoriteProduct;
   className?: string;
   size?: 'sm' | 'md' | 'lg';
 }
@@ -23,7 +23,10 @@ const AddToFavoritesButton: React.FC<AddToFavoritesButtonProps> = ({
 
   const favorite = isFavorite(product.id);
 
-  const handleToggleFavorite = async () => {
+  const handleToggleFavorite = async (e: React.MouseEvent) => {
+    e.preventDefault(); // Предотвращаем всплытие события
+    e.stopPropagation(); // Останавливаем распространение события
+    
     if (loading || isProcessing) return;
     
     setIsProcessing(true);

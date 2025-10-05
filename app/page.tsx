@@ -43,7 +43,7 @@ export default async function Home() {
         <div className="container mx-auto px-4 text-center relative z-10">
           <div className="max-w-4xl mx-auto">
             <h1 className="text-6xl md:text-8xl font-bold mb-6 tracking-tight">
-              <span className="text-primary">KASTOM</span>
+              KAS<span className="text-primary">TOM</span>
             </h1>
             
             <p className="text-xl md:text-2xl text-muted-foreground mb-8 max-w-2xl mx-auto leading-relaxed">
@@ -53,7 +53,7 @@ export default async function Home() {
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
               <Link href="/products">
                 <Button size="lg" className="text-lg px-8 py-6 h-auto">
-                  📦 Смотреть каталог
+                   Смотреть каталог
                 </Button>
               </Link>
               {!session && (
@@ -68,11 +68,11 @@ export default async function Home() {
         </div>
 
         {/* Scroll indicator */}
-        <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce">
+        {/* <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce">
           <div className="w-6 h-10 border-2 border-border rounded-full flex justify-center">
             <div className="w-1 h-3 bg-muted-foreground rounded-full mt-2"></div>
           </div>
-        </div>
+        </div> */}
       </section>
 
       {/* Features Section */}

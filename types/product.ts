@@ -64,12 +64,21 @@ export interface Product {
   category: string;
 }
 
-export interface ProductForFavorites {
+// Упрощенный тип для избранного
+export interface FavoriteProduct {
   id: string;
   name: string;
   price: number;
+  originalPrice?: number;
   image: string;
   slug: string;
+  stock: number;
+  ratings: {
+    average: number;
+    count: number;
+  };
+  brand?: string;
+  category: string;
 }
 
 export type ProductDocument = IProduct & Document;
