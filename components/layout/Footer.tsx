@@ -1,4 +1,4 @@
-// components/layout/Footer.tsx
+// components/layout/Footer.tsx (обновленная версия)
 import React from 'react';
 import Link from 'next/link';
 
@@ -13,7 +13,7 @@ const Footer: React.FC = () => {
             <h3 className="font-semibold text-lg mb-4">Магазин</h3>
             <ul className="space-y-2 text-muted-foreground">
               <li><Link href="/about" className="hover:text-foreground transition-colors">О нас</Link></li>
-              <li><Link href="/contact" className="hover:text-foreground transition-colors">Контакты</Link></li>
+              <li><Link href="/contacts" className="hover:text-foreground transition-colors">Контакты</Link></li>
               <li><Link href="/careers" className="hover:text-foreground transition-colors">Вакансии</Link></li>
               <li><Link href="/stores" className="hover:text-foreground transition-colors">Магазины</Link></li>
             </ul>
@@ -48,15 +48,15 @@ const Footer: React.FC = () => {
             <div className="space-y-4">
               <div className="text-muted-foreground">
                 <p className="font-medium">Телефон:</p>
-                <p className="mt-1">8 (800) 555-35-35</p>
+                <p className="mt-1">+7 (999) 123-45-67</p>
               </div>
               <div className="text-muted-foreground">
                 <p className="font-medium">Email:</p>
-                <p className="mt-1">info@uggstore.ru</p>
+                <p className="mt-1">info@kastom.ru</p>
               </div>
               <div className="text-muted-foreground">
                 <p className="font-medium">Часы работы:</p>
-                <p className="mt-1">Пн-Вс: 9:00-21:00</p>
+                <p className="mt-1">Пн-Вс: 10:00-22:00</p>
               </div>
             </div>
           </div>
@@ -119,7 +119,7 @@ const Footer: React.FC = () => {
 
             {/* Copyright */}
             <div className="text-muted-foreground text-sm">
-              © 2024 UGGSTORE. Все права защищены.
+              © 2024 KASTOM. Все права защищены.
             </div>
           </div>
         </div>

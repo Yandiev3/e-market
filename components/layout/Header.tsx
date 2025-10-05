@@ -1,4 +1,4 @@
-// components/layout/Header.tsx
+// components/layout/Header.tsx (обновленная версия)
 'use client';
 
 import React, { useState } from 'react';
@@ -53,11 +53,6 @@ const Header: React.FC = () => {
 
   return (
     <header className="border-b border-border sticky top-0 z-50 backdrop-blur-sm bg-card/95">
-      {/* Top announcement bar */}
-      {/* <div className="bg-primary text-primary-foreground text-sm py-2 text-center">
-        🚚 Бесплатная доставка при заказе от 5000₽ • ⚡ Быстрая доставка за 1-3 дня
-      </div> */}
-
       {/* Main header */}
       <div className="max-w-7xl mx-auto px-4">
         {/* First row - Logo and actions */}
@@ -70,9 +65,24 @@ const Header: React.FC = () => {
 
             {/* Desktop navigation */}
             <nav className="hidden lg:flex space-x-6">
-              <li className="text-muted-foreground hover:text-foreground font-medium text-sm transition-colors list-none cursor-pointer">Каталог</li>
-              <li className="text-muted-foreground hover:text-foreground font-medium text-sm transition-colors list-none cursor-pointer">Акции</li>
-              <li className="text-muted-foreground hover:text-foreground font-medium text-sm transition-colors list-none cursor-pointer">контакты</li>
+              <Link 
+                href="/products" 
+                className="text-muted-foreground hover:text-foreground font-medium text-sm transition-colors"
+              >
+                Каталог
+              </Link>
+              <Link 
+                href="/products?sale=true" 
+                className="text-muted-foreground hover:text-foreground font-medium text-sm transition-colors"
+              >
+                Акции
+              </Link>
+              <Link 
+                href="/contacts" 
+                className="text-muted-foreground hover:text-foreground font-medium text-sm transition-colors"
+              >
+                Контакты
+              </Link>
             </nav>
           </div>
 
