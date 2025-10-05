@@ -13,8 +13,8 @@ interface ProductCardProps {
 }
 
 const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
-  const hasDiscount = product.originalPrice && product.originalPrice > product.price;
-  const discountPercent = hasDiscount 
+  const hasDiscount = product.originalPrice !== undefined && product.originalPrice > product.price;
+  const discountPercent = hasDiscount && product.originalPrice 
     ? Math.round((1 - product.price / product.originalPrice) * 100)
     : 0;
 
@@ -103,9 +103,9 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
             <span className="text-lg font-bold text-foreground">
               {formatPrice(product.price)}
             </span>
-            {hasDiscount && product.originalPrice && (
+            {hasDiscount && (
               <span className="text-sm text-muted-foreground line-through">
-                {formatPrice(product.originalPrice)}
+                {formatPrice(product.originalPrice!)}
               </span>
             )}
           </div>
