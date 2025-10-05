@@ -3,19 +3,15 @@
 
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { useAuth } from './AuthContext';
+import { Product } from '@/types/product';
 
-export interface FavoriteItem {
-  id: string;
-  name: string;
-  price: number;
-  image: string;
-  slug: string;
+export interface FavoriteItem extends Product {
   addedAt: Date;
 }
 
 interface FavoritesContextType {
   items: FavoriteItem[];
-  addFavorite: (item: Omit<FavoriteItem, 'addedAt'>) => Promise<void>;
+  addFavorite: (item: Product) => Promise<void>;
   removeFavorite: (id: string) => Promise<void>;
   isFavorite: (id: string) => boolean;
   loading: boolean;
@@ -65,7 +61,7 @@ export const FavoritesProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     }
   };
 
-  const addFavorite = async (item: Omit<FavoriteItem, 'addedAt'>) => {
+  const addFavorite = async (item: Product) => {
     const newItem = { ...item, addedAt: new Date() };
     
     if (isAuthenticated) {

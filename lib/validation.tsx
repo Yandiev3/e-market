@@ -37,6 +37,7 @@ export function validateUser(data: any): ValidationResult {
     errors.push('Пароль должен содержать минимум 6 символов');
   }
 
+  // Имя теперь необязательно при регистрации
   if (data.name && !validator.isLength(data.name, { min: 2 })) {
     errors.push('Имя должно содержать минимум 2 символа');
   }

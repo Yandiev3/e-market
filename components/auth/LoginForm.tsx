@@ -1,33 +1,22 @@
-// components/auth/LoginForm.tsx
 'use client';
 
 import React, { useState } from 'react';
 import { signIn } from 'next-auth/react';
-import { useRouter } from 'next/navigation';
-import Input from '../ui/Input';
-import Button from '../ui/Button';
-
-interface LoginFormData {
-  email: string;
-  password: string;
-}
+import { useRouter, useSearchParams } from 'next/navigation';
+import { Card } from '@/components/ui/Card';
+import { Label } from '@/components/ui/Label';
+import Input from '@/components/ui/Input';
+import Button from '@/components/ui/Button';
 
 const LoginForm: React.FC = () => {
   const router = useRouter();
-  const [formData, setFormData] = useState<LoginFormData>({
-    email: '',
-    password: '',
-  });
+  const searchParams = useSearchParams();
+  const message = searchParams.get('message');
+  
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -36,71 +25,97 @@ const LoginForm: React.FC = () => {
 
     try {
       const result = await signIn('credentials', {
-        email: formData.email,
-        password: formData.password,
+        email,
+        password,
         redirect: false,
       });
 
       if (result?.error) {
-        setError('Invalid email or password');
+        setError('Неверный email или пароль');
       } else {
         router.push('/');
         router.refresh();
       }
     } catch (err) {
-      setError('An error occurred during login');
+      setError('Произошла ошибка при входе');
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="max-w-md mx-auto bg-white p-6 rounded-lg shadow-md">
-      <h2 className="text-2xl font-bold text-center mb-6">Авторизация</h2>
-      
-      {error && (
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-          {error}
+    <div className="min-h-screen bg-background flex flex-col">
+      <div className="container mx-auto px-4 py-16 flex-1 flex items-center justify-center">
+        <div className="max-w-md w-full">
+          <Card className="p-8 border-border/50 bg-card/50 backdrop-blur-sm">
+            <div className="text-center mb-8">
+              <h1 className="text-3xl font-bold mb-2 gradient-text-primary">kastom</h1>
+              <p className="text-muted-foreground">
+                Войдите в свой аккаунт
+              </p>
+            </div>
+
+            {message && (
+              <div className="bg-green-500/10 border border-green-500/20 text-green-600 px-4 py-3 rounded-lg mb-4 text-sm">
+                {message}
+              </div>
+            )}
+
+            {error && (
+              <div className="bg-red-500/10 border border-red-500/20 text-red-600 px-4 py-3 rounded-lg mb-4 text-sm">
+                {error}
+              </div>
+            )}
+
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <div>
+                <Label htmlFor="email" className="text-foreground">Email</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="test@example.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="mt-2 bg-input border-border"
+                  required
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="password" className="text-foreground">Пароль</Label>
+                <Input
+                  id="password"
+                  type="password"
+                  placeholder="••••••••"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="mt-2 bg-input border-border"
+                  required
+                  minLength={6}
+                />
+              </div>
+
+              <Button 
+                type="submit" 
+                className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-medium py-3" 
+                disabled={loading}
+              >
+                {loading ? "Загрузка..." : "Войти"}
+              </Button>
+
+              <div className="text-center">
+                <Button
+                  type="button"
+                  variant="ghost"
+                  onClick={() => router.push('/register')}
+                  className="text-sm text-muted-foreground hover:text-foreground"
+                >
+                  Нет аккаунта? Зарегистрироваться
+                </Button>
+              </div>
+            </form>
+          </Card>
         </div>
-      )}
-
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <Input
-          label="Email"
-          type="email"
-          name="email"
-          value={formData.email}
-          onChange={handleChange}
-          required
-          placeholder="email"
-        />
-
-        <Input
-          label="Пароль"
-          type="password"
-          name="password"
-          value={formData.password}
-          onChange={handleChange}
-          required
-          placeholder="Введите пароль"
-        />
-
-        <Button
-          type="submit"
-          loading={loading}
-          className="w-full"
-        >
-          Авторизация
-        </Button>
-      </form>
-
-      <div className="mt-4 text-center">
-        <p className="text-sm text-gray-600">
-        У вас нет учетной записи?{' '}
-          <a href="/register" className="text-blue-600 hover:underline">
-            Зарегестрироваться
-          </a>
-        </p>
       </div>
     </div>
   );

@@ -4,10 +4,10 @@
 import React, { useState } from 'react';
 import { useFavorites } from '@/context/FavoritesContext';
 import { useAuth } from '@/context/AuthContext';
-import { ProductForFavorites } from '@/types/product';
+import { Product } from '@/types/product';
 
 interface AddToFavoritesButtonProps {
-  product: ProductForFavorites;
+  product: Product;
   className?: string;
   size?: 'sm' | 'md' | 'lg';
 }
@@ -46,12 +46,18 @@ const AddToFavoritesButton: React.FC<AddToFavoritesButtonProps> = ({
     lg: 'w-12 h-12',
   };
 
+  const iconSizes = {
+    sm: 'w-4 h-4',
+    md: 'w-5 h-5',
+    lg: 'w-6 h-6',
+  };
+
   return (
     <button
       onClick={handleToggleFavorite}
       disabled={loading || isProcessing}
-      className={`flex items-center justify-center rounded-full bg-white shadow-md hover:shadow-lg transition-all duration-200 ${
-        favorite ? 'text-red-500' : 'text-gray-400 hover:text-red-500'
+      className={`flex items-center justify-center rounded-full bg-background/80 backdrop-blur-sm border border-border shadow-md hover:shadow-lg transition-all duration-200 ${
+        favorite ? 'text-primary' : 'text-muted-foreground hover:text-primary'
       } ${sizeClasses[size]} ${className}`}
       title={favorite ? 'Удалить из избранного' : 'Добавить в избранное'}
     >
@@ -59,7 +65,7 @@ const AddToFavoritesButton: React.FC<AddToFavoritesButtonProps> = ({
         <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current" />
       ) : (
         <svg
-          className="w-5 h-5"
+          className={iconSizes[size]}
           fill={favorite ? 'currentColor' : 'none'}
           stroke="currentColor"
           viewBox="0 0 24 24"

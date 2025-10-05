@@ -1,6 +1,3 @@
-// Этот файл закомментирован и вызывает ошибку TypeScript
-// Удаляем его или раскомментируем с правильной реализацией
-
 import { NextRequest, NextResponse } from 'next/server';
 import dbConnect from '@/lib/dbConnect';
 import { signIn } from 'next-auth/react';

@@ -39,7 +39,7 @@ export interface IProductLean {
   stock: number;
   sku: string;
   slug: string;
-  featured: boolean;
+  featured: boolean; 
   active: boolean;
   gender: 'men' | 'women' | 'kids' | 'unisex'; // Добавлено
   ageCategory?: 'infant' | 'toddler' | 'child' | 'teen'; // Добавлено
