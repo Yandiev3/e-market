@@ -4,15 +4,7 @@
 import React, { useState, useEffect } from 'react';
 import { formatPrice } from '@/lib/utils';
 import Link from 'next/link';
-
-interface DashboardStats {
-  totalSales: number;
-  totalOrders: number;
-  totalProducts: number;
-  totalUsers: number;
-  recentOrders: any[];
-  topProducts: any[];
-}
+import { DashboardStats, RecentOrder, TopProduct } from '@/types/product';
 
 const AdminDashboard: React.FC = () => {
   const [stats, setStats] = useState<DashboardStats | null>(null);
@@ -25,6 +17,9 @@ const AdminDashboard: React.FC = () => {
   const fetchDashboardData = async () => {
     try {
       const response = await fetch('/api/admin/analytics');
+      if (!response.ok) {
+        throw new Error('Failed to fetch dashboard data');
+      }
       const data = await response.json();
       setStats(data);
     } catch (error) {
@@ -67,6 +62,12 @@ const AdminDashboard: React.FC = () => {
     return (
       <div className="text-center py-12">
         <p className="text-muted-foreground">Не удалось загрузить данные дашборда</p>
+        <button 
+          onClick={fetchDashboardData}
+          className="mt-4 px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90"
+        >
+          Попробовать снова
+        </button>
       </div>
     );
   }
@@ -166,26 +167,34 @@ const AdminDashboard: React.FC = () => {
           </div>
           <div className="p-6">
             <div className="space-y-4">
-              {stats.recentOrders.slice(0, 5).map((order) => (
-                <div key={order._id} className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
-                  <div>
-                    <p className="font-medium text-foreground">#{order._id.slice(-6)}</p>
-                    <p className="text-sm text-muted-foreground">{order.user?.name || 'Гость'}</p>
+              {stats.recentOrders && stats.recentOrders.length > 0 ? (
+                stats.recentOrders.slice(0, 5).map((order: RecentOrder) => (
+                  <div key={order._id} className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
+                    <div>
+                      <p className="font-medium text-foreground">#{order._id.slice(-6)}</p>
+                      <p className="text-sm text-muted-foreground">{order.user?.name || 'Гость'}</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="font-medium text-foreground">{formatPrice(order.totalPrice)}</p>
+                      <span className={`inline-block px-2 py-1 text-xs rounded-full ${
+                        order.status === 'delivered' 
+                          ? 'bg-green-100 text-green-800'
+                          : order.status === 'processing'
+                          ? 'bg-blue-100 text-blue-800'
+                          : order.status === 'shipped'
+                          ? 'bg-yellow-100 text-yellow-800'
+                          : order.status === 'cancelled'
+                          ? 'bg-red-100 text-red-800'
+                          : 'bg-gray-100 text-gray-800'
+                      }`}>
+                        {order.status}
+                      </span>
+                    </div>
                   </div>
-                  <div className="text-right">
-                    <p className="font-medium text-foreground">{formatPrice(order.totalPrice)}</p>
-                    <span className={`inline-block px-2 py-1 text-xs rounded-full ${
-                      order.status === 'delivered' 
-                        ? 'bg-green-100 text-green-800'
-                        : order.status === 'processing'
-                        ? 'bg-blue-100 text-blue-800'
-                        : 'bg-yellow-100 text-yellow-800'
-                    }`}>
-                      {order.status}
-                    </span>
-                  </div>
-                </div>
-              ))}
+                ))
+              ) : (
+                <p className="text-center text-muted-foreground py-4">Нет заказов</p>
+              )}
             </div>
             <Link href="/admin/orders" className="btn-outline w-full mt-4">
               Все заказы
@@ -200,25 +209,29 @@ const AdminDashboard: React.FC = () => {
           </div>
           <div className="p-6">
             <div className="space-y-4">
-              {stats.topProducts.slice(0, 5).map((product) => (
-                <div key={product._id} className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
-                  <div className="flex items-center space-x-3">
-                    <img
-                      src={product.images?.[0] || '/images/placeholder.jpg'}
-                      alt={product.name}
-                      className="w-10 h-10 rounded object-cover"
-                    />
-                    <div>
-                      <p className="font-medium text-foreground text-sm">{product.name}</p>
-                      <p className="text-xs text-muted-foreground">{formatPrice(product.price)}</p>
+              {stats.topProducts && stats.topProducts.length > 0 ? (
+                stats.topProducts.slice(0, 5).map((product: TopProduct) => (
+                  <div key={product._id} className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
+                    <div className="flex items-center space-x-3">
+                      <img
+                        src={product.images?.[0] || '/images/placeholder.jpg'}
+                        alt={product.name}
+                        className="w-10 h-10 rounded object-cover"
+                      />
+                      <div>
+                        <p className="font-medium text-foreground text-sm">{product.name}</p>
+                        <p className="text-xs text-muted-foreground">{formatPrice(product.price)}</p>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <p className="font-medium text-foreground">{product.stock} шт.</p>
+                      <p className="text-xs text-muted-foreground">{product.totalSales || 0} продаж</p>
                     </div>
                   </div>
-                  <div className="text-right">
-                    <p className="font-medium text-foreground">{product.stock} шт.</p>
-                    <p className="text-xs text-muted-foreground">{product.totalSales || 0} продаж</p>
-                  </div>
-                </div>
-              ))}
+                ))
+              ) : (
+                <p className="text-center text-muted-foreground py-4">Нет данных о товарах</p>
+              )}
             </div>
             <Link href="/admin/manage-products" className="btn-outline w-full mt-4">
               Все товары

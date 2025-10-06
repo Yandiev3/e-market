@@ -157,7 +157,7 @@ const Header: React.FC = () => {
                     Привет, {user?.name}
                   </div>
                   {isAdmin && (
-                    <Link href="/admin/dashboard" className="block px-3 py-2 text-sm text-foreground hover:bg-accent hover:text-accent-foreground rounded transition-colors">
+                    <Link href="/dashboard" className="block px-3 py-2 text-sm text-foreground hover:bg-accent hover:text-accent-foreground rounded transition-colors">
                       Панель администратора
                     </Link>
                   )}

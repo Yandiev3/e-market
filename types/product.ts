@@ -82,3 +82,56 @@ export interface FavoriteProduct {
 }
 
 export type ProductDocument = IProduct & Document;
+
+// Типы для админ-панели
+export interface OrderItem {
+  product: string;
+  name: string;
+  price: number;
+  quantity: number;
+  image: string;
+}
+
+export interface RecentOrder {
+  _id: string;
+  user?: {
+    name?: string;
+    email?: string;
+  };
+  totalPrice: number;
+  status: 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
+  createdAt: string;
+  orderItems?: OrderItem[];
+}
+
+export interface TopProduct {
+  _id: string;
+  name: string;
+  price: number;
+  images: string[];
+  stock: number;
+  totalSales: number;
+}
+
+export interface DashboardStats {
+  totalSales: number;
+  totalOrders: number;
+  totalProducts: number;
+  totalUsers: number;
+  recentOrders: RecentOrder[];
+  topProducts: TopProduct[];
+  monthlySales?: Array<{
+    month: string;
+    sales: number;
+  }>;
+  topCategories?: Array<{
+    category: string;
+    count: number;
+    revenue: number;
+  }>;
+  recentActivity?: Array<{
+    type: string;
+    description: string;
+    timestamp: string;
+  }>;
+}

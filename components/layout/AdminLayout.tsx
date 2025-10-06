@@ -79,106 +79,111 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
   ];
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Mobile sidebar backdrop */}
-      {sidebarOpen && (
-        <div 
-          className="fixed inset-0 z-40 bg-black bg-opacity-50 lg:hidden"
-          onClick={() => setSidebarOpen(false)}
-        />
-      )}
-
-      {/* Sidebar */}
-      <div className={`fixed inset-y-0 left-0 z-50 w-64 bg-card border-r border-border transform transition-transform lg:translate-x-0 lg:static lg:inset-0 ${
-        sidebarOpen ? 'translate-x-0' : '-translate-x-full'
-      }`}>
-        <div className="flex items-center justify-between h-16 px-4 border-b border-border">
-          <h1 className="text-xl font-bold text-foreground">Админ Панель</h1>
-          <button
+    <div className="min-h-screen bg-background flex flex-col">
+      {/* Main content with sidebar */}
+      <div className="flex flex-1 max-w-7xl mx-auto w-full py-8">
+        {/* Mobile sidebar backdrop */}
+        {sidebarOpen && (
+          <div 
+            className="fixed inset-0 z-40 bg-black bg-opacity-50 lg:hidden"
             onClick={() => setSidebarOpen(false)}
-            className="lg:hidden p-2 text-muted-foreground hover:text-foreground"
-          >
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
-        </div>
+          />
+        )}
 
-        <nav className="mt-8 px-4 space-y-2">
-          {navigation.map((item) => {
-            const isActive = pathname === item.href;
-            return (
-              <Link
-                key={item.name}
-                href={item.href}
-                className={`flex items-center px-3 py-3 text-sm font-medium rounded-lg transition-all ${
-                  isActive
-                    ? 'bg-primary text-primary-foreground shadow-md'
-                    : 'text-muted-foreground hover:text-foreground hover:bg-accent'
-                }`}
-                onClick={() => setSidebarOpen(false)}
-              >
-                <span className="mr-3">{item.icon}</span>
-                {item.name}
-              </Link>
-            );
-          })}
-        </nav>
-
-        {/* User info at bottom */}
-        <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-border">
-          <div className="flex items-center space-x-3">
-            <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center">
-              <span className="text-primary-foreground text-sm font-medium">
-                {user?.name?.charAt(0).toUpperCase()}
-              </span>
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-foreground truncate">
-                {user?.name}
-              </p>
-              <p className="text-xs text-muted-foreground truncate">
-                Администратор
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Main content */}
-      <div className="lg:ml-64">
-        {/* Top header */}
-        <header className="bg-card border-b border-border">
-          <div className="flex items-center justify-between h-16 px-6">
-            <div className="flex items-center">
+        {/* Sidebar */}
+        <div className={`flex-shrink-0 w-64 bg-card border border-border transform transition-transform duration-300 ease-in-out lg:transform-none lg:translate-x-0 lg:static lg:inset-0 ${
+          sidebarOpen ? 'translate-x-0 fixed inset-y-0 left-0 z-10' : '-translate-x-full fixed inset-y-0 left-0 z-10 lg:translate-x-0 lg:relative'
+        }`}>
+          <div className="flex flex-col h-full">
+            <div className="flex items-center justify-between h-16 px-4 border-b border-border">
+              <h1 className="text-xl font-bold text-foreground">Админ Панель</h1>
               <button
-                onClick={() => setSidebarOpen(true)}
-                className="lg:hidden p-2 text-muted-foreground hover:text-foreground mr-4"
+                onClick={() => setSidebarOpen(false)}
+                className="lg:hidden p-2 text-muted-foreground hover:text-foreground"
               >
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                 </svg>
               </button>
-              <h2 className="text-lg font-semibold text-foreground">
-                {navigation.find(item => item.href === pathname)?.name || 'Панель управления'}
-              </h2>
             </div>
 
-            <div className="flex items-center space-x-4">
-              <Link
-                href="/"
-                className="btn-outline px-4 py-2 text-sm"
-              >
-                Вернуться в магазин
-              </Link>
+            <nav className="flex-1 mt-8 px-4 space-y-2">
+              {navigation.map((item) => {
+                const isActive = pathname === item.href;
+                return (
+                  <Link
+                    key={item.name}
+                    href={item.href}
+                    className={`flex items-center px-3 py-3 text-sm font-medium rounded-lg transition-all ${
+                      isActive
+                        ? 'bg-primary text-primary-foreground shadow-md'
+                        : 'text-muted-foreground hover:text-foreground hover:bg-accent'
+                    }`}
+                    onClick={() => setSidebarOpen(false)}
+                  >
+                    <span className="mr-3">{item.icon}</span>
+                    {item.name}
+                  </Link>
+                );
+              })}
+            </nav>
+
+            {/* User info at bottom */}
+            <div className="p-4 border-t border-border">
+              <div className="flex items-center space-x-3">
+                <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center">
+                  <span className="text-primary-foreground text-sm font-medium">
+                    {user?.name?.charAt(0).toUpperCase()}
+                  </span>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-foreground truncate">
+                    {user?.name}
+                  </p>
+                  <p className="text-xs text-muted-foreground truncate">
+                    Администратор
+                  </p>
+                </div>
+              </div>
             </div>
           </div>
-        </header>
+        </div>
 
-        {/* Page content */}
-        <main className="p-6">
-          {children}
-        </main>
+        {/* Main content */}
+        <div className="flex-1 flex flex-col min-w-0">
+          {/* Top header */}
+          <header className="bg-card border border-border flex-shrink-0">
+            <div className="flex items-center justify-between h-16 px-6">
+              <div className="flex items-center">
+                <button
+                  onClick={() => setSidebarOpen(true)}
+                  className="lg:hidden p-2 text-muted-foreground hover:text-foreground mr-4"
+                >
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                  </svg>
+                </button>
+                <h2 className="text-lg font-semibold text-foreground">
+                  {navigation.find(item => item.href === pathname)?.name || 'Панель управления'}
+                </h2>
+              </div>
+
+              <div className="flex items-center space-x-4">
+                <Link
+                  href="/"
+                  className="btn-outline px-4 py-2 text-sm"
+                >
+                  Вернуться в магазин
+                </Link>
+              </div>
+            </div>
+          </header>
+
+          {/* Page content */}
+          <main className="flex-1 p-6 overflow-auto">
+            {children}
+          </main>
+        </div>
       </div>
     </div>
   );

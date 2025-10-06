@@ -1,3 +1,4 @@
+// app/api/admin/analytics/route.tsx
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-config';
@@ -62,6 +63,60 @@ export async function GET(request: NextRequest) {
     const totalProducts = await Product.countDocuments({ active: true });
     const totalUsers = await User.countDocuments();
 
+    // Get recent orders
+    const recentOrders = await Order.find()
+      .sort({ createdAt: -1 })
+      .limit(10)
+      .populate('user', 'name email')
+      .lean();
+
+    // Get top products
+    const topProducts = await Order.aggregate([
+      {
+        $match: {
+          status: 'delivered',
+          createdAt: { $gte: startDate },
+        },
+      },
+      {
+        $unwind: '$orderItems',
+      },
+      {
+        $group: {
+          _id: '$orderItems.product',
+          totalSales: { $sum: '$orderItems.quantity' },
+          totalRevenue: { $sum: { $multiply: ['$orderItems.price', '$orderItems.quantity'] } },
+        },
+      },
+      {
+        $lookup: {
+          from: 'products',
+          localField: '_id',
+          foreignField: '_id',
+          as: 'product',
+        },
+      },
+      {
+        $unwind: '$product',
+      },
+      {
+        $project: {
+          _id: '$product._id',
+          name: '$product.name',
+          price: '$product.price',
+          images: '$product.images',
+          stock: '$product.stock',
+          totalSales: '$totalSales',
+        },
+      },
+      {
+        $sort: { totalSales: -1 },
+      },
+      {
+        $limit: 10,
+      },
+    ]);
+
     // Get monthly sales
     const monthlySales = await Order.aggregate([
       {
@@ -122,15 +177,9 @@ export async function GET(request: NextRequest) {
     ]);
 
     // Get recent activity
-    const recentOrders = await Order.find()
-      .sort({ createdAt: -1 })
-      .limit(5)
-      .populate('user', 'name')
-      .lean();
-
     const recentActivity = recentOrders.map((order) => ({
       type: 'order',
-      description: `New order from ${order.user.name}`,
+      description: `New order from ${order.user?.name || 'Guest'}`,
       timestamp: order.createdAt,
     }));
 
@@ -139,6 +188,8 @@ export async function GET(request: NextRequest) {
       totalOrders,
       totalProducts,
       totalUsers,
+      recentOrders,
+      topProducts,
       monthlySales: monthlySales.map((item) => ({
         month: `${item._id.year}-${item._id.month.toString().padStart(2, '0')}`,
         sales: item.sales,
