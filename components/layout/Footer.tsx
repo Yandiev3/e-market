@@ -1,4 +1,4 @@
-// components/layout/Footer.tsx (обновленная версия)
+// components/layout/Footer.tsx
 import React from 'react';
 import Link from 'next/link';
 
@@ -65,19 +65,19 @@ const Footer: React.FC = () => {
         {/* Newsletter */}
         <div className="border-t border-border mt-8 pt-8">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-            <div>
+            <div className="text-center md:text-left">
               <h4 className="font-semibold text-lg mb-2">Подпишитесь на рассылку</h4>
               <p className="text-muted-foreground text-sm">
                 Узнавайте первыми о новых коллекциях и акциях
               </p>
             </div>
-            <div className="flex gap-2 w-full md:w-auto">
+            <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
               <input
                 type="email"
                 placeholder="Ваш email"
-                className="flex-1 px-4 py-2 bg-input border border-input rounded text-foreground placeholder-muted-foreground focus:ring-2 focus:ring-primary focus:border-transparent"
+                className="flex-1 px-4 py-2 bg-input border border-input rounded text-foreground placeholder-muted-foreground focus:ring-2 focus:ring-primary focus:border-transparent min-w-[200px]"
               />
-              <button className="btn-primary px-6 py-2">
+              <button className="btn-primary px-6 py-2 whitespace-nowrap">
                 Подписаться
               </button>
             </div>
@@ -118,7 +118,7 @@ const Footer: React.FC = () => {
             </div>
 
             {/* Copyright */}
-            <div className="text-muted-foreground text-sm">
+            <div className="text-muted-foreground text-sm text-center md:text-left">
               © 2024 KASTOM. Все права защищены.
             </div>
           </div>
