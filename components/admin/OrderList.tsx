@@ -10,6 +10,11 @@ interface OrderItem {
   price: number;
 }
 
+interface ShippingAddress {
+  street: string;
+  city: string;
+}
+
 interface OrderData {
   _id: string;
   orderNumber: string;
@@ -22,6 +27,7 @@ interface OrderData {
   paymentMethod: string;
   createdAt: string;
   items: OrderItem[];
+  shippingAddress?: ShippingAddress;
 }
 
 interface OrderListProps {
@@ -89,6 +95,9 @@ const OrderList: React.FC<OrderListProps> = ({ orders, onStatusChange, loading =
                 Клиент
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                Адрес доставки
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
                 Товары
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
@@ -110,7 +119,7 @@ const OrderList: React.FC<OrderListProps> = ({ orders, onStatusChange, loading =
               <tr key={order._id} className="hover:bg-muted/30 transition-colors">
                 <td className="px-6 py-4">
                   <div className="text-sm font-medium text-foreground">
-                    #{order.orderNumber}
+                    #{order.orderNumber || order._id.slice(-8)}
                   </div>
                   <div className="text-sm text-muted-foreground">
                     {order.paymentMethod}
@@ -122,6 +131,20 @@ const OrderList: React.FC<OrderListProps> = ({ orders, onStatusChange, loading =
                   </div>
                   <div className="text-sm text-muted-foreground">
                     {order.user.email}
+                  </div>
+                </td>
+                <td className="px-6 py-4">
+                  <div className="text-sm text-foreground max-w-xs">
+                    {order.shippingAddress ? (
+                      <>
+                        <div>{order.shippingAddress.city}</div>
+                        <div className="text-muted-foreground text-xs">
+                          {order.shippingAddress.street}
+                        </div>
+                      </>
+                    ) : (
+                      <span className="text-muted-foreground">Не указан</span>
+                    )}
                   </div>
                 </td>
                 <td className="px-6 py-4 text-sm text-foreground">

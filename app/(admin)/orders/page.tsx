@@ -12,6 +12,11 @@ interface OrderItem {
   price: number;
 }
 
+interface ShippingAddress {
+  street: string;
+  city: string;
+}
+
 interface ApiOrder {
   _id: string;
   orderNumber: string;
@@ -25,6 +30,7 @@ interface ApiOrder {
   paymentMethod?: string;
   createdAt: string;
   orderItems: OrderItem[];
+  shippingAddress: ShippingAddress;
 }
 
 export default function OrdersPage() {
@@ -74,7 +80,7 @@ export default function OrdersPage() {
 
   const transformedOrders = orders.map(order => ({
     _id: order._id,
-    orderNumber: order.orderNumber,
+    orderNumber: order.orderNumber || order._id.slice(-8),
     user: {
       name: order.user.name,
       email: order.user.email,
@@ -87,7 +93,8 @@ export default function OrdersPage() {
       name: item.product?.name || 'Товар',
       quantity: item.quantity,
       price: item.price,
-    }))
+    })),
+    shippingAddress: order.shippingAddress
   }));
 
   useEffect(() => {

@@ -1,9 +1,11 @@
+// app/api/orders/route.tsx
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-config';
 import dbConnect from '@/lib/dbConnect';
 import Order from '@/models/Order';
 import Product from '@/models/Product';
+import User from '@/models/User';
 import { validateOrder } from '@/lib/validation';
 
 export async function GET(request: NextRequest) {
@@ -61,33 +63,60 @@ export async function POST(request: NextRequest) {
     await dbConnect();
 
     const body = await request.json();
-    const { items, shippingAddress, paymentMethod } = body;
+    console.log('Received order data:', body);
 
-    // Validate order
-    const validation = validateOrder({ items, shippingAddress });
-    if (!validation.isValid) {
+    const { 
+      items, 
+      shippingAddress, 
+      paymentMethod,
+      email,
+      phone,
+      firstName,
+      lastName
+    } = body;
+
+    // Validate required fields
+    if (!items || !Array.isArray(items) || items.length === 0) {
       return NextResponse.json(
-        { message: validation.errors[0] },
+        { message: 'Заказ должен содержать товары' },
         { status: 400 }
       );
     }
 
-    // Calculate prices
+    if (!shippingAddress || !shippingAddress.street || !shippingAddress.city) {
+      return NextResponse.json(
+        { message: 'Необходимо указать полный адрес доставки' },
+        { status: 400 }
+      );
+    }
+
+    if (!email || !phone || !firstName || !lastName) {
+      return NextResponse.json(
+        { message: 'Необходимо заполнить все контактные данные' },
+        { status: 400 }
+      );
+    }
+
+    // Calculate prices and validate stock
     let itemsPrice = 0;
     const orderItems = [];
+    const stockUpdates = [];
 
     for (const item of items) {
-      const product = await Product.findById(item.productId);
+      const product = await Product.findById(item.id);
       if (!product) {
         return NextResponse.json(
-          { message: `Product ${item.productId} not found` },
+          { message: `Товар "${item.name}" не найден` },
           { status: 404 }
         );
       }
 
       if (product.stock < item.quantity) {
         return NextResponse.json(
-          { message: `Insufficient stock for ${product.name}` },
+          { 
+            message: `Недостаточно товара "${product.name}" в наличии. Доступно: ${product.stock}`,
+            productId: product._id
+          },
           { status: 400 }
         );
       }
@@ -100,42 +129,88 @@ export async function POST(request: NextRequest) {
         name: product.name,
         price: product.price,
         quantity: item.quantity,
-        image: product.images[0],
+        image: product.images[0] || '/images/placeholder.jpg',
       });
 
-      // Update product stock
-      product.stock -= item.quantity;
-      await product.save();
+      // Prepare stock update
+      stockUpdates.push({
+        updateOne: {
+          filter: { _id: product._id },
+          update: { $inc: { stock: -item.quantity } }
+        }
+      });
+    }
+
+    // Update all product stocks
+    if (stockUpdates.length > 0) {
+      await Product.bulkWrite(stockUpdates);
     }
 
     // Calculate taxes and shipping
     const taxPrice = itemsPrice * 0.1; // 10% tax
-    const shippingPrice = itemsPrice > 100 ? 0 : 10;
+    const shippingPrice = itemsPrice > 5000 ? 0 : 500;
     const totalPrice = itemsPrice + taxPrice + shippingPrice;
 
     // Create order
     const order = new Order({
       user: session.user.id,
       orderItems,
-      shippingAddress,
-      paymentMethod,
+      shippingAddress: {
+        street: shippingAddress.street,
+        city: shippingAddress.city,
+      },
+      paymentMethod: paymentMethod || 'card',
       itemsPrice,
       taxPrice,
       shippingPrice,
       totalPrice,
-      isPaid: false,
+      email,
+      phone,
+      firstName,
+      lastName,
+      isPaid: paymentMethod === 'card' ? false : false,
       isDelivered: false,
       status: 'pending',
     });
 
-    await order.save();
-    await order.populate('user', 'name email');
+    const savedOrder = await order.save();
+    console.log('Order created successfully:', savedOrder._id);
 
-    return NextResponse.json(order, { status: 201 });
+    // Clear user's cart after successful order
+    try {
+      const user = await User.findById(session.user.id);
+      if (user) {
+        user.cart = [];
+        await user.save();
+        console.log('User cart cleared');
+      }
+    } catch (cartError) {
+      console.error('Error clearing cart:', cartError);
+      // Don't fail the order if cart clearing fails
+    }
+
+    await savedOrder.populate('orderItems.product', 'name images slug');
+
+    return NextResponse.json(
+      { 
+        order: savedOrder,
+        message: 'Заказ успешно создан' 
+      }, 
+      { status: 201 }
+    );
   } catch (error: any) {
     console.error('Order creation error:', error);
+    
+    if (error.name === 'ValidationError') {
+      const errors = Object.values(error.errors).map((err: any) => err.message);
+      return NextResponse.json(
+        { message: 'Ошибка валидации данных', errors },
+        { status: 400 }
+      );
+    }
+    
     return NextResponse.json(
-      { message: 'Internal server error' },
+      { message: 'Внутренняя ошибка сервера' },
       { status: 500 }
     );
   }

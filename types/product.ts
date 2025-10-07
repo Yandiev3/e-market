@@ -92,6 +92,11 @@ export interface OrderItem {
   image: string;
 }
 
+export interface ShippingAddress {
+  street: string;
+  city: string;
+}
+
 export interface RecentOrder {
   _id: string;
   user?: {
@@ -102,6 +107,7 @@ export interface RecentOrder {
   status: 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
   createdAt: string;
   orderItems?: OrderItem[];
+  shippingAddress?: ShippingAddress;
 }
 
 export interface TopProduct {

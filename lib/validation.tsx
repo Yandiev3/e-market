@@ -1,3 +1,4 @@
+// lib/validation.tsx
 import validator from 'validator';
 
 export interface ValidationResult {
@@ -56,7 +57,27 @@ export function validateOrder(data: any): ValidationResult {
   }
 
   if (!data.shippingAddress || !data.shippingAddress.street) {
-    errors.push('Необходимо указать адрес доставки');
+    errors.push('Необходимо указать адрес доставки (улица, дом)');
+  }
+
+  if (!data.shippingAddress || !data.shippingAddress.city) {
+    errors.push('Необходимо указать город доставки');
+  }
+
+  if (!data.email || !validator.isEmail(data.email)) {
+    errors.push('Некорректный email адрес');
+  }
+
+  if (!data.phone || !validator.isMobilePhone(data.phone, 'any')) {
+    errors.push('Некорректный номер телефона');
+  }
+
+  if (!data.firstName || data.firstName.trim().length < 2) {
+    errors.push('Имя должно содержать минимум 2 символа');
+  }
+
+  if (!data.lastName || data.lastName.trim().length < 2) {
+    errors.push('Фамилия должна содержать минимум 2 символа');
   }
 
   return {

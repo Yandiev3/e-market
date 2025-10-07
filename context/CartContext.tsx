@@ -19,6 +19,7 @@ interface CartContextType {
   removeItem: (id: string) => Promise<void>;
   updateQuantity: (id: string, quantity: number) => Promise<void>;
   clearCart: () => Promise<void>;
+  createOrder: (orderData: any) => Promise<{ success: boolean; order?: any; error?: string }>;
   totalItems: number;
   totalPrice: number;
   loading: boolean;
@@ -30,6 +31,7 @@ const CartContext = createContext<CartContextType>({
   removeItem: async () => {},
   updateQuantity: async () => {},
   clearCart: async () => {},
+  createOrder: async () => ({ success: false }),
   totalItems: 0,
   totalPrice: 0,
   loading: false,
@@ -166,6 +168,46 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  const createOrder = async (orderData: any) => {
+    try {
+      console.log('Creating order with data:', {
+        ...orderData,
+        items: items
+      });
+
+      const response = await fetch('/api/orders', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          ...orderData,
+          items: items,
+        }),
+      });
+
+      const data = await response.json();
+      console.log('Order creation response:', data);
+
+      if (response.ok) {
+        // Clear cart on successful order
+        await clearCart();
+        return { success: true, order: data.order };
+      } else {
+        return { 
+          success: false, 
+          error: data.message || 'Не удалось создать заказ' 
+        };
+      }
+    } catch (error: any) {
+      console.error('Order creation error:', error);
+      return { 
+        success: false, 
+        error: error.message || 'Ошибка сети' 
+      };
+    }
+  };
+
   const totalItems = items.reduce((sum, item) => sum + item.quantity, 0);
   const totalPrice = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
@@ -177,6 +219,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
         removeItem,
         updateQuantity,
         clearCart,
+        createOrder,
         totalItems,
         totalPrice,
         loading,

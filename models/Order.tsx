@@ -1,3 +1,4 @@
+// models/Order.tsx
 import mongoose, { Document, Schema } from 'mongoose';
 
 export interface IOrderItem {
@@ -11,8 +12,6 @@ export interface IOrderItem {
 export interface IShippingAddress {
   street: string;
   city: string;
-  postalCode: string;
-  country: string;
 }
 
 export interface IPaymentResult {
@@ -37,6 +36,10 @@ export interface IOrder extends Document {
   isDelivered: boolean;
   deliveredAt?: Date;
   status: 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
+  email: string;
+  phone: string;
+  firstName: string;
+  lastName: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -83,19 +86,11 @@ const orderSchema = new Schema<IOrder>(
         type: String,
         required: true,
       },
-      postalCode: {
-        type: String,
-        required: true,
-      },
-      country: {
-        type: String,
-        required: true,
-      },
     },
     paymentMethod: {
       type: String,
       required: true,
-      enum: ['card', 'paypal', 'cash_on_delivery'],
+      enum: ['card', 'cash', 'paypal'],
     },
     paymentResult: {
       id: String,
@@ -139,6 +134,27 @@ const orderSchema = new Schema<IOrder>(
       type: String,
       enum: ['pending', 'processing', 'shipped', 'delivered', 'cancelled'],
       default: 'pending',
+    },
+    email: {
+      type: String,
+      required: true,
+      trim: true,
+      lowercase: true,
+    },
+    phone: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+    firstName: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+    lastName: {
+      type: String,
+      required: true,
+      trim: true,
     },
   },
   {

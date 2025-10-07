@@ -12,7 +12,6 @@ declare module 'next-auth' {
       phone?: string | null;
       address?: string | null;
       city?: string | null;
-      country?: string | null;
     };
   }
 

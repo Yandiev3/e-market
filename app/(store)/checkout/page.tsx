@@ -4,24 +4,28 @@
 import React, { useState, useEffect } from 'react';
 import { useCart } from '@/context/CartContext';
 import { useAuth } from '@/context/AuthContext';
+import { useRouter } from 'next/navigation';
 import { formatPrice } from '@/lib/utils';
 import SubmitButton from '@/components/ui/SubmitButton';
 import Input from '@/components/ui/Input';
 import Link from 'next/link';
-import Product from '@/models/Product';
 import Image from 'next/image';
 
 export default function CheckoutPage() {
-  const { items, clearCart } = useCart();
+  const { items, clearCart, createOrder } = useCart();
   const { user } = useAuth();
+  const router = useRouter();
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  
   const [formData, setFormData] = useState({
     email: '',
     firstName: '',
     lastName: '',
     phone: '',
     address: '',
-    paymentMethod: 'card',
+    city: '',
+    paymentMethod: '',
     saveInfo: true,
   });
 
@@ -35,6 +39,7 @@ export default function CheckoutPage() {
         lastName: user.name?.split(' ')[1] || '',
         phone: user.phone || '',
         address: user.address || '',
+        city: '',
       }));
     }
   }, [user]);
@@ -43,23 +48,43 @@ export default function CheckoutPage() {
   const shippingPrice = subtotal >= 5000 ? 0 : 500;
   const total = subtotal + shippingPrice;
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
+ const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+  setLoading(true);
+  setError('');
 
-    try {
-      // Simulate order processing
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      // Clear cart and redirect to success page
-      clearCart();
-      window.location.href = '/order-success';
-    } catch (error) {
-      console.error('Checkout error:', error);
-    } finally {
-      setLoading(false);
+  try {
+    const orderData = {
+      shippingAddress: {
+        street: formData.address,
+        city: formData.city,
+      },
+      paymentMethod: formData.paymentMethod,
+      email: formData.email,
+      phone: formData.phone,
+      firstName: formData.firstName,
+      lastName: formData.lastName
+    };
+
+    console.log('Submitting order data:', orderData);
+    console.log('Cart items:', items);
+
+    const result = await createOrder(orderData);
+    
+    if (result.success) {
+      console.log('Order created successfully, redirecting...');
+      router.push('/order-success');
+    } else {
+      console.error('Order creation failed:', result.error);
+      setError(result.error || 'Произошла ошибка при создании заказа');
     }
-  };
+  } catch (error: any) {
+    console.error('Checkout error:', error);
+    setError('Произошла ошибка при оформлении заказа');
+  } finally {
+    setLoading(false);
+  }
+};
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
@@ -93,6 +118,12 @@ export default function CheckoutPage() {
       <div className="container mx-auto px-4">
         <h1 className="heading-2 mb-8 text-center">Оформление заказа</h1>
 
+        {error && (
+          <div className="max-w-6xl mx-auto mb-6 p-4 bg-destructive/10 border border-destructive rounded-lg">
+            <p className="text-destructive text-sm">{error}</p>
+          </div>
+        )}
+
         <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-6xl mx-auto">
           {/* Left column - Form */}
           <div className="space-y-6">
@@ -101,7 +132,7 @@ export default function CheckoutPage() {
               <h2 className="heading-3 mb-6 text-foreground">Контактная информация</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <Input
-                  label="Имя"
+                  label="Имя *"
                   name="firstName"
                   value={formData.firstName}
                   onChange={handleInputChange}
@@ -109,7 +140,7 @@ export default function CheckoutPage() {
                   className="bg-input border-border"
                 />
                 <Input
-                  label="Фамилия"
+                  label="Фамилия *"
                   name="lastName"
                   value={formData.lastName}
                   onChange={handleInputChange}
@@ -117,7 +148,7 @@ export default function CheckoutPage() {
                   className="bg-input border-border"
                 />
                 <Input
-                  label="Email"
+                  label="Email *"
                   type="email"
                   name="email"
                   value={formData.email}
@@ -126,7 +157,7 @@ export default function CheckoutPage() {
                   className="bg-input border-border"
                 />
                 <Input
-                  label="Телефон"
+                  label="Телефон *"
                   type="tel"
                   name="phone"
                   value={formData.phone}
@@ -142,11 +173,21 @@ export default function CheckoutPage() {
               <h2 className="heading-3 mb-6 text-foreground">Адрес доставки</h2>
               <div className="grid grid-cols-1 gap-4">
                 <Input
-                  label="Адрес"
+                  label="Город *"
+                  name="city"
+                  value={formData.city}
+                  onChange={handleInputChange}
+                  required
+                  placeholder="Например: Москва"
+                  className="bg-input border-border"
+                />
+                <Input
+                  label="Адрес *"
                   name="address"
                   value={formData.address}
                   onChange={handleInputChange}
                   required
+                  placeholder="Улица, дом, квартира"
                   className="bg-input border-border"
                 />
               </div>
@@ -189,7 +230,7 @@ export default function CheckoutPage() {
             </section>
           </div>
 
-           {/* Right column - Order summary */}
+          {/* Right column - Order summary */}
           <div className="space-y-6">
             <div className="card-minimal">
               <h2 className="heading-3 mb-6 text-foreground">Ваш заказ</h2>
@@ -246,7 +287,6 @@ export default function CheckoutPage() {
                 Подтвердить заказ
               </SubmitButton>
             </div>
-
 
             {/* Security info */}
             <div className="card-minimal bg-primary/5 border-primary/20">
