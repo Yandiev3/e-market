@@ -11,9 +11,6 @@ interface User {
   role: string;
   phone?: string;
   address?: string;
-  city?: string;
-  country?: string;
-  postalCode?: string;
 }
 
 interface AuthContextType {

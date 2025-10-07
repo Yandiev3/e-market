@@ -81,7 +81,7 @@ export default function AccountPage() {
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
                     <div className="flex items-center gap-2">
                       <Phone className="h-4 w-4 text-muted-foreground" />
                       <span>{user?.phone || 'Не указан'}</span>
@@ -91,9 +91,9 @@ export default function AccountPage() {
                       <span>{user?.email}</span>
                     </div>
                     {user?.address && (
-                      <div className="flex items-center gap-2 md:col-span-2">
+                      <div className="flex items-center gap-2">
                         <MapPin className="h-4 w-4 text-muted-foreground" />
-                        <span>{user.address}, {user.city}, {user.country}</span>
+                        <span>{user.address}</span>
                       </div>
                     )}
                   </div>

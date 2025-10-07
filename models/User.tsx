@@ -22,18 +22,7 @@ export interface IUser extends Document {
   active: boolean;
   cart: ICartItem[];
   favorites: IFavoriteItem[];
-  shippingAddress?: {
-    street: string;
-    city: string;
-    postalCode: string;
-    country: string;
-  };
-  billingAddress?: {
-    street: string;
-    city: string;
-    postalCode: string;
-    country: string;
-  };
+  address: string;
   createdAt: Date;
   updatedAt: Date;
   comparePassword(candidatePassword: string): Promise<boolean>;
@@ -56,6 +45,11 @@ const userSchema = new Schema<IUser>(
     phone:{
       type: String,
       required: false,
+    },
+    address: {
+      type: String,
+      required: false,
+      default: '',
     },
     name: {
       type: String,
@@ -99,18 +93,6 @@ const userSchema = new Schema<IUser>(
         default: Date.now,
       },
     }],
-    shippingAddress: {
-      street: String,
-      city: String,
-      postalCode: String,
-      country: String,
-    },
-    billingAddress: {
-      street: String,
-      city: String,
-      postalCode: String,
-      country: String,
-    },
   },
   {
     timestamps: true,

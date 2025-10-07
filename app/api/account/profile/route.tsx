@@ -28,9 +28,6 @@ export async function PUT(request: NextRequest) {
       newPassword,
       phone,
       address,
-      city,
-      postalCode,
-      country
     } = body;
 
     // Находим пользователя
@@ -48,9 +45,6 @@ export async function PUT(request: NextRequest) {
     if (name) updateData.name = name;
     if (phone !== undefined) updateData.phone = phone;
     if (address !== undefined) updateData.address = address;
-    if (city !== undefined) updateData.city = city;
-    if (postalCode !== undefined) updateData.postalCode = postalCode;
-    if (country !== undefined) updateData.country = country;
 
     // Обрабатываем смену пароля
     if (newPassword) {

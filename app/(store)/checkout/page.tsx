@@ -1,29 +1,43 @@
 // app/(store)/checkout/page.tsx
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useCart } from '@/context/CartContext';
 import { useAuth } from '@/context/AuthContext';
 import { formatPrice } from '@/lib/utils';
 import SubmitButton from '@/components/ui/SubmitButton';
 import Input from '@/components/ui/Input';
+import Link from 'next/link';
+import Product from '@/models/Product';
+import Image from 'next/image';
 
 export default function CheckoutPage() {
   const { items, clearCart } = useCart();
   const { user } = useAuth();
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
-    email: user?.email || '',
+    email: '',
     firstName: '',
     lastName: '',
     phone: '',
     address: '',
-    city: '',
-    postalCode: '',
-    country: 'Россия',
     paymentMethod: 'card',
     saveInfo: true,
   });
+
+  // Инициализация формы данными пользователя
+  useEffect(() => {
+    if (user) {
+      setFormData(prev => ({
+        ...prev,
+        email: user.email || '',
+        firstName: user.name?.split(' ')[0] || '',
+        lastName: user.name?.split(' ')[1] || '',
+        phone: user.phone || '',
+        address: user.address || '',
+      }));
+    }
+  }, [user]);
 
   const subtotal = items.reduce((total, item) => total + item.price * item.quantity, 0);
   const shippingPrice = subtotal >= 5000 ? 0 : 500;
@@ -57,190 +71,206 @@ export default function CheckoutPage() {
 
   if (items.length === 0) {
     return (
-      <div className="max-w-4xl mx-auto px-4 py-8">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold text-gray-900 mb-4">Корзина пуста</h1>
-          <p className="text-gray-600 mb-6">Добавьте товары в корзину для оформления заказа</p>
-          <a href="/products" className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors">
-            Вернуться к покупкам
-          </a>
+      <div className="min-h-screen section-padding">
+        <div className="container mx-auto px-4">
+          <div className="max-w-2xl mx-auto text-center">
+            <div className="feature-icon mx-auto">
+              <span className="text-2xl">🛒</span>
+            </div>
+            <h1 className="heading-2 mb-4">Корзина пуста</h1>
+            <p className="body-large mb-8">Добавьте товары в корзину для оформления заказа</p>
+            <Link href="/products" className="btn-minimal-primary">
+              Вернуться к покупкам
+            </Link>
+          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="max-w-6xl mx-auto px-4 py-8">
-      <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-8">Оформление заказа</h1>
+    <div className="min-h-screen bg-background section-padding">
+      <div className="container mx-auto px-4">
+        <h1 className="heading-2 mb-8 text-center">Оформление заказа</h1>
 
-      <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        {/* Left column - Form */}
-        <div className="space-y-8">
-          {/* Contact information */}
-          <section className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">Контактная информация</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <Input
-                label="Имя"
-                name="firstName"
-                value={formData.firstName}
-                onChange={handleInputChange}
-                required
-              />
-              <Input
-                label="Фамилия"
-                name="lastName"
-                value={formData.lastName}
-                onChange={handleInputChange}
-                required
-              />
-              <Input
-                label="Email"
-                type="email"
-                name="email"
-                value={formData.email}
-                onChange={handleInputChange}
-                required
-              />
-              <Input
-                label="Телефон"
-                type="tel"
-                name="phone"
-                value={formData.phone}
-                onChange={handleInputChange}
-                required
-              />
-            </div>
-          </section>
-
-          {/* Shipping address */}
-          <section className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">Адрес доставки</h2>
-            <div className="grid grid-cols-1 gap-4">
-              <Input
-                label="Адрес"
-                name="address"
-                value={formData.address}
-                onChange={handleInputChange}
-                required
-              />
-              <div className="grid grid-cols-2 gap-4">
+        <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-6xl mx-auto">
+          {/* Left column - Form */}
+          <div className="space-y-6">
+            {/* Contact information */}
+            <section className="card-minimal">
+              <h2 className="heading-3 mb-6 text-foreground">Контактная информация</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <Input
-                  label="Город"
-                  name="city"
-                  value={formData.city}
+                  label="Имя"
+                  name="firstName"
+                  value={formData.firstName}
                   onChange={handleInputChange}
                   required
+                  className="bg-input border-border"
                 />
                 <Input
-                  label="Почтовый индекс"
-                  name="postalCode"
-                  value={formData.postalCode}
+                  label="Фамилия"
+                  name="lastName"
+                  value={formData.lastName}
                   onChange={handleInputChange}
                   required
+                  className="bg-input border-border"
+                />
+                <Input
+                  label="Email"
+                  type="email"
+                  name="email"
+                  value={formData.email}
+                  onChange={handleInputChange}
+                  required
+                  className="bg-input border-border"
+                />
+                <Input
+                  label="Телефон"
+                  type="tel"
+                  name="phone"
+                  value={formData.phone}
+                  onChange={handleInputChange}
+                  required
+                  className="bg-input border-border"
                 />
               </div>
-              <Input
-                label="Страна"
-                name="country"
-                value={formData.country}
-                onChange={handleInputChange}
-                required
-              />
-            </div>
-          </section>
+            </section>
 
-          {/* Payment method */}
-          <section className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">Способ оплаты</h2>
-            <div className="space-y-3">
-              <label className="flex items-center p-4 border border-gray-300 rounded-lg cursor-pointer hover:border-gray-400">
-                <input
-                  type="radio"
-                  name="paymentMethod"
-                  value="card"
-                  checked={formData.paymentMethod === 'card'}
+            {/* Shipping address */}
+            <section className="card-minimal">
+              <h2 className="heading-3 mb-6 text-foreground">Адрес доставки</h2>
+              <div className="grid grid-cols-1 gap-4">
+                <Input
+                  label="Адрес"
+                  name="address"
+                  value={formData.address}
                   onChange={handleInputChange}
-                  className="text-blue-600 focus:ring-blue-500"
+                  required
+                  className="bg-input border-border"
                 />
-                <div className="ml-3">
-                  <span className="font-medium text-gray-900">Банковская карта</span>
-                  <p className="text-sm text-gray-600">Visa, Mastercard, МИР</p>
-                </div>
-              </label>
+              </div>
+            </section>
 
-              <label className="flex items-center p-4 border border-gray-300 rounded-lg cursor-pointer hover:border-gray-400">
-                <input
-                  type="radio"
-                  name="paymentMethod"
-                  value="cash"
-                  checked={formData.paymentMethod === 'cash'}
-                  onChange={handleInputChange}
-                  className="text-blue-600 focus:ring-blue-500"
-                />
-                <div className="ml-3">
-                  <span className="font-medium text-gray-900">Наличные при получении</span>
-                  <p className="text-sm text-gray-600">Оплата курьеру</p>
-                </div>
-              </label>
-            </div>
-          </section>
-        </div>
+            {/* Payment method */}
+            <section className="card-minimal">
+              <h2 className="heading-3 mb-6 text-foreground">Способ оплаты</h2>
+              <div className="space-y-3">
+                <label className="flex items-center p-4 border border-border rounded-lg cursor-pointer hover:border-primary/50 transition-colors duration-200 bg-input">
+                  <input
+                    type="radio"
+                    name="paymentMethod"
+                    value="card"
+                    checked={formData.paymentMethod === 'card'}
+                    onChange={handleInputChange}
+                    className="text-primary focus:ring-primary"
+                  />
+                  <div className="ml-3">
+                    <span className="font-medium text-foreground">Банковская карта</span>
+                    <p className="text-sm text-muted-foreground">Visa, Mastercard, МИР</p>
+                  </div>
+                </label>
 
-        {/* Right column - Order summary */}
-        <div className="space-y-6">
-          <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">Ваш заказ</h2>
-            
-            <div className="space-y-3">
-              {items.map((item) => (
-                <div key={item.id} className="flex justify-between text-sm">
-                  <span className="text-gray-600">
-                    {item.name} × {item.quantity}
+                <label className="flex items-center p-4 border border-border rounded-lg cursor-pointer hover:border-primary/50 transition-colors duration-200 bg-input">
+                  <input
+                    type="radio"
+                    name="paymentMethod"
+                    value="cash"
+                    checked={formData.paymentMethod === 'cash'}
+                    onChange={handleInputChange}
+                    className="text-primary focus:ring-primary"
+                  />
+                  <div className="ml-3">
+                    <span className="font-medium text-foreground">Наличные при получении</span>
+                    <p className="text-sm text-muted-foreground">Оплата курьеру</p>
+                  </div>
+                </label>
+              </div>
+            </section>
+          </div>
+
+           {/* Right column - Order summary */}
+          <div className="space-y-6">
+            <div className="card-minimal">
+              <h2 className="heading-3 mb-6 text-foreground">Ваш заказ</h2>
+              
+              <div className="space-y-4 mb-6">
+                {items.map((item) => (
+                  <div key={item.id} className="flex items-center justify-between">
+                    <div className="flex items-center space-x-3">
+                      <div className="w-16 h-16 bg-secondary rounded-lg flex items-center justify-center overflow-hidden">
+                        {item.image ? (
+                          <Image 
+                            src={item.image} 
+                            alt={item.name}
+                            width={64}
+                            height={64}
+                            className="object-cover w-full h-full"
+                          />
+                        ) : (
+                          <span className="text-lg">👟</span>
+                        )}
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium text-foreground">{item.name}</p>
+                        <p className="text-sm text-muted-foreground">× {item.quantity}</p>
+                      </div>
+                    </div>
+                    <span className="text-foreground font-medium">{formatPrice(item.price * item.quantity)}</span>
+                  </div>
+                ))}
+              </div>
+
+              <div className="border-t border-border pt-4 space-y-3">
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">Промежуточный итог</span>
+                  <span className="text-foreground">{formatPrice(subtotal)}</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">Доставка</span>
+                  <span className={shippingPrice === 0 ? 'text-green-400' : 'text-foreground'}>
+                    {shippingPrice === 0 ? 'Бесплатно' : formatPrice(shippingPrice)}
                   </span>
-                  <span className="text-gray-900">{formatPrice(item.price * item.quantity)}</span>
                 </div>
-              ))}
+                <div className="flex justify-between text-lg font-semibold pt-3 border-t border-border">
+                  <span className="text-foreground">Итого</span>
+                  <span className="gradient-text-primary">{formatPrice(total)}</span>
+                </div>
+              </div>
+
+              <SubmitButton
+                loading={loading}
+                disabled={items.length === 0}
+                className="mt-6"
+              >
+                Подтвердить заказ
+              </SubmitButton>
             </div>
 
-            <div className="border-t border-gray-200 pt-4 mt-4 space-y-2">
-              <div className="flex justify-between text-sm">
-                <span className="text-gray-600">Промежуточный итог</span>
-                <span className="text-gray-900">{formatPrice(subtotal)}</span>
-              </div>
-              <div className="flex justify-between text-sm">
-                <span className="text-gray-600">Доставка</span>
-                <span className={shippingPrice === 0 ? 'text-green-600' : 'text-gray-900'}>
-                  {shippingPrice === 0 ? 'Бесплатно' : formatPrice(shippingPrice)}
-                </span>
-              </div>
-              <div className="flex justify-between text-lg font-semibold pt-2 border-t border-gray-200">
-                <span>Итого</span>
-                <span className="text-gray-900">{formatPrice(total)}</span>
+
+            {/* Security info */}
+            <div className="card-minimal bg-primary/5 border-primary/20">
+              <div className="flex items-center">
+                <div className="text-primary text-2xl mr-3">🔒</div>
+                <div>
+                  <p className="text-sm font-medium text-foreground">Безопасная оплата</p>
+                  <p className="text-sm text-muted-foreground">Ваши данные защищены шифрованием</p>
+                </div>
               </div>
             </div>
 
-            <SubmitButton
-              loading={loading}
-              disabled={items.length === 0}
-              className="mt-6"
-            >
-              Подтвердить заказ
-            </SubmitButton>
-          </div>
-
-          {/* Security info */}
-          <div className="bg-blue-50 p-4 rounded-lg">
-            <div className="flex items-center">
-              <div className="text-blue-600 text-2xl mr-3">🔒</div>
-              <div>
-                <p className="text-sm font-medium text-blue-900">Безопасная оплата</p>
-                <p className="text-xs text-blue-700">Ваши данные защищены шифрованием</p>
-              </div>
+            {/* Continue shopping link */}
+            <div className="text-center">
+              <Link 
+                href="/products" 
+                className="text-primary hover:text-primary/80 transition-colors duration-200 text-sm"
+              >
+                ← Вернуться к покупкам
+              </Link>
             </div>
           </div>
-        </div>
-      </form>
+        </form>
+      </div>
     </div>
   );
 }
