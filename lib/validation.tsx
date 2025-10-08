@@ -60,9 +60,9 @@ export function validateOrder(data: any): ValidationResult {
     errors.push('Необходимо указать адрес доставки (улица, дом)');
   }
 
-  if (!data.shippingAddress || !data.shippingAddress.city) {
-    errors.push('Необходимо указать город доставки');
-  }
+  // if (!data.shippingAddress || !data.shippingAddress.city) {
+  //   errors.push('Необходимо указать город доставки');
+  // }
 
   if (!data.email || !validator.isEmail(data.email)) {
     errors.push('Некорректный email адрес');

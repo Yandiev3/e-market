@@ -14,7 +14,7 @@ interface OrderItem {
 
 interface ShippingAddress {
   street: string;
-  city: string;
+  // city: string;
 }
 
 interface ApiOrder {

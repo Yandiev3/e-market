@@ -11,7 +11,7 @@ export interface IOrderItem {
 
 export interface IShippingAddress {
   street: string;
-  city: string;
+  // city: string;
 }
 
 export interface IPaymentResult {
@@ -82,10 +82,10 @@ const orderSchema = new Schema<IOrder>(
         type: String,
         required: true,
       },
-      city: {
-        type: String,
-        required: true,
-      },
+      // city: {
+      //   type: String,
+      //   required: true,
+      // },
     },
     paymentMethod: {
       type: String,

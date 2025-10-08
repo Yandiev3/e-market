@@ -12,7 +12,6 @@ interface OrderItem {
 
 interface ShippingAddress {
   street: string;
-  city: string;
 }
 
 interface OrderData {
@@ -134,18 +133,6 @@ const OrderList: React.FC<OrderListProps> = ({ orders, onStatusChange, loading =
                   </div>
                 </td>
                 <td className="px-6 py-4">
-                  <div className="text-sm text-foreground max-w-xs">
-                    {order.shippingAddress ? (
-                      <>
-                        <div>{order.shippingAddress.city}</div>
-                        <div className="text-muted-foreground text-xs">
-                          {order.shippingAddress.street}
-                        </div>
-                      </>
-                    ) : (
-                      <span className="text-muted-foreground">Не указан</span>
-                    )}
-                  </div>
                 </td>
                 <td className="px-6 py-4 text-sm text-foreground">
                   {order.items.length} товар(ов)

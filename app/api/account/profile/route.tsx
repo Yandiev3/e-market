@@ -23,7 +23,8 @@ export async function PUT(request: NextRequest) {
     // Получаем данные из запроса
     const body = await request.json();
     const { 
-      name, 
+      name,
+      lastname, 
       currentPassword, 
       newPassword,
       phone,
@@ -45,7 +46,7 @@ export async function PUT(request: NextRequest) {
     if (name) updateData.name = name;
     if (phone !== undefined) updateData.phone = phone;
     if (address !== undefined) updateData.address = address;
-
+    if (lastname !== undefined) updateData.lastname = lastname;
     // Обрабатываем смену пароля
     if (newPassword) {
       if (!currentPassword) {

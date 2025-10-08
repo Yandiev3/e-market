@@ -83,7 +83,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (!shippingAddress || !shippingAddress.street || !shippingAddress.city) {
+    if (!shippingAddress || !shippingAddress.street) {
       return NextResponse.json(
         { message: 'Необходимо указать полный адрес доставки' },
         { status: 400 }
@@ -157,7 +157,7 @@ export async function POST(request: NextRequest) {
       orderItems,
       shippingAddress: {
         street: shippingAddress.street,
-        city: shippingAddress.city,
+        // city: shippingAddress.city,
       },
       paymentMethod: paymentMethod || 'card',
       itemsPrice,

@@ -21,10 +21,10 @@ export default function CheckoutPage() {
   const [formData, setFormData] = useState({
     email: '',
     firstName: '',
-    lastName: '',
+    lastname: '',
     phone: '',
     address: '',
-    city: '',
+    // city: '',
     paymentMethod: '',
     saveInfo: true,
   });
@@ -36,10 +36,10 @@ export default function CheckoutPage() {
         ...prev,
         email: user.email || '',
         firstName: user.name?.split(' ')[0] || '',
-        lastName: user.name?.split(' ')[1] || '',
+        lastname: user.name || '',
         phone: user.phone || '',
         address: user.address || '',
-        city: '',
+        // city: '',
       }));
     }
   }, [user]);
@@ -57,13 +57,13 @@ export default function CheckoutPage() {
     const orderData = {
       shippingAddress: {
         street: formData.address,
-        city: formData.city,
+        // city: formData.city,
       },
       paymentMethod: formData.paymentMethod,
       email: formData.email,
       phone: formData.phone,
       firstName: formData.firstName,
-      lastName: formData.lastName
+      lastName: formData.lastname
     };
 
     console.log('Submitting order data:', orderData);
@@ -142,7 +142,7 @@ export default function CheckoutPage() {
                 <Input
                   label="Фамилия *"
                   name="lastName"
-                  value={formData.lastName}
+                  value={formData.lastname}
                   onChange={handleInputChange}
                   required
                   className="bg-input border-border"
@@ -172,7 +172,7 @@ export default function CheckoutPage() {
             <section className="card-minimal">
               <h2 className="heading-3 mb-6 text-foreground">Адрес доставки</h2>
               <div className="grid grid-cols-1 gap-4">
-                <Input
+                {/* <Input
                   label="Город *"
                   name="city"
                   value={formData.city}
@@ -180,14 +180,14 @@ export default function CheckoutPage() {
                   required
                   placeholder="Например: Москва"
                   className="bg-input border-border"
-                />
+                /> */}
                 <Input
                   label="Адрес *"
                   name="address"
                   value={formData.address}
                   onChange={handleInputChange}
                   required
-                  placeholder="Улица, дом, квартира"
+                  placeholder="Город, улица, дом"
                   className="bg-input border-border"
                 />
               </div>

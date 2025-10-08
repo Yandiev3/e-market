@@ -20,6 +20,7 @@ export default function ProfilePage() {
   const [showPasswordSection, setShowPasswordSection] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
+    lastname: '',
     email: '',
     phone: '',
     address: '',
@@ -33,6 +34,7 @@ export default function ProfilePage() {
       setFormData(prev => ({
         ...prev,
         name: user.name || '',
+        lastname: user.lastname || '',
         email: user.email || '',
         phone: user.phone || '',
         address: user.address || '',
@@ -65,6 +67,7 @@ export default function ProfilePage() {
         },
         body: JSON.stringify({
           name: formData.name,
+          lastname: formData.lastname,
           phone: formData.phone,
           address: formData.address,
           currentPassword: formData.currentPassword || undefined,
@@ -81,6 +84,7 @@ export default function ProfilePage() {
         // Реактивное обновление данных в контексте без перезагрузки страницы
         updateUser({
           name: formData.name,
+          lastname: formData.lastname,
           phone: formData.phone,
           address: formData.address,
         });
@@ -186,7 +190,18 @@ export default function ProfilePage() {
                           required
                         />
                       </div>
-
+                      <div>
+                      <Label htmlFor="lastname" className="flex items-center gap-2 mb-2">
+                          <User className="h-4 w-4" />
+                          Фамилия
+                        </Label>
+                        <Input
+                          id="lastname"
+                          name="lastname"
+                          value={formData.lastname}
+                          onChange={handleChange}
+                        />
+                      </div>
                       <div>
                         <Label htmlFor="email" className="flex items-center gap-2 mb-2">
                           <Mail className="h-4 w-4" />
@@ -211,6 +226,7 @@ export default function ProfilePage() {
                         <Input
                           id="phone"
                           name="phone"
+                          maxLength={11}
                           value={formData.phone}
                           onChange={handleChange}
                           placeholder="+7 999 123-45-67"

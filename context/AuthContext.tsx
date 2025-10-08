@@ -8,6 +8,7 @@ interface User {
   id: string;
   email: string;
   name: string;
+  lastname: string;
   role: string;
   phone?: string;
   address?: string;
@@ -80,6 +81,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
               id: session.user.id,
               email: session.user.email!,
               name: session.user.name!,
+              lastname: session.user.lastname || '', 
               role: session.user.role || 'user',
               phone: session.user.phone || '',
               address: session.user.address || '',
@@ -92,6 +94,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             id: session.user.id,
             email: session.user.email!,
             name: session.user.name!,
+            lastname: session.user.lastname || '',
             role: session.user.role || 'user',
             phone: session.user.phone || '',
             address: session.user.address || '',
