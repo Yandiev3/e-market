@@ -1,5 +1,4 @@
 // components/product/ProductDetail.tsx
-// components/product/ProductDetail.tsx
 import React, { useState } from 'react';
 import Image from 'next/image';
 import { formatPrice } from '@/lib/utils';
@@ -28,6 +27,7 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product }) => {
   const [selectedSize, setSelectedSize] = useState<string | null>(null);
   const [selectedColor, setSelectedColor] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState('description');
+  const [showSizeError, setShowSizeError] = useState(false);
   
   const hasDiscount = product.originalPrice && product.originalPrice > product.price;
   const discountPercent = hasDiscount 
@@ -59,6 +59,22 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product }) => {
     stock: product.stock,
     sizes: product.sizes,
     requiresSizeSelection: requiresSizeSelection
+  };
+
+  // Обработчик требования выбора размера
+  const handleSizeRequired = () => {
+    setShowSizeError(true);
+    
+    // Автоматически скрываем ошибку через 3 секунды
+    setTimeout(() => {
+      setShowSizeError(false);
+    }, 3000);
+  };
+
+  // Обработчик выбора размера
+  const handleSizeSelect = (size: string) => {
+    setSelectedSize(size);
+    setShowSizeError(false);
   };
 
   return (
@@ -182,45 +198,6 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product }) => {
             {product.stock > 0 ? `✓ В наличии: ${product.stock} шт.` : '✗ Нет в наличии'}
           </div>
 
-          {/* Size selection */}
-          {availableSizes.length > 0 && (
-            <div>
-              <div className="flex items-center justify-between mb-3">
-                <h3 className="font-semibold text-foreground">Размер:</h3>
-                {selectedSize && (
-                  <span className="text-sm text-muted-foreground">
-                    В наличии: {product.sizes.find(s => s.size === selectedSize)?.stockQuantity} шт.
-                  </span>
-                )}
-              </div>
-              <div className="grid grid-cols-4 md:grid-cols-6 gap-2">
-                {availableSizes.map((size) => (
-                  <button
-                    key={size.size}
-                    onClick={() => setSelectedSize(size.size)}
-                    className={`p-3 border rounded text-center text-sm font-medium transition-colors ${
-                      selectedSize === size.size
-                        ? 'border-primary bg-primary/10 text-primary'
-                        : 'border-border text-foreground hover:border-primary hover:text-primary'
-                    } ${size.stockQuantity === 0 ? 'opacity-50 cursor-not-allowed' : ''}`}
-                    disabled={size.stockQuantity === 0}
-                    title={size.stockQuantity === 0 ? 'Нет в наличии' : `В наличии: ${size.stockQuantity} шт.`}
-                  >
-                    {size.size}
-                  </button>
-                ))}
-              </div>
-              {!selectedSize && (
-                <p className="text-sm text-destructive mt-2">
-                  * Пожалуйста, выберите размер для добавления в корзину
-                </p>
-              )}
-              <button className="text-primary text-sm mt-2 hover:underline">
-                Таблица размеров →
-              </button>
-            </div>
-          )}
-
           {/* Color selection */}
           {product.colors && product.colors.length > 0 && (
             <div>
@@ -247,16 +224,81 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product }) => {
             </div>
           )}
 
-          {/* Add to cart */}
+          {/* Size selection - ПЕРЕНЕСЕН НАД КНОПКОЙ КОРЗИНЫ */}
+          {availableSizes.length > 0 && (
+            <div data-size-selection className={`transition-all duration-300 ${
+              showSizeError ? 'ring-2 ring-red-500 rounded-lg p-4 bg-red-50' : ''
+            }`}>
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="font-semibold text-foreground">Размер: *</h3>
+                {selectedSize && (
+                  <span className="text-sm text-muted-foreground">
+                    В наличии: {product.sizes.find(s => s.size === selectedSize)?.stockQuantity} шт.
+                  </span>
+                )}
+              </div>
+              
+              {/* Сообщение об ошибке */}
+              {showSizeError && (
+                <div className="mb-3 p-3 bg-red-100 border border-red-300 rounded-md">
+                  <p className="text-red-700 text-sm font-medium flex items-center">
+                    <span className="mr-2">⚠</span>
+                    Пожалуйста, выберите размер перед добавлением в корзину
+                  </p>
+                </div>
+              )}
+              
+              <div className="grid grid-cols-4 md:grid-cols-6 gap-2">
+                {availableSizes.map((size) => (
+                  <button
+                    key={size.size}
+                    onClick={() => handleSizeSelect(size.size)}
+                    className={`p-3 border rounded text-center text-sm font-medium transition-all duration-200 ${
+                      selectedSize === size.size
+                        ? 'border-primary bg-primary/10 text-primary shadow-md scale-105'
+                        : 'border-border text-foreground hover:border-primary hover:text-primary hover:shadow-sm'
+                    } ${
+                      size.stockQuantity === 0 ? 'opacity-50 cursor-not-allowed' : ''
+                    } ${
+                      showSizeError && !selectedSize ? 'border-red-300 bg-red-50' : ''
+                    }`}
+                    disabled={size.stockQuantity === 0}
+                    title={size.stockQuantity === 0 ? 'Нет в наличии' : `В наличии: ${size.stockQuantity} шт.`}
+                  >
+                    {size.size}
+                  </button>
+                ))}
+              </div>
+              
+              {!selectedSize && !showSizeError && (
+                <p className="text-sm text-muted-foreground mt-2">
+                  * Обязательно для выбора
+                </p>
+              )}
+              
+              <button className="text-primary text-sm mt-2 hover:underline">
+                Таблица размеров →
+              </button>
+            </div>
+          )}
+
+          {/* Add to cart - КНОПКА ТЕПЕРЬ ПОД ВЫБОРОМ РАЗМЕРА */}
           <div className="pt-4">
             <AddToCartButton
               product={cartProduct}
               selectedSize={selectedSize || undefined}
               selectedColor={selectedColor || undefined}
               requiresSizeSelection={requiresSizeSelection}
-              disabled={requiresSizeSelection ? !selectedSize : false}
+              onSizeRequired={handleSizeRequired}
               size="lg"
             />
+            
+            {/* Дополнительное сообщение под кнопкой */}
+            {requiresSizeSelection && !selectedSize && (
+              <p className="text-sm text-muted-foreground mt-2 text-center">
+                Для добавления в корзину необходимо выбрать размер
+              </p>
+            )}
           </div>
 
           {/* Quick features */}

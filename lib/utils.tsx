@@ -64,6 +64,8 @@ export function toProductLean(obj: any): IProductLean | null {
     featured: obj.featured,
     active: obj.active,
     specifications: obj.specifications,
+     sizes: Array.isArray(obj.sizes) ? obj.sizes : [],
+      colors: Array.isArray(obj.colors) ? obj.colors : [],
     ratings: obj.ratings ? {
       average: obj.ratings.average,
       count: obj.ratings.count

@@ -12,7 +12,7 @@ interface AddToCartButtonProps {
   className?: string;
   disabled?: boolean;
   size?: 'sm' | 'md' | 'lg' | 'xl';
-  selectedSize?: string;
+  selectedSize?: string;  
   selectedColor?: string;
   requiresSizeSelection?: boolean;
   onSizeRequired?: () => void;
