@@ -1,30 +1,44 @@
 // components/product/ProductDetail.tsx
+// components/product/ProductDetail.tsx
 import React, { useState } from 'react';
 import Image from 'next/image';
 import { formatPrice } from '@/lib/utils';
 import AddToCartButton from '@/components/cart/AddToCartButton';
 import AddToFavoritesButton from '@/components/favorites/AddToFavoritesButton';
-import { Product } from '@/types/product';
+import { IProduct, IProductSize, IProductColor, CartProduct } from '@/types/product';
+
+// Расширяем базовый интерфейс IProduct для компонента
+interface ProductDetailProduct extends IProduct {
+  description: string;
+  images: string[];
+  specifications?: Record<string, string>;
+  sku: string;
+  colors: IProductColor[];
+  sizes: IProductSize[];
+  // Для обратной совместимости
+  image?: string;
+}
 
 interface ProductDetailProps {
-  product: Product & {
-    description: string;
-    images: string[];
-    specifications?: Record<string, string>;
-    sku: string;
-    colors?: { name: string; value: string; image: string }[];
-    sizes?: { size: string; inStock: boolean }[];
-  };
+  product: ProductDetailProduct;
 }
 
 const ProductDetail: React.FC<ProductDetailProps> = ({ product }) => {
   const [selectedImage, setSelectedImage] = useState(0);
   const [selectedSize, setSelectedSize] = useState<string | null>(null);
+  const [selectedColor, setSelectedColor] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState('description');
+  
   const hasDiscount = product.originalPrice && product.originalPrice > product.price;
   const discountPercent = hasDiscount 
     ? Math.round((1 - product.price / product.originalPrice!) * 100)
     : 0;
+
+  // Доступные размеры (в наличии)
+  const availableSizes = product.sizes?.filter(size => size.inStock && size.stockQuantity > 0) || [];
+  
+  // Определяем, требуется ли обязательный выбор размера
+  const requiresSizeSelection = availableSizes.length > 0;
 
   const tabs = [
     { id: 'description', label: 'Описание' },
@@ -32,6 +46,20 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product }) => {
     { id: 'sizes', label: 'Размеры' },
     { id: 'delivery', label: 'Доставка и возврат' },
   ];
+
+  // Основное изображение (для обратной совместимости)
+  const mainImage = product.images?.[0] || product.image;
+
+  // Продукт для корзины
+  const cartProduct: CartProduct = {
+    id: product._id.toString(),
+    name: product.name,
+    price: product.price,
+    image: mainImage || '',
+    stock: product.stock,
+    sizes: product.sizes,
+    requiresSizeSelection: requiresSizeSelection
+  };
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
@@ -50,7 +78,7 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product }) => {
           {/* Main image */}
           <div className="relative aspect-square bg-secondary rounded-lg overflow-hidden">
             <Image
-              src={product.images[selectedImage] || product.images[0] || '/images/placeholder.jpg'}
+              src={product.images[selectedImage] || mainImage || '/images/placeholder.jpg'}
               alt={product.name}
               fill
               className="object-cover"
@@ -65,7 +93,18 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product }) => {
             {/* Favorite button */}
             <div className="absolute top-4 right-4">
               <AddToFavoritesButton
-                product={product}
+                product={{
+                  id: product._id.toString(),
+                  name: product.name,
+                  price: product.price,
+                  image: mainImage || '',
+                  slug: product.slug,
+                  stock: product.stock,
+                  ratings: product.ratings,
+                  brand: product.brand,
+                  category: product.category,
+                  originalPrice: product.originalPrice,
+                }}
                 size="lg"
               />
             </div>
@@ -144,44 +183,78 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product }) => {
           </div>
 
           {/* Size selection */}
-          {product.sizes && product.sizes.length > 0 && (
+          {availableSizes.length > 0 && (
             <div>
-              <h3 className="font-semibold text-foreground mb-3">Размер:</h3>
-              <div className="grid grid-cols-4 gap-2">
-                {product.sizes.map((size) => (
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="font-semibold text-foreground">Размер:</h3>
+                {selectedSize && (
+                  <span className="text-sm text-muted-foreground">
+                    В наличии: {product.sizes.find(s => s.size === selectedSize)?.stockQuantity} шт.
+                  </span>
+                )}
+              </div>
+              <div className="grid grid-cols-4 md:grid-cols-6 gap-2">
+                {availableSizes.map((size) => (
                   <button
                     key={size.size}
                     onClick={() => setSelectedSize(size.size)}
-                    disabled={!size.inStock}
                     className={`p-3 border rounded text-center text-sm font-medium transition-colors ${
                       selectedSize === size.size
                         ? 'border-primary bg-primary/10 text-primary'
-                        : size.inStock
-                        ? 'border-border text-foreground hover:border-primary hover:text-primary'
-                        : 'border-border/50 text-muted-foreground cursor-not-allowed'
-                    }`}
+                        : 'border-border text-foreground hover:border-primary hover:text-primary'
+                    } ${size.stockQuantity === 0 ? 'opacity-50 cursor-not-allowed' : ''}`}
+                    disabled={size.stockQuantity === 0}
+                    title={size.stockQuantity === 0 ? 'Нет в наличии' : `В наличии: ${size.stockQuantity} шт.`}
                   >
                     {size.size}
                   </button>
                 ))}
               </div>
+              {!selectedSize && (
+                <p className="text-sm text-destructive mt-2">
+                  * Пожалуйста, выберите размер для добавления в корзину
+                </p>
+              )}
               <button className="text-primary text-sm mt-2 hover:underline">
                 Таблица размеров →
               </button>
             </div>
           )}
 
+          {/* Color selection */}
+          {product.colors && product.colors.length > 0 && (
+            <div>
+              <h3 className="font-semibold text-foreground mb-3">Цвет:</h3>
+              <div className="flex flex-wrap gap-2">
+                {product.colors.map((color, index) => (
+                  <button
+                    key={index}
+                    onClick={() => setSelectedColor(color.name)}
+                    className={`flex items-center space-x-2 px-3 py-2 border rounded text-sm transition-colors ${
+                      selectedColor === color.name
+                        ? 'border-primary bg-primary/10 text-primary'
+                        : 'border-border text-foreground hover:border-primary'
+                    }`}
+                  >
+                    <div
+                      className="w-4 h-4 rounded border"
+                      style={{ backgroundColor: color.value }}
+                    />
+                    <span>{color.name}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* Add to cart */}
           <div className="pt-4">
             <AddToCartButton
-              product={{
-                id: product.id,
-                name: product.name,
-                price: product.price,
-                image: product.images[0],
-                stock: product.stock,
-              }}
-              disabled={product.sizes ? !selectedSize : false}
+              product={cartProduct}
+              selectedSize={selectedSize || undefined}
+              selectedColor={selectedColor || undefined}
+              requiresSizeSelection={requiresSizeSelection}
+              disabled={requiresSizeSelection ? !selectedSize : false}
               size="lg"
             />
           </div>
@@ -248,9 +321,21 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product }) => {
 
             {activeTab === 'sizes' && (
               <div>
-                <h4 className="font-semibold text-foreground mb-4">Таблица размеров</h4>
-                <div className="bg-secondary p-4 rounded-lg">
-                  <p className="text-muted-foreground">Информация о размерах...</p>
+                <h4 className="font-semibold text-foreground mb-4">Доступные размеры</h4>
+                <div className="space-y-3">
+                  {product.sizes.map((size) => (
+                    <div key={size.size} className="flex justify-between items-center p-3 bg-secondary rounded-lg">
+                      <span className="font-medium">Размер {size.size}</span>
+                      <div className="flex items-center space-x-4">
+                        <span className={`text-sm ${size.inStock && size.stockQuantity > 0 ? 'text-green-600' : 'text-red-600'}`}>
+                          {size.inStock && size.stockQuantity > 0 ? 'В наличии' : 'Нет в наличии'}
+                        </span>
+                        <span className="text-sm text-muted-foreground">
+                          {size.stockQuantity} шт.
+                        </span>
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </div>
             )}

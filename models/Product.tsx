@@ -1,6 +1,18 @@
 // models/Product.tsx
 import mongoose, { Document, Schema, Types } from 'mongoose';
 
+export interface IProductSize {
+  size: string;
+  inStock: boolean;
+  stockQuantity: number;
+}
+
+export interface IProductColor {
+  name: string;
+  value: string;
+  image?: string;
+}
+
 export interface IProduct extends Document {
   name: string;
   description: string;
@@ -14,11 +26,11 @@ export interface IProduct extends Document {
   slug: string;
   featured: boolean;
   active: boolean;
-  gender: 'men' | 'women' | 'kids' | 'unisex'; // Добавлено поле пола
-  ageCategory?: 'infant' | 'toddler' | 'child' | 'teen'; // Возрастная категория для детей
+  gender: 'men' | 'women' | 'kids' | 'unisex';
+  ageCategory?: 'infant' | 'toddler' | 'child' | 'teen';
   specifications?: Record<string, string>;
-  sizes?: { size: string; inStock: boolean }[]; // Добавлены размеры
-  colors?: { name: string; value: string }[]; // Добавлены цвета
+  sizes: IProductSize[];
+  colors: IProductColor[];
   ratings: {
     average: number;
     count: number;
@@ -41,11 +53,11 @@ export interface IProductLean {
   slug: string;
   featured: boolean; 
   active: boolean;
-  gender: 'men' | 'women' | 'kids' | 'unisex'; // Добавлено
-  ageCategory?: 'infant' | 'toddler' | 'child' | 'teen'; // Добавлено
+  gender: 'men' | 'women' | 'kids' | 'unisex';
+  ageCategory?: 'infant' | 'toddler' | 'child' | 'teen';
   specifications?: Record<string, string>;
-  sizes?: { size: string; inStock: boolean }[]; // Добавлено
-  colors?: { name: string; value: string }[]; // Добавлено
+  sizes: IProductSize[];
+  colors: IProductColor[];
   ratings: {
     average: number;
     count: number;
@@ -129,12 +141,30 @@ const productSchema = new Schema<IProduct>(
       of: String,
     },
     sizes: [{
-      size: String,
-      inStock: Boolean
+      size: {
+        type: String,
+        required: true
+      },
+      inStock: {
+        type: Boolean,
+        default: true
+      },
+      stockQuantity: {
+        type: Number,
+        default: 0,
+        min: 0
+      }
     }],
     colors: [{
-      name: String,
-      value: String
+      name: {
+        type: String,
+        required: true
+      },
+      value: {
+        type: String,
+        required: true
+      },
+      image: String
     }],
     ratings: {
       average: {
@@ -155,12 +185,20 @@ const productSchema = new Schema<IProduct>(
   }
 );
 
+// Автоматический расчет общего количества на складе на основе размеров
+productSchema.pre('save', function(next) {
+  if (this.sizes && this.sizes.length > 0) {
+    this.stock = this.sizes.reduce((total, size) => total + (size.stockQuantity || 0), 0);
+  }
+  next();
+});
+
 productSchema.index({ name: 'text', description: 'text' });
 productSchema.index({ category: 1 });
 productSchema.index({ price: 1 });
 productSchema.index({ featured: 1 });
 productSchema.index({ active: 1 });
-productSchema.index({ gender: 1 }); // Добавлен индекс по полу
-productSchema.index({ ageCategory: 1 }); // Добавлен индекс по возрастной категории
+productSchema.index({ gender: 1 });
+productSchema.index({ ageCategory: 1 });
 
 export default mongoose.models.Product || mongoose.model<IProduct>('Product', productSchema);

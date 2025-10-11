@@ -81,7 +81,7 @@ const ProductList: React.FC<ProductListProps> = ({
         <div className="text-6xl mb-4">📦</div>
         <h3 className="text-lg font-medium text-foreground mb-2">Товары не найдены</h3>
         <p className="text-muted-foreground">Начните с добавления первого товара</p>
-        <Button href="/admin/manage-products/new" className="mt-4">
+        <Button href="/manage-products/new" className="mt-4">
           Добавить товар
         </Button>
       </div>
@@ -176,7 +176,7 @@ const ProductList: React.FC<ProductListProps> = ({
                       {product.active ? 'Деактивировать' : 'Активировать'}
                     </Button>
                     <Link
-                      href={`/admin/manage-products/edit/${product._id}`}
+                      href={`/manage-products/edit/${product._id}`}
                       className="text-primary hover:text-primary/80 transition-colors"
                     >
                       Редактировать

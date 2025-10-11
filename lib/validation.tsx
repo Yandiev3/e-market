@@ -17,8 +17,52 @@ export function validateProduct(data: any): ValidationResult {
     errors.push('Цена должна быть положительным числом');
   }
 
-  if (data.description && data.description.length > 1000) {
-    errors.push('Описание не должно превышать 1000 символов');
+  if (data.originalPrice && !validator.isFloat(data.originalPrice.toString(), { min: 0 })) {
+    errors.push('Исходная цена должна быть положительным числом');
+  }
+
+  if (!data.description || data.description.trim().length < 10) {
+    errors.push('Описание должно содержать минимум 10 символов');
+  }
+
+  if (!data.category) {
+    errors.push('Необходимо выбрать категорию');
+  }
+
+  if (!data.brand || data.brand.trim().length < 2) {
+    errors.push('Бренд должен содержать минимум 2 символа');
+  }
+
+  if (!data.sku || data.sku.trim().length < 3) {
+    errors.push('SKU должен содержать минимум 3 символа');
+  }
+
+  if (!data.slug || data.slug.trim().length < 2) {
+    errors.push('Slug должен содержать минимум 2 символа');
+  }
+
+  // Валидация размеров
+  if (data.sizes && Array.isArray(data.sizes)) {
+    data.sizes.forEach((size: any, index: number) => {
+      if (!size.size || size.size.trim().length === 0) {
+        errors.push(`Размер #${index + 1} не может быть пустым`);
+      }
+      if (typeof size.stockQuantity !== 'number' || size.stockQuantity < 0) {
+        errors.push(`Количество для размера "${size.size}" должно быть неотрицательным числом`);
+      }
+    });
+  }
+
+  // Валидация цветов
+  if (data.colors && Array.isArray(data.colors)) {
+    data.colors.forEach((color: any, index: number) => {
+      if (!color.name || color.name.trim().length === 0) {
+        errors.push(`Название цвета #${index + 1} не может быть пустым`);
+      }
+      if (!color.value || !validator.isHexColor(color.value)) {
+        errors.push(`Цвет #${index + 1} должен быть в формате HEX`);
+      }
+    });
   }
 
   return {
@@ -59,10 +103,6 @@ export function validateOrder(data: any): ValidationResult {
   if (!data.shippingAddress || !data.shippingAddress.street) {
     errors.push('Необходимо указать адрес доставки (улица, дом)');
   }
-
-  // if (!data.shippingAddress || !data.shippingAddress.city) {
-  //   errors.push('Необходимо указать город доставки');
-  // }
 
   if (!data.email || !validator.isEmail(data.email)) {
     errors.push('Некорректный email адрес');

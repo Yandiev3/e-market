@@ -4,9 +4,8 @@ import CredentialsProvider from 'next-auth/providers/credentials';
 import dbConnect from './dbConnect';
 import User, { IUser } from '@/models/User';
 import { validateEmail } from './utils';
-import { Types } from 'mongoose';
+import { Types } from 'mongoose'; 
 
-// Расширяем интерфейс IUser для добавления метода _id
 interface IUserWithId extends IUser {
   _id: Types.ObjectId;
 }
@@ -69,12 +68,13 @@ export const authOptions: NextAuthOptions = {
             id: user._id.toString(),
             email: user.email,
             name: user.name,
+            lastname: user.lastname,
             role: user.role,
-            phone: user.phone || '', // ← Убедитесь, что это строка
+            phone: user.phone || '',
           };
         } catch (error) {
           console.error('Authorize error:', error);
-          return null; // ← Возвращаем null вместо throw error
+          return null;
         }
       },
     }),

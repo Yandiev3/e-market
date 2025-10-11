@@ -5,6 +5,7 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
+import { IProductSize, IProductColor } from '@/models/Product';
 
 interface ProductFormData {
   name: string;
@@ -22,8 +23,8 @@ interface ProductFormData {
   gender: 'men' | 'women' | 'kids' | 'unisex';
   ageCategory?: 'infant' | 'toddler' | 'child' | 'teen';
   specifications: Record<string, string>;
-  sizes: { size: string; inStock: boolean }[];
-  colors: { name: string; value: string }[];
+  sizes: IProductSize[];
+  colors: IProductColor[];
 }
 
 interface ProductFormProps {
@@ -31,6 +32,13 @@ interface ProductFormProps {
   onSubmit: (data: ProductFormData) => Promise<void>;
   loading?: boolean;
 }
+
+// Стандартные размеры для разных категорий
+const STANDARD_SIZES = {
+  adult: ['35', '36', '37', '38', '39', '40', '41', '42', '43', '44', '45'],
+  kids: ['25', '26', '27', '28', '29', '30', '31', '32', '33', '34'],
+  infant: ['18', '19', '20', '21', '22', '23', '24']
+};
 
 const ProductForm: React.FC<ProductFormProps> = ({ initialData, onSubmit, loading = false }) => {
   const router = useRouter();
@@ -74,10 +82,32 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialData, onSubmit, loadin
     }));
   };
 
-  const addSize = () => {
+  // Автогенерация slug из названия
+  const generateSlug = (name: string) => {
+    return name
+      .toLowerCase()
+      .replace(/[^\w\u0400-\u04FF]+/g, '-')
+      .replace(/^-+|-+$/g, '');
+  };
+
+  const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const name = e.target.value;
     setFormData(prev => ({
       ...prev,
-      sizes: [...prev.sizes, { size: '', inStock: true }]
+      name,
+      slug: generateSlug(name)
+    }));
+  };
+
+  // Управление размерами
+  const addSize = (size?: string) => {
+    setFormData(prev => ({
+      ...prev,
+      sizes: [...prev.sizes, { 
+        size: size || '', 
+        inStock: true,
+        stockQuantity: 0
+      }]
     }));
   };
 
@@ -88,7 +118,7 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialData, onSubmit, loadin
     }));
   };
 
-  const updateSize = (index: number, field: 'size' | 'inStock', value: string | boolean) => {
+  const updateSize = (index: number, field: keyof IProductSize, value: string | boolean | number) => {
     setFormData(prev => ({
       ...prev,
       sizes: prev.sizes.map((size, i) => 
@@ -97,6 +127,39 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialData, onSubmit, loadin
     }));
   };
 
+  const addStandardSizes = () => {
+    let sizesToAdd: string[] = [];
+    
+    if (formData.gender === 'kids' && formData.ageCategory) {
+      switch (formData.ageCategory) {
+        case 'infant':
+          sizesToAdd = STANDARD_SIZES.infant;
+          break;
+        case 'toddler':
+        case 'child':
+          sizesToAdd = STANDARD_SIZES.kids;
+          break;
+        case 'teen':
+          sizesToAdd = STANDARD_SIZES.adult.slice(0, 8); // Меньшие размеры для подростков
+          break;
+      }
+    } else {
+      sizesToAdd = STANDARD_SIZES.adult;
+    }
+
+    const newSizes = sizesToAdd.map(size => ({
+      size,
+      inStock: true,
+      stockQuantity: 0
+    }));
+
+    setFormData(prev => ({
+      ...prev,
+      sizes: [...prev.sizes, ...newSizes]
+    }));
+  };
+
+  // Управление цветами
   const addColor = () => {
     setFormData(prev => ({
       ...prev,
@@ -111,7 +174,7 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialData, onSubmit, loadin
     }));
   };
 
-  const updateColor = (index: number, field: 'name' | 'value', value: string) => {
+  const updateColor = (index: number, field: keyof IProductColor, value: string) => {
     setFormData(prev => ({
       ...prev,
       colors: prev.colors.map((color, i) => 
@@ -119,6 +182,9 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialData, onSubmit, loadin
       )
     }));
   };
+
+  // Расчет общего количества на складе
+  const totalStock = formData.sizes.reduce((sum, size) => sum + (size.stockQuantity || 0), 0);
 
   return (
     <form onSubmit={handleSubmit} className="space-y-8">
@@ -131,7 +197,7 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialData, onSubmit, loadin
             type="text"
             name="name"
             value={formData.name}
-            onChange={handleInputChange}
+            onChange={handleNameChange}
             required
             placeholder="Введите название товара"
           />
@@ -181,6 +247,8 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialData, onSubmit, loadin
               <option value="mini">Мини угги</option>
               <option value="tall">Высокие угги</option>
               <option value="slippers">Домашние тапочки</option>
+              <option value="boots">Ботинки</option>
+              <option value="sandals">Сандалии</option>
             </select>
           </div>
 
@@ -235,83 +303,142 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialData, onSubmit, loadin
         </div>
       </div>
 
-      {/* Размеры и цвета */}
+      {/* Размеры */}
       <div className="card p-6">
-        <h3 className="text-lg font-medium text-foreground mb-4">Размеры и цвета</h3>
+        <h3 className="text-lg font-medium text-foreground mb-4">
+          Размеры 
+          <span className="ml-2 text-sm font-normal text-muted-foreground">
+            (Общее количество: {totalStock} шт.)
+          </span>
+        </h3>
         
-        {/* Размеры */}
         <div className="mb-6">
           <div className="flex items-center justify-between mb-4">
-            <label className="block text-sm font-medium text-foreground">Размеры</label>
-            <Button type="button" variant="outline" size="sm" onClick={addSize}>
-              Добавить размер
-            </Button>
+            <label className="block text-sm font-medium text-foreground">Управление размерами</label>
+            <div className="flex space-x-2">
+              <Button type="button" variant="outline" size="sm" onClick={addStandardSizes}>
+                Добавить стандартные размеры
+              </Button>
+              <Button type="button" variant="outline" size="sm" onClick={() => addSize()}>
+                Добавить размер
+              </Button>
+            </div>
           </div>
-          <div className="space-y-3">
-            {formData.sizes.map((size, index) => (
-              <div key={index} className="flex items-center space-x-3">
-                <Input
-                  placeholder="Размер (например: 36)"
-                  value={size.size}
-                  onChange={(e) => updateSize(index, 'size', e.target.value)}
-                />
-                <label className="flex items-center space-x-2">
-                  <input
-                    type="checkbox"
-                    checked={size.inStock}
-                    onChange={(e) => updateSize(index, 'inStock', e.target.checked)}
-                    className="rounded border-input text-primary focus:ring-primary"
-                  />
-                  <span className="text-sm text-foreground">В наличии</span>
-                </label>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => removeSize(index)}
-                >
-                  Удалить
-                </Button>
-              </div>
-            ))}
-          </div>
+          
+          {formData.sizes.length > 0 ? (
+            <div className="space-y-4">
+              {formData.sizes.map((size, index) => (
+                <div key={index} className="flex items-center space-x-4 p-4 border border-border rounded-lg">
+                  <div className="flex-1 grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <Input
+                      label="Размер"
+                      placeholder="Например: 36, 37, M, L"
+                      value={size.size}
+                      onChange={(e) => updateSize(index, 'size', e.target.value)}
+                      required
+                    />
+                    
+                    <Input
+                      label="Количество"
+                      type="number"
+                      min="0"
+                      value={size.stockQuantity}
+                      onChange={(e) => updateSize(index, 'stockQuantity', parseInt(e.target.value) || 0)}
+                      required
+                    />
+                    
+                    <div className="flex items-end space-x-4">
+                      <label className="flex items-center space-x-2">
+                        <input
+                          type="checkbox"
+                          checked={size.inStock}
+                          onChange={(e) => updateSize(index, 'inStock', e.target.checked)}
+                          className="rounded border-input text-primary focus:ring-primary"
+                        />
+                        <span className="text-sm text-foreground">В наличии</span>
+                      </label>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => removeSize(index)}
+                        className="text-destructive hover:text-destructive/80"
+                      >
+                        Удалить
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-8 border-2 border-dashed border-border rounded-lg">
+              <p className="text-muted-foreground mb-4">Размеры не добавлены</p>
+              <Button type="button" variant="outline" onClick={addStandardSizes}>
+                Добавить стандартные размеры
+              </Button>
+            </div>
+          )}
         </div>
+      </div>
 
-        {/* Цвета */}
+      {/* Цвета */}
+      <div className="card p-6">
+        <h3 className="text-lg font-medium text-foreground mb-4">Цвета</h3>
+        
         <div>
           <div className="flex items-center justify-between mb-4">
-            <label className="block text-sm font-medium text-foreground">Цвета</label>
+            <label className="block text-sm font-medium text-foreground">Управление цветами</label>
             <Button type="button" variant="outline" size="sm" onClick={addColor}>
               Добавить цвет
             </Button>
           </div>
-          <div className="space-y-3">
-            {formData.colors.map((color, index) => (
-              <div key={index} className="flex items-center space-x-3">
-                <Input
-                  placeholder="Название цвета"
-                  value={color.name}
-                  onChange={(e) => updateColor(index, 'name', e.target.value)}
-                />
-                <div className="flex items-center space-x-2">
-                  <input
-                    type="color"
-                    value={color.value}
-                    onChange={(e) => updateColor(index, 'value', e.target.value)}
-                    className="w-10 h-10 rounded border border-input"
-                  />
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => removeColor(index)}
-                  >
-                    Удалить
-                  </Button>
+          
+          {formData.colors.length > 0 ? (
+            <div className="space-y-4">
+              {formData.colors.map((color, index) => (
+                <div key={index} className="flex items-center space-x-4 p-4 border border-border rounded-lg">
+                  <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <Input
+                      label="Название цвета"
+                      placeholder="Например: Черный, Бежевый"
+                      value={color.name}
+                      onChange={(e) => updateColor(index, 'name', e.target.value)}
+                      required
+                    />
+                    
+                    <div className="flex items-end space-x-4">
+                      <div className="flex-1">
+                        <label className="block text-sm font-medium text-foreground mb-2">Цвет</label>
+                        <div className="flex items-center space-x-3">
+                          <input
+                            type="color"
+                            value={color.value}
+                            onChange={(e) => updateColor(index, 'value', e.target.value)}
+                            className="w-12 h-12 rounded border border-input cursor-pointer"
+                          />
+                          <span className="text-sm text-muted-foreground">{color.value}</span>
+                        </div>
+                      </div>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => removeColor(index)}
+                        className="text-destructive hover:text-destructive/80 mt-2"
+                      >
+                        Удалить
+                      </Button>
+                    </div>
+                  </div>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-8 border-2 border-dashed border-border rounded-lg">
+              <p className="text-muted-foreground">Цвета не добавлены</p>
+            </div>
+          )}
         </div>
       </div>
 
@@ -320,24 +447,13 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialData, onSubmit, loadin
         <h3 className="text-lg font-medium text-foreground mb-4">Дополнительные настройки</h3>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <Input
-            label="SKU"
+            label="SKU (Артикул)"
             type="text"
             name="sku"
             value={formData.sku}
             onChange={handleInputChange}
             required
-            placeholder="Уникальный код"
-          />
-
-          <Input
-            label="Остаток на складе"
-            type="number"
-            name="stock"
-            value={formData.stock}
-            onChange={handleInputChange}
-            required
-            min="0"
-            placeholder="0"
+            placeholder="UGG-CLASSIC-36"
           />
 
           <Input
@@ -349,6 +465,15 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialData, onSubmit, loadin
             required
             placeholder="product-slug"
           />
+
+          <div>
+            <label className="block text-sm font-medium text-foreground mb-2">
+              Общее количество: {totalStock} шт.
+            </label>
+            <p className="text-xs text-muted-foreground">
+              Рассчитывается автоматически из количества по размерам
+            </p>
+          </div>
         </div>
 
         <div className="mt-6 space-y-4">

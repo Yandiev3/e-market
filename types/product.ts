@@ -1,4 +1,16 @@
 // types/product.ts
+export interface IProductSize {
+  size: string;
+  inStock: boolean;
+  stockQuantity: number;
+}
+
+export interface IProductColor {
+  name: string;
+  value: string;
+  image?: string;
+}
+
 export interface IProduct {
   _id: string;
   name: string;
@@ -12,14 +24,16 @@ export interface IProduct {
   gender: 'men' | 'women' | 'kids' | 'unisex';
   ageCategory?: 'infant' | 'toddler' | 'child' | 'teen';
   specifications?: Record<string, string>;
-  sizes?: { size: string; inStock: boolean }[];
-  colors?: { name: string; value: string }[];
+  sizes: IProductSize[];
+  colors: IProductColor[];
   ratings: {
     average: number;
     count: number;
   };
   slug: string;
   brand: string;
+  sku: string;
+  featured: boolean;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -37,11 +51,15 @@ export interface IProductLean {
   brand: string;
   gender: 'men' | 'women' | 'kids' | 'unisex';
   ageCategory?: 'infant' | 'toddler' | 'child' | 'teen';
+  sizes: IProductSize[];
+  colors: IProductColor[];
   ratings: {
     average: number;
     count: number;
   };
   slug: string;
+  sku: string;
+  featured?: boolean;
   createdAt?: Date; 
   updatedAt?: Date;
 }
@@ -62,6 +80,9 @@ export interface Product {
   isNew?: boolean;
   isFeatured?: boolean;
   category: string;
+  sizes?: IProductSize[];
+  colors?: IProductColor[];
+  sku?: string;
 }
 
 // Упрощенный тип для избранного
@@ -90,6 +111,8 @@ export interface OrderItem {
   price: number;
   quantity: number;
   image: string;
+  size?: string;
+  color?: string;
 }
 
 export interface ShippingAddress {
@@ -140,4 +163,29 @@ export interface DashboardStats {
     description: string;
     timestamp: string;
   }>;
+}
+
+// Типы для корзины
+export interface CartProduct {
+  id: string;
+  name: string;
+  price: number;
+  image: string;
+  stock: number;
+  size?: string;
+  color?: string;
+  sizes?: IProductSize[];
+  requiresSizeSelection?: boolean;
+}
+
+export interface CartItem {
+  id: string;
+  name: string;
+  price: number;
+  image: string;
+  quantity: number;
+  stock: number;
+  size?: string;
+  color?: string;
+  productId: string;
 }

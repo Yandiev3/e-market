@@ -30,6 +30,7 @@ export async function GET(request: NextRequest) {
       image: item.product.images[0],
       quantity: item.quantity,
       stock: item.product.stock,
+      size: item.product.size,
     }));
 
     return NextResponse.json({ cart });

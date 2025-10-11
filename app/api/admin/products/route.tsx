@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-config';
 import dbConnect from '@/lib/dbConnect';
 import Product from '@/models/Product';
+import { validateProduct } from '@/lib/validation';
 
 export async function GET(request: NextRequest) {
   try {
@@ -71,26 +72,63 @@ export async function POST(request: NextRequest) {
 
     const body = await request.json();
     
-    // Generate slug from name
-    const slug = body.name
-      .toLowerCase()
-      .replace(/[^\w ]+/g, '')
-      .replace(/ +/g, '-');
+    // Валидация данных
+    const validation = validateProduct(body);
+    if (!validation.isValid) {
+      return NextResponse.json(
+        { message: 'Validation failed', errors: validation.errors },
+        { status: 400 }
+      );
+    }
 
-    const product = new Product({
+    // Проверка уникальности SKU
+    const existingSku = await Product.findOne({ sku: body.sku });
+    if (existingSku) {
+      return NextResponse.json(
+        { message: 'Товар с таким SKU уже существует' },
+        { status: 400 }
+      );
+    }
+
+    // Проверка уникальности slug
+    const existingSlug = await Product.findOne({ slug: body.slug });
+    if (existingSlug) {
+      return NextResponse.json(
+        { message: 'Товар с таким slug уже существует' },
+        { status: 400 }
+      );
+    }
+
+    // Автоматический расчет общего stock из размеров
+    const totalStock = body.sizes?.reduce((sum: number, size: any) => 
+      sum + (size.stockQuantity || 0), 0) || 0;
+
+    const productData = {
       ...body,
-      slug,
+      stock: totalStock,
       ratings: {
         average: 0,
         count: 0,
       },
-    });
+      // Убедимся, что массивы размеров и цветов инициализированы
+      sizes: body.sizes || [],
+      colors: body.colors || [],
+    };
 
+    const product = new Product(productData);
     await product.save();
 
     return NextResponse.json(product, { status: 201 });
   } catch (error: any) {
     console.error('Product creation error:', error);
+    
+    if (error.code === 11000) {
+      return NextResponse.json(
+        { message: 'Товар с таким SKU или slug уже существует' },
+        { status: 400 }
+      );
+    }
+    
     return NextResponse.json(
       { message: 'Internal server error' },
       { status: 500 }

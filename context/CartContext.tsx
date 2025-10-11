@@ -3,21 +3,13 @@
 
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { useAuth } from './AuthContext';
+import { CartItem } from '@/types/product';
 
-export interface CartItem {
-  id: string;
-  name: string;
-  price: number;
-  image: string;
-  quantity: number;
-  stock: number;
-}
-
-interface CartContextType {
+export interface CartContextType {
   items: CartItem[];
-  addItem: (item: Omit<CartItem, 'quantity'>) => Promise<void>;
-  removeItem: (id: string) => Promise<void>;
-  updateQuantity: (id: string, quantity: number) => Promise<void>;
+  addItem: (item: Omit<CartItem, 'quantity' | 'productId'>) => Promise<void>; // Изменено здесь
+  removeItem: (id: string, size?: string, color?: string) => Promise<void>;
+  updateQuantity: (id: string, quantity: number, size?: string, color?: string) => Promise<void>;
   clearCart: () => Promise<void>;
   createOrder: (orderData: any) => Promise<{ success: boolean; order?: any; error?: string }>;
   totalItems: number;
@@ -43,6 +35,11 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [items, setItems] = useState<CartItem[]>([]);
   const [loading, setLoading] = useState(true);
   const { isAuthenticated } = useAuth();
+
+  // Генерация уникального ID для элемента корзины с учетом размера и цвета
+  const generateCartItemId = (id: string, size?: string, color?: string) => {
+    return `${id}-${size || 'no-size'}-${color || 'no-color'}`;
+  };
 
   useEffect(() => {
     loadCart();
@@ -88,19 +85,28 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  const addItem = async (item: Omit<CartItem, 'quantity'>) => {
+  const addItem = async (item: Omit<CartItem, 'quantity' | 'productId'>) => { // Изменено здесь
+    const cartItemId = generateCartItemId(item.id, item.size, item.color);
+    
     setItems(prev => {
-      const existingItem = prev.find(i => i.id === item.id);
+      const existingItem = prev.find(i => 
+        generateCartItemId(i.id, i.size, i.color) === cartItemId
+      );
+      
       let newItems: CartItem[];
       
       if (existingItem) {
         newItems = prev.map(i =>
-          i.id === item.id
+          generateCartItemId(i.id, i.size, i.color) === cartItemId
             ? { ...i, quantity: Math.min(i.quantity + 1, item.stock) }
             : i
         );
       } else {
-        newItems = [...prev, { ...item, quantity: 1 }];
+        newItems = [...prev, { 
+          ...item, 
+          quantity: 1, 
+          productId: item.id // Добавляем productId здесь
+        }];
       }
 
       // Сохранение в localStorage для гостей
@@ -115,9 +121,13 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     });
   };
 
-  const removeItem = async (id: string) => {
+  const removeItem = async (id: string, size?: string, color?: string) => {
+    const cartItemId = generateCartItemId(id, size, color);
+    
     setItems(prev => {
-      const newItems = prev.filter(item => item.id !== id);
+      const newItems = prev.filter(item => 
+        generateCartItemId(item.id, item.size, item.color) !== cartItemId
+      );
       
       if (!isAuthenticated) {
         localStorage.setItem('cart', JSON.stringify(newItems));
@@ -128,15 +138,17 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     });
   };
 
-  const updateQuantity = async (id: string, quantity: number) => {
+  const updateQuantity = async (id: string, quantity: number, size?: string, color?: string) => {
     if (quantity <= 0) {
-      removeItem(id);
+      removeItem(id, size, color);
       return;
     }
 
+    const cartItemId = generateCartItemId(id, size, color);
+    
     setItems(prev => {
       const newItems = prev.map(item =>
-        item.id === id
+        generateCartItemId(item.id, item.size, item.color) === cartItemId
           ? { ...item, quantity: Math.min(quantity, item.stock) }
           : item
       );
