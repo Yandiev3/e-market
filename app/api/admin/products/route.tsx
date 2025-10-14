@@ -99,23 +99,20 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Автоматический расчет общего stock из размеров
-    const totalStock = body.sizes?.reduce((sum: number, size: any) => 
-      sum + (size.stockQuantity || 0), 0) || 0;
+    // Удаляем поле stock из данных, так как теперь используем sizes.stockQuantity
+    const { stock, ...productData } = body;
 
-    const productData = {
-      ...body,
-      stock: totalStock,
+    const product = new Product({
+      ...productData,
       ratings: {
         average: 0,
         count: 0,
       },
       // Убедимся, что массивы размеров и цветов инициализированы
-      sizes: body.sizes || [],
-      colors: body.colors || [],
-    };
+      sizes: productData.sizes || [],
+      colors: productData.colors || [],
+    });
 
-    const product = new Product(productData);
     await product.save();
 
     return NextResponse.json(product, { status: 201 });

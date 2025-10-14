@@ -15,7 +15,6 @@ interface ProductFormData {
   images: string[];
   category: string;
   brand: string;
-  stock: number;
   sku: string;
   slug: string;
   featured: boolean;
@@ -50,7 +49,6 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialData, onSubmit, loadin
     images: [],
     category: '',
     brand: '',
-    stock: 0,
     sku: '',
     slug: '',
     featured: false,
@@ -445,7 +443,7 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialData, onSubmit, loadin
       {/* Дополнительные настройки */}
       <div className="card p-6">
         <h3 className="text-lg font-medium text-foreground mb-4">Дополнительные настройки</h3>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <Input
             label="SKU (Артикул)"
             type="text"
@@ -465,15 +463,6 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialData, onSubmit, loadin
             required
             placeholder="product-slug"
           />
-
-          <div>
-            <label className="block text-sm font-medium text-foreground mb-2">
-              Общее количество: {totalStock} шт.
-            </label>
-            <p className="text-xs text-muted-foreground">
-              Рассчитывается автоматически из количества по размерам
-            </p>
-          </div>
         </div>
 
         <div className="mt-6 space-y-4">

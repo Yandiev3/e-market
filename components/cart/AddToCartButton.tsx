@@ -37,6 +37,11 @@ const AddToCartButton: React.FC<AddToCartButtonProps> = ({
   const requiresSize = requiresSizeSelection || hasAvailableSizes;
   const isSizeRequiredButNotSelected = requiresSize && !selectedSize;
   
+  // Проверяем наличие товара на основе выбранного размера или общего количества
+  const isOutOfStock = selectedSize 
+    ? !product.sizes?.some(size => size.size === selectedSize && size.inStock && size.stockQuantity > 0)
+    : !product.sizes?.some(size => size.inStock && size.stockQuantity > 0);
+
   const handleAddToCart = async () => {
     // ЕСЛИ РАЗМЕР ОБЯЗАТЕЛЕН И НЕ ВЫБРАН - ТРЕБУЕМ ВЫБОР
     if (isSizeRequiredButNotSelected) {
@@ -58,7 +63,7 @@ const AddToCartButton: React.FC<AddToCartButtonProps> = ({
       return; // ПРЕКРАЩАЕМ выполнение - не добавляем в корзину
     }
     
-    if (disabled) return;
+    if (disabled || isOutOfStock) return;
     
     setAdding(true);
     
@@ -70,25 +75,25 @@ const AddToCartButton: React.FC<AddToCartButtonProps> = ({
       name: product.name,
       price: product.price,
       image: product.image,
-      stock: product.stock,
       size: selectedSize,
-      color: selectedColor
+      color: selectedColor,
+      sizes: product.sizes
     });
     
     setAdding(false);
   };
 
-  const isOutOfStock = product.stock === 0;
   const isDisabled = isOutOfStock || adding || disabled;
 
   const getButtonText = () => {
     if (isOutOfStock) return 'Нет в наличии';
+    if (isSizeRequiredButNotSelected) return 'Выберите размер';
     return 'В корзину';
   };
 
   const getButtonVariant = () => {
     if (isOutOfStock) return 'secondary';
-    if (isSizeRequiredButNotSelected) return 'danger'; // Используем 'danger' вместо 'destructive'
+    if (isSizeRequiredButNotSelected) return 'danger';
     return 'primary';
   };
 
@@ -102,9 +107,9 @@ const AddToCartButton: React.FC<AddToCartButtonProps> = ({
       }`}
       variant={getButtonVariant()}
       size={size}
-      title={isSizeRequiredButNotSelected ? 'Сначала выберите размер' : undefined}
+      title={isSizeRequiredButNotSelected ? 'Сначала выберите размер' : isOutOfStock ? 'Товар отсутствует' : undefined}
     >
-      {isSizeRequiredButNotSelected ? 'Выберите размер' : getButtonText()}
+      {getButtonText()}
     </Button>
   );
 };

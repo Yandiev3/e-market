@@ -23,6 +23,9 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   const averageRating = Math.max(0, Math.min(5, ratings.average || 0));
   const ratingCount = ratings.count || 0;
 
+  // Общее количество на складе
+  const totalStock = product.sizes?.reduce((total, size) => total + size.stockQuantity, 0) || 0;
+
   return (
     <Card className="group overflow-hidden hover:shadow-lg transition-all duration-300">
       <div className="relative">
@@ -50,7 +53,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
             </div>
 
             {/* Out of stock overlay */}
-            {product.stock === 0 && (
+            {totalStock === 0 && (
               <div className="absolute inset-0 bg-background/60 flex items-center justify-center">
                 <span className="text-foreground font-semibold bg-background/80 px-3 py-1 rounded">
                   Нет в наличии
@@ -70,7 +73,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
               originalPrice: product.originalPrice,
               image: product.image,
               slug: product.slug,
-              stock: product.stock,
+              sizes: product.sizes,
               ratings: product.ratings,
               brand: product.brand,
               category: product.category,
@@ -125,12 +128,11 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           </div>
         </div>
 
-        {/* Add to cart button */}
-        <AddToCartButton
+        {/* <AddToCartButton
           product={product}
           className="text-sm"
           size="sm"
-        />
+        /> */}
       </div>
     </Card>
   );

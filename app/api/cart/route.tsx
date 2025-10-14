@@ -16,7 +16,7 @@ export async function GET(request: NextRequest) {
     await dbConnect();
 
     const user = await User.findById(session.user.id)
-      .populate('cart.product', 'name price images stock')
+      .populate('cart.product', 'name price images sizes')
       .select('cart');
 
     if (!user) {
@@ -29,7 +29,7 @@ export async function GET(request: NextRequest) {
       price: item.product.price,
       image: item.product.images[0],
       quantity: item.quantity,
-      stock: item.product.stock,
+      sizes: item.product.sizes,
       size: item.product.size,
     }));
 
@@ -66,12 +66,16 @@ export async function PUT(request: NextRequest) {
     const validCartItems = [];
     for (const item of cart) {
       const product = await Product.findById(item.id);
-      if (product && product.stock > 0) {
-        validCartItems.push({
-          product: item.id,
-          quantity: Math.min(item.quantity, product.stock),
-          addedAt: new Date(),
-        });
+      if (product) {
+        // Проверяем наличие через размеры
+        const hasStock = product.sizes.some(size => size.inStock && size.stockQuantity > 0);
+        if (hasStock) {
+          validCartItems.push({
+            product: item.id,
+            quantity: item.quantity,
+            addedAt: new Date(),
+          });
+        }
       }
     }
 

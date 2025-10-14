@@ -21,7 +21,6 @@ export interface IProduct extends Document {
   images: string[];
   category: string;
   brand: string;
-  stock: number;
   sku: string;
   slug: string;
   featured: boolean;
@@ -48,7 +47,6 @@ export interface IProductLean {
   images: string[];
   category: string;
   brand: string;
-  stock: number;
   sku: string;
   slug: string;
   featured: boolean; 
@@ -98,12 +96,6 @@ const productSchema = new Schema<IProduct>(
     brand: {
       type: String,
       required: true,
-    },
-    stock: {
-      type: Number,
-      required: true,
-      min: 0,
-      default: 0,
     },
     sku: {
       type: String,
@@ -185,13 +177,17 @@ const productSchema = new Schema<IProduct>(
   }
 );
 
-// Автоматический расчет общего количества на складе на основе размеров
-productSchema.pre('save', function(next) {
+// Виртуальное поле для общего количества на складе
+productSchema.virtual('totalStock').get(function() {
   if (this.sizes && this.sizes.length > 0) {
-    this.stock = this.sizes.reduce((total, size) => total + (size.stockQuantity || 0), 0);
+    return this.sizes.reduce((total, size) => total + (size.stockQuantity || 0), 0);
   }
-  next();
+  return 0;
 });
+
+// Ensure virtual fields are serialized
+productSchema.set('toJSON', { virtuals: true });
+productSchema.set('toObject', { virtuals: true });
 
 productSchema.index({ name: 'text', description: 'text' });
 productSchema.index({ category: 1 });

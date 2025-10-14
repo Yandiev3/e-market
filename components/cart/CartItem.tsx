@@ -11,17 +11,33 @@ interface CartItemProps {
     price: number;
     image: string;
     quantity: number;
-    stock: number;
     size?: string;
     color?: string;
+    sizes?: Array<{
+      size: string;
+      inStock: boolean;
+      stockQuantity: number;
+    }>;
   };
 }
 
 const CartItem: React.FC<CartItemProps> = ({ item }) => {
   const { updateQuantity, removeItem } = useCart();
 
+  // Получаем доступное количество для выбранного размера
+  const getAvailableQuantity = () => {
+    if (item.size && item.sizes) {
+      const sizeInfo = item.sizes.find(s => s.size === item.size);
+      return sizeInfo ? sizeInfo.stockQuantity : 0;
+    }
+    // Если размер не выбран, возвращаем общее количество
+    return item.sizes ? item.sizes.reduce((total, size) => total + size.stockQuantity, 0) : 0;
+  };
+
+  const availableQuantity = getAvailableQuantity();
+
   const handleQuantityChange = (newQuantity: number) => {
-    if (newQuantity >= 1 && newQuantity <= item.stock) {
+    if (newQuantity >= 1 && newQuantity <= availableQuantity) {
       updateQuantity(item.id, newQuantity);
     }
   };
@@ -77,11 +93,16 @@ const CartItem: React.FC<CartItemProps> = ({ item }) => {
             </span>
             <button
               onClick={() => handleQuantityChange(item.quantity + 1)}
-              disabled={item.quantity >= item.stock}
+              disabled={item.quantity >= availableQuantity}
               className="px-3 py-1 text-gray-600 hover:text-gray-900 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               +
             </button>
+          </div>
+
+          {/* Stock info */}
+          <div className="ml-4 text-xs text-gray-500">
+            Доступно: {availableQuantity} шт.
           </div>
 
           {/* Remove button */}

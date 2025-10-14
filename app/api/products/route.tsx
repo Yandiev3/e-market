@@ -43,9 +43,10 @@ export async function GET(request: NextRequest) {
       query.featured = true;
     }
 
-    // Stock filter
+    // Stock filter - теперь проверяем наличие через размеры
     if (inStock === 'true') {
-      query.stock = { $gt: 0 };
+      query['sizes.stockQuantity'] = { $gt: 0 };
+      query['sizes.inStock'] = true;
     }
 
     // Sort options

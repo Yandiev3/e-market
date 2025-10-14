@@ -60,12 +60,11 @@ export default function ProductsPage() {
             images: product.images || [],
             slug: product.slug || '',
             category: product.category || '',
-            stock: product.stock || 0,
             ratings: product.ratings || { average: 0, count: 0 },
             brand: product.brand || '',
             description: '',
-            sizes: [],
-            colors: []
+            sizes: product.sizes || [],
+            colors: product.colors || []
           }));
           
           setProducts(formattedProducts);
@@ -126,9 +125,11 @@ export default function ProductsPage() {
       filtered = filtered.filter(product => product.brand === filters.brand);
     }
 
-    // Apply in-stock filter
+    // Apply in-stock filter - теперь проверяем через размеры
     if (filters.inStock) {
-      filtered = filtered.filter(product => product.stock > 0);
+      filtered = filtered.filter(product => 
+        product.sizes && product.sizes.some(size => size.inStock && size.stockQuantity > 0)
+      );
     }
 
     // Apply featured filter

@@ -37,6 +37,9 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product }) => {
   // Доступные размеры (в наличии)
   const availableSizes = product.sizes?.filter(size => size.inStock && size.stockQuantity > 0) || [];
   
+  // Общее количество на складе
+  const totalStock = product.sizes?.reduce((total, size) => total + size.stockQuantity, 0) || 0;
+  
   // Определяем, требуется ли обязательный выбор размера
   const requiresSizeSelection = availableSizes.length > 0;
 
@@ -56,7 +59,6 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product }) => {
     name: product.name,
     price: product.price,
     image: mainImage || '',
-    stock: product.stock,
     sizes: product.sizes,
     requiresSizeSelection: requiresSizeSelection
   };
@@ -115,7 +117,7 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product }) => {
                   price: product.price,
                   image: mainImage || '',
                   slug: product.slug,
-                  stock: product.stock,
+                  sizes: product.sizes,
                   ratings: product.ratings,
                   brand: product.brand,
                   category: product.category,
@@ -194,8 +196,8 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product }) => {
           </div>
 
           {/* Stock status */}
-          <div className={product.stock > 0 ? 'text-green-600' : 'text-red-600'}>
-            {product.stock > 0 ? `✓ В наличии: ${product.stock} шт.` : '✗ Нет в наличии'}
+          <div className={totalStock > 0 ? 'text-green-600' : 'text-red-600'}>
+            {totalStock > 0 ? `✓ В наличии: ${totalStock} шт.` : '✗ Нет в наличии'}
           </div>
 
           {/* Color selection */}

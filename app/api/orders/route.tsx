@@ -111,10 +111,12 @@ export async function POST(request: NextRequest) {
         );
       }
 
-      if (product.stock < item.quantity) {
+      // Проверяем наличие через размеры
+      const hasStock = product.sizes.some(size => size.inStock && size.stockQuantity > 0);
+      if (!hasStock) {
         return NextResponse.json(
           { 
-            message: `Недостаточно товара "${product.name}" в наличии. Доступно: ${product.stock}`,
+            message: `Товар "${product.name}" отсутствует в наличии`,
             productId: product._id
           },
           { status: 400 }
@@ -132,13 +134,23 @@ export async function POST(request: NextRequest) {
         image: product.images[0] || '/images/placeholder.jpg',
       });
 
-      // Prepare stock update
-      stockUpdates.push({
-        updateOne: {
-          filter: { _id: product._id },
-          update: { $inc: { stock: -item.quantity } }
+      // Подготавливаем обновление количества для выбранного размера
+      if (item.size && product.sizes) {
+        const sizeIndex = product.sizes.findIndex(s => s.size === item.size);
+        if (sizeIndex !== -1) {
+          stockUpdates.push({
+            updateOne: {
+              filter: { _id: product._id, 'sizes.size': item.size },
+              update: { 
+                $inc: { 'sizes.$.stockQuantity': -item.quantity },
+                $set: { 
+                  'sizes.$.inStock': product.sizes[sizeIndex].stockQuantity - item.quantity > 0 
+                }
+              }
+            }
+          });
         }
-      });
+      }
     }
 
     // Update all product stocks
@@ -157,7 +169,6 @@ export async function POST(request: NextRequest) {
       orderItems,
       shippingAddress: {
         street: shippingAddress.street,
-        // city: shippingAddress.city,
       },
       paymentMethod: paymentMethod || 'card',
       itemsPrice,

@@ -19,7 +19,6 @@ export interface IProduct {
   originalPrice?: number;
   images: string[];
   category: string;
-  stock: number;
   active: boolean;
   gender: 'men' | 'women' | 'kids' | 'unisex';
   ageCategory?: 'infant' | 'toddler' | 'child' | 'teen';
@@ -46,7 +45,6 @@ export interface IProductLean {
   originalPrice?: number;
   images: string[];
   category: string;
-  stock: number;
   active?: boolean;
   brand: string;
   gender: 'men' | 'women' | 'kids' | 'unisex';
@@ -71,7 +69,6 @@ export interface Product {
   originalPrice?: number;
   image: string;
   slug: string;
-  stock: number;
   ratings: {
     average: number;
     count: number;
@@ -93,13 +90,13 @@ export interface FavoriteProduct {
   originalPrice?: number;
   image: string;
   slug: string;
-  stock: number;
   ratings: {
     average: number;
     count: number;
   };
   brand?: string;
   category: string;
+  sizes?: IProductSize[];
 }
 
 export type ProductDocument = IProduct & Document;
@@ -138,7 +135,6 @@ export interface TopProduct {
   name: string;
   price: number;
   images: string[];
-  stock: number;
   totalSales: number;
 }
 
@@ -171,7 +167,6 @@ export interface CartProduct {
   name: string;
   price: number;
   image: string;
-  stock: number;
   size?: string;
   color?: string;
   sizes?: IProductSize[];
@@ -184,8 +179,8 @@ export interface CartItem {
   price: number;
   image: string;
   quantity: number;
-  stock: number;
   size?: string;
   color?: string;
   productId: string;
+  sizes?: IProductSize[];
 }

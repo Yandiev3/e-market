@@ -13,7 +13,6 @@ interface ProductFormData {
   images: string[];
   category: string;
   brand: string;
-  stock: number;
   sku: string;
   slug: string;
   featured: boolean;

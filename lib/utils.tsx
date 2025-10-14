@@ -6,6 +6,7 @@ import { twMerge } from 'tailwind-merge';
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
+
 export function formatPrice(price: number): string {
   return new Intl.NumberFormat('ru-RU', {
     style: 'currency',
@@ -57,15 +58,14 @@ export function toProductLean(obj: any): IProductLean | null {
     images: obj.images || [],
     category: obj.category,
     brand: obj.brand,
-    stock: obj.stock,
     sku: obj.sku,
     gender: obj.gender,
     slug: obj.slug,
     featured: obj.featured,
     active: obj.active,
     specifications: obj.specifications,
-     sizes: Array.isArray(obj.sizes) ? obj.sizes : [],
-      colors: Array.isArray(obj.colors) ? obj.colors : [],
+    sizes: Array.isArray(obj.sizes) ? obj.sizes : [],
+    colors: Array.isArray(obj.colors) ? obj.colors : [],
     ratings: obj.ratings ? {
       average: obj.ratings.average,
       count: obj.ratings.count

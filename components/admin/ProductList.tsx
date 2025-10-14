@@ -11,12 +11,16 @@ interface Product {
   _id: string;
   name: string;
   price: number;
-  stock: number;
   active: boolean;
   featured: boolean;
   category: string;
   brand: string;
   images: string[];
+  sizes: Array<{
+    size: string;
+    inStock: boolean;
+    stockQuantity: number;
+  }>;
   createdAt: string;
 }
 
@@ -47,6 +51,11 @@ const ProductList: React.FC<ProductListProps> = ({
       setDeleteModalOpen(false);
       setSelectedProduct(null);
     }
+  };
+
+  // Расчет общего количества на складе
+  const getTotalStock = (product: Product) => {
+    return product.sizes.reduce((total, size) => total + (size.stockQuantity || 0), 0);
   };
 
   const formatDate = (dateString: string) => {
@@ -119,77 +128,82 @@ const ProductList: React.FC<ProductListProps> = ({
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
-              {products.map((product) => (
-                <tr key={product._id} className="hover:bg-muted/30 transition-colors">
-                  <td className="px-6 py-4">
-                    <div className="flex items-center">
-                      <div className="flex-shrink-0 h-10 w-10">
-                        <img
-                          className="h-10 w-10 rounded object-cover"
-                          src={product.images[0] || '/images/placeholder.jpg'}
-                          alt={product.name}
-                        />
-                      </div>
-                      <div className="ml-4">
-                        <div className="text-sm font-medium text-foreground">
-                          {product.name}
+              {products.map((product) => {
+                const totalStock = getTotalStock(product);
+                const hasStock = totalStock > 0;
+                
+                return (
+                  <tr key={product._id} className="hover:bg-muted/30 transition-colors">
+                    <td className="px-6 py-4">
+                      <div className="flex items-center">
+                        <div className="flex-shrink-0 h-10 w-10">
+                          <img
+                            className="h-10 w-10 rounded object-cover"
+                            src={product.images[0] || '/images/placeholder.jpg'}
+                            alt={product.name}
+                          />
                         </div>
-                        <div className="text-sm text-muted-foreground">
-                          {product.brand}
+                        <div className="ml-4">
+                          <div className="text-sm font-medium text-foreground">
+                            {product.name}
+                          </div>
+                          <div className="text-sm text-muted-foreground">
+                            {product.brand}
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 text-sm text-foreground">
-                    {product.category}
-                  </td>
-                  <td className="px-6 py-4 text-sm text-foreground">
-                    {formatPrice(product.price)}
-                  </td>
-                  <td className="px-6 py-4">
-                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                      product.stock > 0 
-                        ? 'bg-green-100 text-green-800' 
-                        : 'bg-red-100 text-red-800'
-                    }`}>
-                      {product.stock} шт.
-                    </span>
-                  </td>
-                  <td className="px-6 py-4">
-                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                      product.active 
-                        ? 'bg-green-100 text-green-800' 
-                        : 'bg-red-100 text-red-800'
-                    }`}>
-                      {product.active ? 'Активен' : 'Неактивен'}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 text-sm text-muted-foreground">
-                    {formatDate(product.createdAt)}
-                  </td>
-                  <td className="px-6 py-4 text-right text-sm font-medium space-x-2">
-                    <Button
-                      variant={product.active ? 'secondary' : 'success'}
-                      size="sm"
-                      onClick={() => onToggleStatus(product._id, !product.active)}
-                    >
-                      {product.active ? 'Деактивировать' : 'Активировать'}
-                    </Button>
-                    <Link
-                      href={`/manage-products/edit/${product._id}`}
-                      className="text-primary hover:text-primary/80 transition-colors"
-                    >
-                      Редактировать
-                    </Link>
-                    <button
-                      onClick={() => handleDeleteClick(product)}
-                      className="text-destructive hover:text-destructive/80 transition-colors"
-                    >
-                      Удалить
-                    </button>
-                  </td>
-                </tr>
-              ))}
+                    </td>
+                    <td className="px-6 py-4 text-sm text-foreground">
+                      {product.category}
+                    </td>
+                    <td className="px-6 py-4 text-sm text-foreground">
+                      {formatPrice(product.price)}
+                    </td>
+                    <td className="px-6 py-4">
+                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                        hasStock 
+                          ? 'bg-green-100 text-green-800' 
+                          : 'bg-red-100 text-red-800'
+                      }`}>
+                        {totalStock} шт.
+                      </span>
+                    </td>
+                    <td className="px-6 py-4">
+                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                        product.active 
+                          ? 'bg-green-100 text-green-800' 
+                          : 'bg-red-100 text-red-800'
+                      }`}>
+                        {product.active ? 'Активен' : 'Неактивен'}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 text-sm text-muted-foreground">
+                      {formatDate(product.createdAt)}
+                    </td>
+                    <td className="px-6 py-4 text-right text-sm font-medium space-x-2">
+                      <Button
+                        variant={product.active ? 'secondary' : 'success'}
+                        size="sm"
+                        onClick={() => onToggleStatus(product._id, !product.active)}
+                      >
+                        {product.active ? 'Деактивировать' : 'Активировать'}
+                      </Button>
+                      <Link
+                        href={`/manage-products/edit/${product._id}`}
+                        className="text-primary hover:text-primary/80 transition-colors"
+                      >
+                        Редактировать
+                      </Link>
+                      <button
+                        onClick={() => handleDeleteClick(product)}
+                        className="text-destructive hover:text-destructive/80 transition-colors"
+                      >
+                        Удалить
+                      </button>
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>

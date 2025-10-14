@@ -97,69 +97,83 @@ export default function CartPage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Cart Items */}
           <div className="lg:col-span-2 space-y-4">
-            {items.map((item) => (
-              <Card key={item.id} className="p-4">
-                <div className="flex gap-4">
-                  <img
-                    src={item.image || '/images/placeholder.jpg'}
-                    alt={item.name}
-                    className="w-24 h-24 object-cover rounded"
-                  />
-                  <div className="flex-1">
-                    <h3 className="font-semibold text-lg mb-2 text-foreground">{item.name}</h3>
-                    <p className="text-primary font-bold mb-4">
-                      {formatPrice(item.price)}
-                    </p>
-                    
-                    {/* Quantity controls */}
-                    <div className="flex items-center gap-4">
-                      <div className="flex items-center border border-border rounded-md">
+            {items.map((item) => {
+              // Получаем доступное количество для выбранного размера
+              const getAvailableQuantity = () => {
+                if (item.size && item.sizes) {
+                  const sizeInfo = item.sizes.find(s => s.size === item.size);
+                  return sizeInfo ? sizeInfo.stockQuantity : 0;
+                }
+                // Если размер не выбран, возвращаем общее количество
+                return item.sizes ? item.sizes.reduce((total, size) => total + size.stockQuantity, 0) : 0;
+              };
+
+              const availableQuantity = getAvailableQuantity();
+
+              return (
+                <Card key={item.id} className="p-4">
+                  <div className="flex gap-4">
+                    <img
+                      src={item.image || '/images/placeholder.jpg'}
+                      alt={item.name}
+                      className="w-24 h-24 object-cover rounded"
+                    />
+                    <div className="flex-1">
+                      <h3 className="font-semibold text-lg mb-2 text-foreground">{item.name}</h3>
+                      <p className="text-primary font-bold mb-4">
+                        {formatPrice(item.price)}
+                      </p>
+                      
+                      {/* Quantity controls */}
+                      <div className="flex items-center gap-4">
+                        <div className="flex items-center border border-border rounded-md">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                            disabled={item.quantity <= 1}
+                            className="h-8 w-8 p-0 hover:bg-accent"
+                          >
+                            <Minus className="h-3 w-3" />
+                          </Button>
+                          <span className="w-8 text-center text-sm font-medium text-foreground">
+                            {item.quantity}
+                          </span>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                            disabled={item.quantity >= availableQuantity}
+                            className="h-8 w-8 p-0 hover:bg-accent"
+                          >
+                            <Plus className="h-3 w-3" />
+                          </Button>
+                        </div>
+
                         <Button
                           variant="ghost"
                           size="sm"
-                          onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                          disabled={item.quantity <= 1}
-                          className="h-8 w-8 p-0 hover:bg-accent"
+                          onClick={() => removeItem(item.id)}
+                          className="text-red-600 hover:text-red-800 hover:bg-red-50"
                         >
-                          <Minus className="h-3 w-3" />
-                        </Button>
-                        <span className="w-8 text-center text-sm font-medium text-foreground">
-                          {item.quantity}
-                        </span>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                          disabled={item.quantity >= item.stock}
-                          className="h-8 w-8 p-0 hover:bg-accent"
-                        >
-                          <Plus className="h-3 w-3" />
+                          <Trash2 className="h-4 w-4 mr-1" />
+                          Удалить
                         </Button>
                       </div>
-
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => removeItem(item.id)}
-                        className="text-red-600 hover:text-red-800 hover:bg-red-50"
-                      >
-                        <Trash2 className="h-4 w-4 mr-1" />
-                        Удалить
-                      </Button>
+                    </div>
+                    
+                    <div className="text-right">
+                      <div className="text-lg font-semibold text-foreground">
+                        {formatPrice(item.price * item.quantity)}
+                      </div>
+                      <div className="text-sm text-muted-foreground mt-1">
+                        {item.quantity} × {formatPrice(item.price)}
+                      </div>
                     </div>
                   </div>
-                  
-                  <div className="text-right">
-                    <div className="text-lg font-semibold text-foreground">
-                      {formatPrice(item.price * item.quantity)}
-                    </div>
-                    <div className="text-sm text-muted-foreground mt-1">
-                      {item.quantity} × {formatPrice(item.price)}
-                    </div>
-                  </div>
-                </div>
-              </Card>
-            ))}
+                </Card>
+              );
+            })}
           </div>
 
           {/* Order Summary */}

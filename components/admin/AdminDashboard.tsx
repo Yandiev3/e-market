@@ -4,7 +4,15 @@
 import React, { useState, useEffect } from 'react';
 import { formatPrice } from '@/lib/utils';
 import Link from 'next/link';
-import { DashboardStats, RecentOrder, TopProduct } from '@/types/product';
+
+interface DashboardStats {
+  totalSales: number;
+  totalOrders: number;
+  totalProducts: number;
+  totalUsers: number;
+  recentOrders: any[];
+  topProducts: any[];
+}
 
 const AdminDashboard: React.FC = () => {
   const [stats, setStats] = useState<DashboardStats | null>(null);
@@ -17,9 +25,6 @@ const AdminDashboard: React.FC = () => {
   const fetchDashboardData = async () => {
     try {
       const response = await fetch('/api/admin/analytics');
-      if (!response.ok) {
-        throw new Error('Failed to fetch dashboard data');
-      }
       const data = await response.json();
       setStats(data);
     } catch (error) {
@@ -62,12 +67,6 @@ const AdminDashboard: React.FC = () => {
     return (
       <div className="text-center py-12">
         <p className="text-muted-foreground">Не удалось загрузить данные дашборда</p>
-        <button 
-          onClick={fetchDashboardData}
-          className="mt-4 px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90"
-        >
-          Попробовать снова
-        </button>
       </div>
     );
   }
@@ -76,7 +75,7 @@ const AdminDashboard: React.FC = () => {
     <div className="space-y-8">
       {/* Quick Actions */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <Link href="/manage-products" className="card p-4 text-center hover:bg-accent transition-colors">
+        <Link href="/admin/manage-products" className="card p-4 text-center hover:bg-accent transition-colors">
           <div className="text-primary mb-2">
             <svg className="w-6 h-6 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
@@ -85,7 +84,7 @@ const AdminDashboard: React.FC = () => {
           <p className="text-sm font-medium">Добавить товар</p>
         </Link>
         
-        <Link href="/orders" className="card p-4 text-center hover:bg-accent transition-colors">
+        <Link href="/admin/orders" className="card p-4 text-center hover:bg-accent transition-colors">
           <div className="text-primary mb-2">
             <svg className="w-6 h-6 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
@@ -94,7 +93,7 @@ const AdminDashboard: React.FC = () => {
           <p className="text-sm font-medium">Заказы</p>
         </Link>
         
-        <Link href="/users" className="card p-4 text-center hover:bg-accent transition-colors">
+        <Link href="/admin/users" className="card p-4 text-center hover:bg-accent transition-colors">
           <div className="text-primary mb-2">
             <svg className="w-6 h-6 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
@@ -103,7 +102,7 @@ const AdminDashboard: React.FC = () => {
           <p className="text-sm font-medium">Пользователи</p>
         </Link>
         
-        <Link href="/analytics" className="card p-4 text-center hover:bg-accent transition-colors">
+        <Link href="/admin/analytics" className="card p-4 text-center hover:bg-accent transition-colors">
           <div className="text-primary mb-2">
             <svg className="w-6 h-6 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
@@ -167,34 +166,26 @@ const AdminDashboard: React.FC = () => {
           </div>
           <div className="p-6">
             <div className="space-y-4">
-              {stats.recentOrders && stats.recentOrders.length > 0 ? (
-                stats.recentOrders.slice(0, 5).map((order: RecentOrder) => (
-                  <div key={order._id} className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
-                    <div>
-                      <p className="font-medium text-foreground">#{order._id.slice(-6)}</p>
-                      <p className="text-sm text-muted-foreground">{order.user?.name || 'Гость'}</p>
-                    </div>
-                    <div className="text-right">
-                      <p className="font-medium text-foreground">{formatPrice(order.totalPrice)}</p>
-                      <span className={`inline-block px-2 py-1 text-xs rounded-full ${
-                        order.status === 'delivered' 
-                          ? 'bg-green-100 text-green-800'
-                          : order.status === 'processing'
-                          ? 'bg-blue-100 text-blue-800'
-                          : order.status === 'shipped'
-                          ? 'bg-yellow-100 text-yellow-800'
-                          : order.status === 'cancelled'
-                          ? 'bg-red-100 text-red-800'
-                          : 'bg-gray-100 text-gray-800'
-                      }`}>
-                        {order.status}
-                      </span>
-                    </div>
+              {stats.recentOrders.slice(0, 5).map((order) => (
+                <div key={order._id} className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
+                  <div>
+                    <p className="font-medium text-foreground">#{order._id.slice(-6)}</p>
+                    <p className="text-sm text-muted-foreground">{order.user?.name || 'Гость'}</p>
                   </div>
-                ))
-              ) : (
-                <p className="text-center text-muted-foreground py-4">Нет заказов</p>
-              )}
+                  <div className="text-right">
+                    <p className="font-medium text-foreground">{formatPrice(order.totalPrice)}</p>
+                    <span className={`inline-block px-2 py-1 text-xs rounded-full ${
+                      order.status === 'delivered' 
+                        ? 'bg-green-100 text-green-800'
+                        : order.status === 'processing'
+                        ? 'bg-blue-100 text-blue-800'
+                        : 'bg-yellow-100 text-yellow-800'
+                    }`}>
+                      {order.status}
+                    </span>
+                  </div>
+                </div>
+              ))}
             </div>
             <Link href="/admin/orders" className="btn-outline w-full mt-4">
               Все заказы
@@ -209,29 +200,25 @@ const AdminDashboard: React.FC = () => {
           </div>
           <div className="p-6">
             <div className="space-y-4">
-              {stats.topProducts && stats.topProducts.length > 0 ? (
-                stats.topProducts.slice(0, 5).map((product: TopProduct) => (
-                  <div key={product._id} className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
-                    <div className="flex items-center space-x-3">
-                      <img
-                        src={product.images?.[0] || '/images/placeholder.jpg'}
-                        alt={product.name}
-                        className="w-10 h-10 rounded object-cover"
-                      />
-                      <div>
-                        <p className="font-medium text-foreground text-sm">{product.name}</p>
-                        <p className="text-xs text-muted-foreground">{formatPrice(product.price)}</p>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <p className="font-medium text-foreground">{product.stock} шт.</p>
-                      <p className="text-xs text-muted-foreground">{product.totalSales || 0} продаж</p>
+              {stats.topProducts.slice(0, 5).map((product) => (
+                <div key={product._id} className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
+                  <div className="flex items-center space-x-3">
+                    <img
+                      src={product.images?.[0] || '/images/placeholder.jpg'}
+                      alt={product.name}
+                      className="w-10 h-10 rounded object-cover"
+                    />
+                    <div>
+                      <p className="font-medium text-foreground text-sm">{product.name}</p>
+                      <p className="text-xs text-muted-foreground">{formatPrice(product.price)}</p>
                     </div>
                   </div>
-                ))
-              ) : (
-                <p className="text-center text-muted-foreground py-4">Нет данных о товарах</p>
-              )}
+                  <div className="text-right">
+                    <p className="font-medium text-foreground">{product.stock} шт.</p>
+                    <p className="text-xs text-muted-foreground">{product.totalSales || 0} продаж</p>
+                  </div>
+                </div>
+              ))}
             </div>
             <Link href="/admin/manage-products" className="btn-outline w-full mt-4">
               Все товары
