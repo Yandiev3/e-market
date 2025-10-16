@@ -15,20 +15,20 @@ export default async function Home() {
   const featuredProducts = await Product.find({
     featured: true,
     active: true,
-    stock: { $gt: 0 },
+    'sizes.stockQuantity': { $gt: 0 },
   })
     .limit(8)
-    .select('name price images slug stock ratings brand category')
+    .select('name price images slug sizes ratings brand category')
     .lean() as unknown as IProductLean[];
 
   // Get new arrivals
   const newProducts = await Product.find({
     active: true,
-    stock: { $gt: 0 },
+    'sizes.stockQuantity': { $gt: 0 },
   })
     .sort({ createdAt: -1 })
     .limit(8)
-    .select('name price images slug stock ratings brand category')
+    .select('name price images slug sizes ratings brand category')
     .lean() as unknown as IProductLean[];
 
   const session = await getServerSession(authOptions);
@@ -138,7 +138,7 @@ export default async function Home() {
               image: product.images?.[0] || '/images/placeholder.jpg',
               slug: product.slug,
               category: product.category || '',
-              stock: product.stock,
+              sizes: product.sizes,
               ratings: product.ratings,
               brand: product.brand,
               isNew: true
@@ -173,7 +173,7 @@ export default async function Home() {
               image: product.images?.[0] || '/images/placeholder.jpg',
               slug: product.slug,
               category: product.category || '',
-              stock: product.stock,
+              sizes: product.sizes,
               ratings: product.ratings,
               brand: product.brand,
               isFeatured: true
