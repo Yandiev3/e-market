@@ -36,7 +36,7 @@ export default function CheckoutPage() {
         ...prev,
         email: user.email || '',
         firstName: user.name?.split(' ')[0] || '',
-        lastname: user.name || '',
+        lastname: user.lastname || '',
         phone: user.phone || '',
         address: user.address || '',
         // city: '',
@@ -90,7 +90,7 @@ export default function CheckoutPage() {
     const { name, value, type } = e.target;
     setFormData(prev => ({
       ...prev,
-      [name]: type === 'checkbox' ? (e.target as HTMLInputElement).checked : value
+      [name]: type === 'checkbox' ? (e.target as HTMLInputElement).checked : value,
     }));
   };
 
@@ -230,7 +230,6 @@ export default function CheckoutPage() {
             </section>
           </div>
 
-          {/* Right column - Order summary */}
           <div className="space-y-6">
             <div className="card-minimal">
               <h2 className="heading-3 mb-6 text-foreground">Ваш заказ</h2>

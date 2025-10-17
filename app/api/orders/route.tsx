@@ -7,6 +7,8 @@ import Order from '@/models/Order';
 import Product from '@/models/Product';
 import User from '@/models/User';
 import { validateOrder } from '@/lib/validation';
+import { OrderItemRequest, IProductSize } from '@/types/product';
+
 
 export async function GET(request: NextRequest) {
   try {
@@ -102,7 +104,8 @@ export async function POST(request: NextRequest) {
     const orderItems = [];
     const stockUpdates = [];
 
-    for (const item of items) {
+    // Добавляем тип для item
+    for (const item of items as OrderItemRequest[]) {
       const product = await Product.findById(item.id);
       if (!product) {
         return NextResponse.json(
@@ -112,11 +115,11 @@ export async function POST(request: NextRequest) {
       }
 
       // Проверяем наличие через размеры
-      const hasStock = product.sizes.some(size => size.inStock && size.stockQuantity > 0);
+      const hasStock = item.sizes.some((size: any) => size.inStock && size.stockQuantity >= item.quantity);
       if (!hasStock) {
         return NextResponse.json(
           { 
-            message: `Товар "${product.name}" отсутствует в наличии`,
+            message: `Товар "${product.name}" отсутствует в нужном количестве`,
             productId: product._id
           },
           { status: 400 }
@@ -132,19 +135,22 @@ export async function POST(request: NextRequest) {
         price: product.price,
         quantity: item.quantity,
         image: product.images[0] || '/images/placeholder.jpg',
+        sizes: item.sizes,
+        color: item.color,
+        sku: item.sku
       });
 
-      // Подготавливаем обновление количества для выбранного размера
-      if (item.size && product.sizes) {
-        const sizeIndex = product.sizes.findIndex(s => s.size === item.size);
+      // Подготавливаем обновление количества для всех размеров в заказе
+      for (const size of item.sizes) {
+        const sizeIndex = product.sizes.findIndex((s: any) => s.size === size.size);
         if (sizeIndex !== -1) {
           stockUpdates.push({
             updateOne: {
-              filter: { _id: product._id, 'sizes.size': item.size },
+              filter: { _id: product._id, 'sizes.size': size.size },
               update: { 
-                $inc: { 'sizes.$.stockQuantity': -item.quantity },
+                $inc: { 'sizes.$.stockQuantity': -size.stockQuantity },
                 $set: { 
-                  'sizes.$.inStock': product.sizes[sizeIndex].stockQuantity - item.quantity > 0 
+                  'sizes.$.inStock': product.sizes[sizeIndex].stockQuantity - size.stockQuantity > 0 
                 }
               }
             }

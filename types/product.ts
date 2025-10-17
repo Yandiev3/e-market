@@ -104,7 +104,17 @@ export interface FavoriteProduct {
 
 export type ProductDocument = IProduct & Document;
 
-// Типы для админ-панели
+export interface OrderItemRequest {
+  id: string;
+  name: string;
+  price: number;
+  quantity: number;
+  image: string;
+  sizes: IProductSize[];
+  color?: string;
+  sku?: string;
+}
+
 export interface OrderItem {
   product: string;
   name: string;

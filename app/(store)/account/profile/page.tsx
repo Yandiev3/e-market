@@ -126,7 +126,6 @@ export default function ProfilePage() {
   return (
     <ProtectedRoute>
       <div className="min-h-screen bg-background">
-        {/* Добавляем Toaster компонент */}
         <Toaster 
           position="top-right"
           toastOptions={{

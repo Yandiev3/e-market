@@ -1,13 +1,19 @@
 // models/Order.tsx
 import mongoose, { Document, Schema } from 'mongoose';
 
+export interface IProductSize {
+  size: string;
+  inStock: boolean;
+  stockQuantity: number;
+}
+
 export interface IOrderItem {
   product: mongoose.Types.ObjectId;
   name: string;
   price: number;
   quantity: number;
   image: string;
-  size?: string;
+  sizes: IProductSize[];
   color?: string;
   sku?: string;
 }
@@ -78,10 +84,21 @@ const orderSchema = new Schema<IOrder>(
           type: String,
           required: true,
         },
-        size: {
-          type: String,
-          default: null,
-        },
+        sizes: [{
+          size: {
+            type: String,
+            required: true
+          },
+          inStock: {
+            type: Boolean,
+            default: true
+          },
+          stockQuantity: {
+            type: Number,
+            default: 0,
+            min: 0
+          }
+        }],
         color: {
           type: String,
           default: null,
