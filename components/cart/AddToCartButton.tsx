@@ -77,7 +77,8 @@ const AddToCartButton: React.FC<AddToCartButtonProps> = ({
       image: product.image,
       size: selectedSize,
       color: selectedColor,
-      sizes: product.sizes
+      sizes: product.sizes,
+      sku: product.sku
     });
     
     setAdding(false);

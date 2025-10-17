@@ -80,6 +80,8 @@ export interface Product {
   sizes?: IProductSize[];
   colors?: IProductColor[];
   sku?: string;
+  description?: string;
+  images?: string[];
 }
 
 // Упрощенный тип для избранного
@@ -97,6 +99,7 @@ export interface FavoriteProduct {
   brand?: string;
   category: string;
   sizes?: IProductSize[];
+  sku?: string;
 }
 
 export type ProductDocument = IProduct & Document;
@@ -110,6 +113,7 @@ export interface OrderItem {
   image: string;
   size?: string;
   color?: string;
+  sku?: string;
 }
 
 export interface ShippingAddress {
@@ -136,6 +140,7 @@ export interface TopProduct {
   price: number;
   images: string[];
   totalSales: number;
+  sku?: string;
 }
 
 export interface DashboardStats {
@@ -171,6 +176,7 @@ export interface CartProduct {
   color?: string;
   sizes?: IProductSize[];
   requiresSizeSelection?: boolean;
+  sku?: string;
 }
 
 export interface CartItem {
@@ -183,4 +189,5 @@ export interface CartItem {
   color?: string;
   productId: string;
   sizes?: IProductSize[];
+  sku?: string;
 }

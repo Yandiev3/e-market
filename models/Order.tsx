@@ -7,6 +7,9 @@ export interface IOrderItem {
   price: number;
   quantity: number;
   image: string;
+  size?: string;
+  color?: string;
+  sku?: string;
 }
 
 export interface IShippingAddress {
@@ -74,6 +77,18 @@ const orderSchema = new Schema<IOrder>(
         image: {
           type: String,
           required: true,
+        },
+        size: {
+          type: String,
+          default: null,
+        },
+        color: {
+          type: String,
+          default: null,
+        },
+        sku: {
+          type: String,
+          default: null,
         },
       },
     ],

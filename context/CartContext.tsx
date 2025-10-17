@@ -3,11 +3,11 @@
 
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { useAuth } from './AuthContext';
-import { CartItem } from '@/types/product';
+import { CartItem, IProductSize } from '@/types/product';
 
 export interface CartContextType {
   items: CartItem[];
-  addItem: (item: Omit<CartItem, 'quantity' | 'productId'>) => Promise<void>; // Изменено здесь
+  addItem: (item: Omit<CartItem, 'quantity' | 'productId'>) => Promise<void>;
   removeItem: (id: string, size?: string, color?: string) => Promise<void>;
   updateQuantity: (id: string, quantity: number, size?: string, color?: string) => Promise<void>;
   clearCart: () => Promise<void>;
@@ -85,7 +85,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  const addItem = async (item: Omit<CartItem, 'quantity' | 'productId'>) => { // Изменено здесь
+  const addItem = async (item: Omit<CartItem, 'quantity' | 'productId'>) => {
     const cartItemId = generateCartItemId(item.id, item.size, item.color);
     
     setItems(prev => {
@@ -96,16 +96,21 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       let newItems: CartItem[];
       
       if (existingItem) {
+        // Получаем доступное количество для выбранного размера
+        const availableQuantity = item.size && item.sizes 
+          ? item.sizes.find((s: IProductSize) => s.size === item.size)?.stockQuantity || 0
+          : item.sizes?.reduce((total: number, size: IProductSize) => total + size.stockQuantity, 0) || 0;
+        
         newItems = prev.map(i =>
           generateCartItemId(i.id, i.size, i.color) === cartItemId
-            ? { ...i, quantity: Math.min(i.quantity + 1, item.stock) }
+            ? { ...i, quantity: Math.min(i.quantity + 1, availableQuantity) }
             : i
         );
       } else {
         newItems = [...prev, { 
           ...item, 
           quantity: 1, 
-          productId: item.id // Добавляем productId здесь
+          productId: item.id
         }];
       }
 
@@ -147,11 +152,17 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const cartItemId = generateCartItemId(id, size, color);
     
     setItems(prev => {
-      const newItems = prev.map(item =>
-        generateCartItemId(item.id, item.size, item.color) === cartItemId
-          ? { ...item, quantity: Math.min(quantity, item.stock) }
-          : item
-      );
+      const newItems = prev.map(item => {
+        if (generateCartItemId(item.id, item.size, item.color) === cartItemId) {
+          // Получаем доступное количество для выбранного размера
+          const availableQuantity = item.size && item.sizes 
+            ? item.sizes.find((s: IProductSize) => s.size === item.size)?.stockQuantity || 0
+            : item.sizes?.reduce((total: number, size: IProductSize) => total + size.stockQuantity, 0) || 0;
+          
+          return { ...item, quantity: Math.min(quantity, availableQuantity) };
+        }
+        return item;
+      });
 
       if (!isAuthenticated) {
         localStorage.setItem('cart', JSON.stringify(newItems));

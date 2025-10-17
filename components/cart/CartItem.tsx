@@ -13,6 +13,7 @@ interface CartItemProps {
     quantity: number;
     size?: string;
     color?: string;
+    sku?: string;
     sizes?: Array<{
       size: string;
       inStock: boolean;
@@ -38,12 +39,12 @@ const CartItem: React.FC<CartItemProps> = ({ item }) => {
 
   const handleQuantityChange = (newQuantity: number) => {
     if (newQuantity >= 1 && newQuantity <= availableQuantity) {
-      updateQuantity(item.id, newQuantity);
+      updateQuantity(item.id, newQuantity, item.size, item.color);
     }
   };
 
   const handleRemove = () => {
-    removeItem(item.id);
+    removeItem(item.id, item.size, item.color);
   };
 
   return (
@@ -63,6 +64,13 @@ const CartItem: React.FC<CartItemProps> = ({ item }) => {
         <h3 className="text-sm font-medium text-gray-900 line-clamp-2">
           {item.name}
         </h3>
+        
+        {/* SKU */}
+        {item.sku && (
+          <div className="mt-1 text-xs text-gray-500">
+            Артикул: {item.sku}
+          </div>
+        )}
         
         {/* Size and color */}
         {(item.size || item.color) && (

@@ -6,6 +6,8 @@ export interface ICartItem {
   product: mongoose.Types.ObjectId;
   quantity: number;
   addedAt: Date;
+  size?: string;
+  color?: string;
 }
 
 export interface IFavoriteItem {
@@ -81,6 +83,14 @@ const userSchema = new Schema<IUser>(
         required: true,
         min: 1,
         default: 1,
+      },
+      size: {
+        type: String,
+        default: null,
+      },
+      color: {
+        type: String,
+        default: null,
       },
       addedAt: {
         type: Date,

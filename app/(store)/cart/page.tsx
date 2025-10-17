@@ -111,7 +111,7 @@ export default function CartPage() {
               const availableQuantity = getAvailableQuantity();
 
               return (
-                <Card key={item.id} className="p-4">
+                <Card key={`${item.id}-${item.size || 'no-size'}-${item.color || 'no-color'}`} className="p-4">
                   <div className="flex gap-4">
                     <img
                       src={item.image || '/images/placeholder.jpg'}
@@ -120,6 +120,23 @@ export default function CartPage() {
                     />
                     <div className="flex-1">
                       <h3 className="font-semibold text-lg mb-2 text-foreground">{item.name}</h3>
+                      
+                      {/* SKU */}
+                      {item.sku && (
+                        <p className="text-sm text-muted-foreground mb-1">
+                          Артикул: {item.sku}
+                        </p>
+                      )}
+                      
+                      {/* Size and color */}
+                      {(item.size || item.color) && (
+                        <div className="text-sm text-muted-foreground mb-2">
+                          {item.size && <span>Размер: {item.size}</span>}
+                          {item.size && item.color && <span className="mx-2">•</span>}
+                          {item.color && <span>Цвет: {item.color}</span>}
+                        </div>
+                      )}
+                      
                       <p className="text-primary font-bold mb-4">
                         {formatPrice(item.price)}
                       </p>
@@ -130,7 +147,7 @@ export default function CartPage() {
                           <Button
                             variant="ghost"
                             size="sm"
-                            onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                            onClick={() => updateQuantity(item.id, item.quantity - 1, item.size, item.color)}
                             disabled={item.quantity <= 1}
                             className="h-8 w-8 p-0 hover:bg-accent"
                           >
@@ -142,7 +159,7 @@ export default function CartPage() {
                           <Button
                             variant="ghost"
                             size="sm"
-                            onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                            onClick={() => updateQuantity(item.id, item.quantity + 1, item.size, item.color)}
                             disabled={item.quantity >= availableQuantity}
                             className="h-8 w-8 p-0 hover:bg-accent"
                           >
@@ -153,7 +170,7 @@ export default function CartPage() {
                         <Button
                           variant="ghost"
                           size="sm"
-                          onClick={() => removeItem(item.id)}
+                          onClick={() => removeItem(item.id, item.size, item.color)}
                           className="text-red-600 hover:text-red-800 hover:bg-red-50"
                         >
                           <Trash2 className="h-4 w-4 mr-1" />
@@ -207,13 +224,11 @@ export default function CartPage() {
                 </div>
               </div>
               
-              <Button 
-                className="w-full" 
-                size="lg"
-                onClick={() => window.location.href = '/checkout'}
-              >
-                Оформить заказ
-              </Button>
+              <Link href="/checkout" className="block">
+                <Button className="w-full" size="lg">
+                  Оформить заказ
+                </Button>
+              </Link>
               
               <Link href="/products">
                 <Button variant="outline" className="w-full mt-3">

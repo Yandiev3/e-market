@@ -5,6 +5,7 @@ import { authOptions } from '@/lib/auth-config';
 import dbConnect from '@/lib/dbConnect';
 import User from '@/models/User';
 import Product from '@/models/Product';
+import { IProductSize } from '@/types/product';
 
 export async function GET(request: NextRequest) {
   try {
@@ -16,7 +17,7 @@ export async function GET(request: NextRequest) {
     await dbConnect();
 
     const user = await User.findById(session.user.id)
-      .populate('cart.product', 'name price images sizes')
+      .populate('cart.product', 'name price images sizes colors sku')
       .select('cart');
 
     if (!user) {
@@ -27,10 +28,14 @@ export async function GET(request: NextRequest) {
       id: item.product._id.toString(),
       name: item.product.name,
       price: item.product.price,
-      image: item.product.images[0],
+      image: item.product.images?.[0] || '/images/placeholder.jpg',
       quantity: item.quantity,
+      size: item.size,
+      color: item.color,
       sizes: item.product.sizes,
-      size: item.product.size,
+      colors: item.product.colors,
+      sku: item.product.sku,
+      productId: item.product._id.toString(),
     }));
 
     return NextResponse.json({ cart });
@@ -62,17 +67,26 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json({ message: 'User not found' }, { status: 404 });
     }
 
-    // Валидация и обновление корзины
+    // Валидация и обновление корзины с учетом параметров
     const validCartItems = [];
     for (const item of cart) {
       const product = await Product.findById(item.id);
       if (product) {
         // Проверяем наличие через размеры
-        const hasStock = product.sizes.some(size => size.inStock && size.stockQuantity > 0);
+        let hasStock = true;
+        if (item.size && product.sizes.length > 0) {
+          const sizeInfo = product.sizes.find((s: IProductSize) => s.size === item.size);
+          hasStock = sizeInfo ? sizeInfo.inStock && sizeInfo.stockQuantity > 0 : false;
+        } else {
+          hasStock = product.sizes.some((size: IProductSize) => size.inStock && size.stockQuantity > 0);
+        }
+        
         if (hasStock) {
           validCartItems.push({
             product: item.id,
             quantity: item.quantity,
+            size: item.size || null,
+            color: item.color || null,
             addedAt: new Date(),
           });
         }

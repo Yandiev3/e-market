@@ -122,6 +122,7 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product }) => {
                   brand: product.brand,
                   category: product.category,
                   originalPrice: product.originalPrice,
+                  sku: product.sku
                 }}
                 size="lg"
               />
