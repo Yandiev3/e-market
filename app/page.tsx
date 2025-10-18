@@ -36,9 +36,7 @@ export default async function Home() {
   return (
     <div className="min-h-screen bg-background">
       {/* Hero Section */}
-      <section className="relative overflow-hidden min-h-screen flex items-center justify-center">
-        <div className="absolute inset-0 bg-gradient-to-b from-primary/10 via-background to-background"></div>
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-primary/5 via-transparent to-transparent"></div>
+      <section className="relative overflow-hidden flex items-center justify-center min-h-[calc(100vh-113px)] border border-dashed border-primary">
         
         <div className="container mx-auto px-4 text-center relative z-10">
           <div className="max-w-4xl mx-auto">

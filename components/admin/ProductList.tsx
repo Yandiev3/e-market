@@ -6,26 +6,10 @@ import Link from 'next/link';
 import { formatPrice } from '@/lib/utils';
 import Button from '@/components/ui/Button';
 import Modal from '@/components/ui/Modal';
-
-interface Product {
-  _id: string;
-  name: string;
-  price: number;
-  active: boolean;
-  featured: boolean;
-  category: string;
-  brand: string;
-  images: string[];
-  sizes: Array<{
-    size: string;
-    inStock: boolean;
-    stockQuantity: number;
-  }>;
-  createdAt: string;
-}
+import { IProduct } from '@/types/product';
 
 interface ProductListProps {
-  products: Product[];
+  products: IProduct[];
   onDelete: (id: string) => void;
   onToggleStatus: (id: string, active: boolean) => void;
   loading?: boolean;
@@ -38,9 +22,9 @@ const ProductList: React.FC<ProductListProps> = ({
   loading = false,
 }) => {
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
-  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [selectedProduct, setSelectedProduct] = useState<IProduct | null>(null);
 
-  const handleDeleteClick = (product: Product) => {
+  const handleDeleteClick = (product: IProduct) => {
     setSelectedProduct(product);
     setDeleteModalOpen(true);
   };
@@ -54,12 +38,12 @@ const ProductList: React.FC<ProductListProps> = ({
   };
 
   // Расчет общего количества на складе
-  const getTotalStock = (product: Product) => {
+  const getTotalStock = (product: IProduct) => {
     return product.sizes.reduce((total, size) => total + (size.stockQuantity || 0), 0);
   };
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('ru-RU');
+  const formatDate = (date: Date | string) => {
+    return new Date(date).toLocaleDateString('ru-RU');
   };
 
   if (loading) {

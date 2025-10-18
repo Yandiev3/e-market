@@ -34,7 +34,6 @@ export default function ProductDetailPage() {
           originalPrice: productData.originalPrice,
           images: productData.images || [productData.image].filter(Boolean),
           category: productData.category,
-          stock: productData.stock,
           active: productData.active ?? true,
           brand: productData.brand,
           slug: productData.slug,

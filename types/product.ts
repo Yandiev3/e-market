@@ -11,6 +11,7 @@ export interface IProductColor {
   image?: string;
 }
 
+// Основной интерфейс для данных из базы данных
 export interface IProduct {
   _id: string;
   name: string;
@@ -77,14 +78,20 @@ export interface Product {
   isNew?: boolean;
   isFeatured?: boolean;
   category: string;
-  sizes?: IProductSize[];
+  sizes: IProductSize[];
   colors?: IProductColor[];
   sku?: string;
   description?: string;
   images?: string[];
+  active?: boolean;
+  featured?: boolean;
+  gender?: 'men' | 'women' | 'kids' | 'unisex';
+  ageCategory?: 'infant' | 'toddler' | 'child' | 'teen';
+  specifications?: Record<string, string>;
+  createdAt?: Date;
+  updatedAt?: Date;
 }
 
-// Упрощенный тип для избранного
 export interface FavoriteProduct {
   id: string;
   name: string;
@@ -98,7 +105,7 @@ export interface FavoriteProduct {
   };
   brand?: string;
   category: string;
-  sizes?: IProductSize[];
+  sizes: IProductSize[];
   sku?: string;
 }
 
@@ -201,3 +208,7 @@ export interface CartItem {
   sizes?: IProductSize[];
   sku?: string;
 }
+
+// Вспомогательные типы для преобразования
+export type IProductToProduct = (product: IProduct) => Product;
+export type ProductToIProduct = (product: Product) => IProduct;

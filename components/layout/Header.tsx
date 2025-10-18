@@ -64,7 +64,7 @@ const Header: React.FC = () => {
   };
 
   return (
-    <header className="border-b border-border sticky top-0 z-50 bg-card">
+    <header className="border-b border-border z-50 bg-card">
       {/* Main header */}
       <div className="max-w-7xl mx-auto px-4">
         {/* First row - Logo and actions */}

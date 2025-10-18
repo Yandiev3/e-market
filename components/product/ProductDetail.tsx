@@ -6,20 +6,8 @@ import AddToCartButton from '@/components/cart/AddToCartButton';
 import AddToFavoritesButton from '@/components/favorites/AddToFavoritesButton';
 import { IProduct, IProductSize, IProductColor, CartProduct } from '@/types/product';
 
-// Расширяем базовый интерфейс IProduct для компонента
-interface ProductDetailProduct extends IProduct {
-  description: string;
-  images: string[];
-  specifications?: Record<string, string>;
-  sku: string;
-  colors: IProductColor[];
-  sizes: IProductSize[];
-  // Для обратной совместимости
-  image?: string;
-}
-
 interface ProductDetailProps {
-  product: ProductDetailProduct;
+  product: IProduct;
 }
 
 const ProductDetail: React.FC<ProductDetailProps> = ({ product }) => {
@@ -50,15 +38,15 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product }) => {
     { id: 'delivery', label: 'Доставка и возврат' },
   ];
 
-  // Основное изображение (для обратной совместимости)
-  const mainImage = product.images?.[0] || product.image;
+  // Основное изображение
+  const mainImage = product.images?.[0] || '';
 
   // Продукт для корзины
   const cartProduct: CartProduct = {
     id: product._id.toString(),
     name: product.name,
     price: product.price,
-    image: mainImage || '',
+    image: mainImage,
     sizes: product.sizes,
     requiresSizeSelection: requiresSizeSelection
   };
@@ -115,7 +103,7 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product }) => {
                   id: product._id.toString(),
                   name: product.name,
                   price: product.price,
-                  image: mainImage || '',
+                  image: mainImage,
                   slug: product.slug,
                   sizes: product.sizes,
                   ratings: product.ratings,

@@ -99,8 +99,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Удаляем поле stock из данных, так как теперь используем sizes.stockQuantity
-    const { stock, ...productData } = body;
+    const { ...productData } = body;
 
     const product = new Product({
       ...productData,

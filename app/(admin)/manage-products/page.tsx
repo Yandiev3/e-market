@@ -4,22 +4,10 @@
 import { useState, useEffect } from 'react';
 import ProductList from '@/components/admin/ProductList';
 import Button from '@/components/ui/Button';
-
-interface Product {
-  _id: string;
-  name: string;
-  price: number;
-  stock: number;
-  active: boolean;
-  featured: boolean;
-  category: string;
-  brand: string;
-  images: string[];
-  createdAt: string;
-}
+import { IProduct } from '@/types/product';
 
 export default function ManageProductsPage() {
-  const [products, setProducts] = useState<Product[]>([]);
+  const [products, setProducts] = useState<IProduct[]>([]);
   const [loading, setLoading] = useState(true);
 
   const fetchProducts = async () => {
