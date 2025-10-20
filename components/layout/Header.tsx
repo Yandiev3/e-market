@@ -94,8 +94,10 @@ const Header: React.FC = () => {
               <span className="text-primary">KASTOM</span>
             </Link>
 
-            {/* Desktop navigation */}
-            <nav className="hidden lg:flex space-x-6">
+          </div>
+
+          <div>
+            <nav className="hidden lg:flex space-x-6 justify-center">
               {mainNavigation.map((item) => (
                 <Link 
                   key={item.name}
@@ -109,6 +111,28 @@ const Header: React.FC = () => {
           </div>
 
           {/* Right side - Actions (только для десктопа) */}
+          {isSearchOpen && (
+          <div className="">
+            <div className="relative pb-1">
+              <input
+                type="text"
+                placeholder="Поиск товаров..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full px-2 py-1 bg-input border border-input rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent text-foreground placeholder-muted-foreground"
+              />
+              <button 
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                onClick={() => setIsSearchOpen(false)}
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+          </div>
+        )}
+
           <div className="hidden lg:flex items-center space-x-2">
             {/* Search */}
             <button
@@ -186,37 +210,17 @@ const Header: React.FC = () => {
         </div>
 
         {/* Search bar */}
-        {isSearchOpen && (
-          <div className="pb-4">
-            <div className="relative">
-              <input
-                type="text"
-                placeholder="Поиск товаров..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full px-4 py-3 bg-input border border-input rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent text-foreground placeholder-muted-foreground"
-              />
-              <button 
-                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                onClick={() => setIsSearchOpen(false)}
-              >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-            </div>
-          </div>
-        )}
+        
 
         {/* Second row - Categories */}
-        <div className="hidden lg:flex items-center justify-between h-12 border-t border-border">
-          <div className="flex space-x-6">
+        <div className="hidden lg:flex items-center justify-between h-12 border-t border-border ml-4">
+          <div className="flex  items-center space-x-6">
             {categories.map((category) => (
               <div key={category.name} className="relative group">
                 {category.subcategories ? (
                   <button
                     onClick={() => toggleCategory(category.name)}
-                    className="flex items-center space-x-1 text-muted-foreground hover:text-foreground text-sm font-medium py-3 transition-colors"
+                    className="flex items-center space-x-1 text-muted-foreground hover:text-foreground text-sm font-medium transition-colors"
                   >
                     <span>{category.name}</span>
                     <svg 

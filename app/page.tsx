@@ -36,7 +36,7 @@ export default async function Home() {
   return (
     <div className="min-h-screen bg-background">
       {/* Hero Section */}
-      <section className="relative overflow-hidden flex items-center justify-center min-h-[calc(100vh-113px)] border border-dashed border-primary">
+      <section className="relative overflow-hidden flex items-center justify-center min-h-[calc(100vh-113px)] border-[2px] border-primary">
         
         <div className="container mx-auto px-4 text-center relative z-10">
           <div className="max-w-4xl mx-auto">
@@ -45,7 +45,7 @@ export default async function Home() {
             </h1>
             
             <p className="text-xl md:text-2xl text-muted-foreground mb-8 max-w-2xl mx-auto leading-relaxed">
-              Премиальные угги для максимального комфорта в городской жизни
+              Премиальные обувь для максимального комфорта в городской жизни
             </p>
             
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
