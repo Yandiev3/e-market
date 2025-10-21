@@ -11,8 +11,7 @@ export interface IProductColor {
   image?: string;
 }
 
-// Основной интерфейс для данных из базы данных
-export interface IProduct {
+export interface Product {
   _id: string;
   name: string;
   description: string;
@@ -20,6 +19,10 @@ export interface IProduct {
   originalPrice?: number;
   images: string[];
   category: string;
+  brand: string;
+  sku: string;
+  slug: string;
+  featured: boolean;
   active: boolean;
   gender: 'men' | 'women' | 'kids' | 'unisex';
   ageCategory?: 'infant' | 'toddler' | 'child' | 'teen';
@@ -30,86 +33,30 @@ export interface IProduct {
     average: number;
     count: number;
   };
-  slug: string;
-  brand: string;
-  sku: string;
-  featured: boolean;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: string;
+  updatedAt: string;
 }
 
-export interface IProductLean {
-  _id: unknown;
+export interface CartItem {
+  id: string;
+  productId: string;
   name: string;
-  description?: string;
   price: number;
-  originalPrice?: number;
-  images: string[];
-  category: string;
-  active?: boolean;
-  brand: string;
-  gender: 'men' | 'women' | 'kids' | 'unisex';
-  ageCategory?: 'infant' | 'toddler' | 'child' | 'teen';
+  image: string;
+  quantity: number;
+  size?: string;
+  color?: string;
   sizes: IProductSize[];
   colors: IProductColor[];
-  ratings: {
-    average: number;
-    count: number;
-  };
-  slug: string;
   sku: string;
-  featured?: boolean;
-  createdAt?: Date; 
-  updatedAt?: Date;
 }
 
-export interface Product {
-  id: string;
-  name: string;
-  price: number;
-  originalPrice?: number;
-  image: string;
-  slug: string;
-  ratings: {
-    average: number;
-    count: number;
-  };
-  brand?: string;
-  isNew?: boolean;
-  isFeatured?: boolean;
-  category: string;
-  sizes: IProductSize[];
-  colors?: IProductColor[];
-  sku?: string;
-  description?: string;
-  images?: string[];
-  active?: boolean;
-  featured?: boolean;
-  gender?: 'men' | 'women' | 'kids' | 'unisex';
-  ageCategory?: 'infant' | 'toddler' | 'child' | 'teen';
-  specifications?: Record<string, string>;
-  createdAt?: Date;
-  updatedAt?: Date;
+export interface IOrderItemSize {
+  size: string;
+  quantity: number;
+  stockQuantity: number;
+  inStock: boolean;
 }
-
-export interface FavoriteProduct {
-  id: string;
-  name: string;
-  price: number;
-  originalPrice?: number;
-  image: string;
-  slug: string;
-  ratings: {
-    average: number;
-    count: number;
-  };
-  brand?: string;
-  category: string;
-  sizes: IProductSize[];
-  sku?: string;
-}
-
-export type ProductDocument = IProduct & Document;
 
 export interface OrderItemRequest {
   id: string;
@@ -117,98 +64,101 @@ export interface OrderItemRequest {
   price: number;
   quantity: number;
   image: string;
-  sizes: IProductSize[];
+  sizes: IOrderItemSize[];
   color?: string;
-  sku?: string;
+  sku: string;
 }
 
-export interface OrderItem {
-  product: string;
-  name: string;
-  price: number;
-  quantity: number;
-  image: string;
-  size?: string;
-  color?: string;
-  sku?: string;
+export interface ProductFilter {
+  category?: string;
+  brand?: string;
+  priceRange?: [number, number];
+  sizes?: string[];
+  colors?: string[];
+  gender?: string;
+  ageCategory?: string;
+  inStock?: boolean;
+  featured?: boolean;
 }
 
-export interface ShippingAddress {
-  street: string;
-  city: string;
+export interface PaginationInfo {
+  page: number;
+  limit: number;
+  total: number;
+  totalPages: number;
 }
 
-export interface RecentOrder {
-  _id: string;
-  user?: {
-    name?: string;
-    email?: string;
+export interface ProductsResponse {
+  products: Product[];
+  pagination: PaginationInfo;
+  filters: {
+    categories: string[];
+    brands: string[];
+    sizes: string[];
+    colors: string[];
+    priceRange: [number, number];
   };
-  totalPrice: number;
-  status: 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
-  createdAt: string;
-  orderItems?: OrderItem[];
-  shippingAddress?: ShippingAddress;
 }
 
-export interface TopProduct {
-  _id: string;
+export interface SearchParams {
+  query?: string;
+  category?: string;
+  brand?: string;
+  minPrice?: number;
+  maxPrice?: number;
+  sizes?: string[];
+  colors?: string[];
+  gender?: string;
+  ageCategory?: string;
+  inStock?: boolean;
+  featured?: boolean;
+  sortBy?: string;
+  sortOrder?: 'asc' | 'desc';
+  page?: number;
+  limit?: number;
+}
+
+// Admin product types
+export interface ProductFormData {
   name: string;
+  description: string;
   price: number;
+  originalPrice?: number;
   images: string[];
-  totalSales: number;
-  sku?: string;
-}
-
-export interface DashboardStats {
-  totalSales: number;
-  totalOrders: number;
-  totalProducts: number;
-  totalUsers: number;
-  recentOrders: RecentOrder[];
-  topProducts: TopProduct[];
-  monthlySales?: Array<{
-    month: string;
-    sales: number;
+  category: string;
+  brand: string;
+  sku: string;
+  slug: string;
+  featured: boolean;
+  active: boolean;
+  gender: 'men' | 'women' | 'kids' | 'unisex';
+  ageCategory?: 'infant' | 'toddler' | 'child' | 'teen';
+  specifications?: Record<string, string>;
+  sizes: Array<{
+    size: string;
+    inStock: boolean;
+    stockQuantity: number;
   }>;
-  topCategories?: Array<{
-    category: string;
-    count: number;
-    revenue: number;
-  }>;
-  recentActivity?: Array<{
-    type: string;
-    description: string;
-    timestamp: string;
+  colors: Array<{
+    name: string;
+    value: string;
+    image?: string;
   }>;
 }
 
-// Типы для корзины
-export interface CartProduct {
-  id: string;
-  name: string;
-  price: number;
-  image: string;
-  size?: string;
-  color?: string;
-  sizes?: IProductSize[];
-  requiresSizeSelection?: boolean;
-  sku?: string;
+// API response types
+export interface ApiResponse<T = any> {
+  success: boolean;
+  data?: T;
+  message?: string;
+  error?: string;
 }
 
-export interface CartItem {
-  id: string;
-  name: string;
-  price: number;
-  image: string;
-  quantity: number;
-  size?: string;
-  color?: string;
-  productId: string;
-  sizes?: IProductSize[];
-  sku?: string;
+export interface CartResponse {
+  cart: CartItem[];
 }
 
-// Вспомогательные типы для преобразования
-export type IProductToProduct = (product: IProduct) => Product;
-export type ProductToIProduct = (product: Product) => IProduct;
+export interface OrderResponse {
+  order: any; // This would be more specific in a real implementation
+  message: string;
+}

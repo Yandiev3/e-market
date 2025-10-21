@@ -193,9 +193,31 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const createOrder = async (orderData: any) => {
     try {
+      // Prepare items for order with proper size quantities
+      const orderItems = items.map(item => {
+        // For items with specific size, create size array with quantity
+        const sizes = item.size ? [{
+          size: item.size,
+          quantity: item.quantity,
+          stockQuantity: item.sizes?.find((s: IProductSize) => s.size === item.size)?.stockQuantity || 0,
+          inStock: true
+        }] : [];
+
+        return {
+          id: item.id,
+          name: item.name,
+          price: item.price,
+          quantity: item.quantity,
+          image: item.image,
+          sizes: sizes,
+          color: item.color,
+          sku: item.sku
+        };
+      });
+
       console.log('Creating order with data:', {
         ...orderData,
-        items: items
+        items: orderItems
       });
 
       const response = await fetch('/api/orders', {
@@ -205,7 +227,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
         },
         body: JSON.stringify({
           ...orderData,
-          items: items,
+          items: orderItems,
         }),
       });
 

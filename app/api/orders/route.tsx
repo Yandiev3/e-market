@@ -6,9 +6,6 @@ import dbConnect from '@/lib/dbConnect';
 import Order from '@/models/Order';
 import Product from '@/models/Product';
 import User from '@/models/User';
-import { validateOrder } from '@/lib/validation';
-import { OrderItemRequest, IProductSize } from '@/types/product';
-
 
 export async function GET(request: NextRequest) {
   try {
@@ -104,8 +101,7 @@ export async function POST(request: NextRequest) {
     const orderItems = [];
     const stockUpdates = [];
 
-    // Добавляем тип для item
-    for (const item of items as OrderItemRequest[]) {
+    for (const item of items) {
       const product = await Product.findById(item.id);
       if (!product) {
         return NextResponse.json(
@@ -114,54 +110,77 @@ export async function POST(request: NextRequest) {
         );
       }
 
-      // Проверяем наличие через размеры
-      const hasStock = item.sizes.some((size: any) => size.inStock && size.stockQuantity >= item.quantity);
-      if (!hasStock) {
-        return NextResponse.json(
-          { 
-            message: `Товар "${product.name}" отсутствует в нужном количестве`,
-            productId: product._id
-          },
-          { status: 400 }
-        );
+      // Validate stock for each size in the item
+      const validatedSizes = [];
+      let totalItemQuantity = 0;
+
+      for (const size of item.sizes) {
+        const productSize = product.sizes.find((s: any) => s.size === size.size);
+        if (!productSize) {
+          return NextResponse.json(
+            { 
+              message: `Размер ${size.size} не найден для товара "${product.name}"`,
+              productId: product._id
+            },
+            { status: 400 }
+          );
+        }
+
+        if (!productSize.inStock || productSize.stockQuantity < size.quantity) {
+          return NextResponse.json(
+            { 
+              message: `Недостаточно товара "${product.name}" в размере ${size.size}. Доступно: ${productSize.stockQuantity}, запрошено: ${size.quantity}`,
+              productId: product._id,
+              size: size.size,
+              available: productSize.stockQuantity,
+              requested: size.quantity
+            },
+            { status: 400 }
+          );
+        }
+
+        validatedSizes.push({
+          size: size.size,
+          quantity: size.quantity,
+          stockQuantity: productSize.stockQuantity,
+          inStock: productSize.inStock
+        });
+
+        totalItemQuantity += size.quantity;
+
+        // Prepare stock update for this size
+        stockUpdates.push({
+          updateOne: {
+            filter: { _id: product._id, 'sizes.size': size.size },
+            update: { 
+              $inc: { 'sizes.$.stockQuantity': -size.quantity },
+              $set: { 
+                'sizes.$.inStock': productSize.stockQuantity - size.quantity > 0 
+              }
+            }
+          }
+        });
       }
 
-      const itemTotal = product.price * item.quantity;
+      const itemTotal = product.price * totalItemQuantity;
       itemsPrice += itemTotal;
 
       orderItems.push({
         product: product._id,
         name: product.name,
         price: product.price,
-        quantity: item.quantity,
+        quantity: totalItemQuantity,
         image: product.images[0] || '/images/placeholder.jpg',
-        sizes: item.sizes,
+        sizes: validatedSizes,
         color: item.color,
-        sku: item.sku
+        sku: product.sku
       });
-
-      // Подготавливаем обновление количества для всех размеров в заказе
-      for (const size of item.sizes) {
-        const sizeIndex = product.sizes.findIndex((s: any) => s.size === size.size);
-        if (sizeIndex !== -1) {
-          stockUpdates.push({
-            updateOne: {
-              filter: { _id: product._id, 'sizes.size': size.size },
-              update: { 
-                $inc: { 'sizes.$.stockQuantity': -size.stockQuantity },
-                $set: { 
-                  'sizes.$.inStock': product.sizes[sizeIndex].stockQuantity - size.stockQuantity > 0 
-                }
-              }
-            }
-          });
-        }
-      }
     }
 
     // Update all product stocks
     if (stockUpdates.length > 0) {
       await Product.bulkWrite(stockUpdates);
+      console.log('Stock updated successfully for order');
     }
 
     // Calculate taxes and shipping
