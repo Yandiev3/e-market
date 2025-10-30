@@ -6,10 +6,10 @@ import Link from 'next/link';
 import { formatPrice } from '@/lib/utils';
 import Button from '@/components/ui/Button';
 import Modal from '@/components/ui/Modal';
-import { IProduct } from '@/types/product';
+import { Product } from '@/types/product';
 
 interface ProductListProps {
-  products: IProduct[];
+  products: Product[];
   onDelete: (id: string) => void;
   onToggleStatus: (id: string, active: boolean) => void;
   loading?: boolean;
@@ -22,9 +22,9 @@ const ProductList: React.FC<ProductListProps> = ({
   loading = false,
 }) => {
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
-  const [selectedProduct, setSelectedProduct] = useState<IProduct | null>(null);
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
 
-  const handleDeleteClick = (product: IProduct) => {
+  const handleDeleteClick = (product: Product) => {
     setSelectedProduct(product);
     setDeleteModalOpen(true);
   };
@@ -38,7 +38,7 @@ const ProductList: React.FC<ProductListProps> = ({
   };
 
   // Расчет общего количества на складе
-  const getTotalStock = (product: IProduct) => {
+  const getTotalStock = (product: Product) => {
     return product.sizes.reduce((total, size) => total + (size.stockQuantity || 0), 0);
   };
 

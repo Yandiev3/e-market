@@ -3,15 +3,11 @@
 
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { useAuth } from './AuthContext';
-import { Product } from '@/types/product';
-
-export interface FavoriteItem extends Product {
-  addedAt: Date;
-}
+import { FavoriteProduct, FavoriteItem as FavoriteItemType } from '@/types/product';
 
 interface FavoritesContextType {
-  items: FavoriteItem[];
-  addFavorite: (item: Product) => Promise<void>;
+  items: FavoriteItemType[];
+  addFavorite: (item: FavoriteProduct) => Promise<void>;
   removeFavorite: (id: string) => Promise<void>;
   isFavorite: (id: string) => boolean;
   loading: boolean;
@@ -28,7 +24,7 @@ const FavoritesContext = createContext<FavoritesContextType>({
 export const useFavorites = () => useContext(FavoritesContext);
 
 export const FavoritesProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [items, setItems] = useState<FavoriteItem[]>([]);
+  const [items, setItems] = useState<FavoriteItemType[]>([]);
   const [loading, setLoading] = useState(true);
   const { isAuthenticated } = useAuth();
 
@@ -61,8 +57,30 @@ export const FavoritesProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     }
   };
 
-  const addFavorite = async (item: Product) => {
-    const newItem = { ...item, addedAt: new Date() };
+  const addFavorite = async (item: FavoriteProduct) => {
+    const newItem: FavoriteItemType = { 
+      _id: item.id,
+      id: item.id,
+      name: item.name,
+      description: '', // Добавляем обязательные поля
+      images: [item.image],
+      category: item.category,
+      brand: item.brand || '',
+      sku: item.sku, // Теперь sku обязательное в FavoriteProduct
+      slug: item.slug,
+      featured: false,
+      active: true,
+      gender: 'unisex',
+      specifications: {},
+      sizes: item.sizes,
+      colors: [],
+      ratings: item.ratings,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      addedAt: new Date(),
+      price: item.price,
+      originalPrice: item.originalPrice
+    };
     
     if (isAuthenticated) {
       // Синхронизация с сервером

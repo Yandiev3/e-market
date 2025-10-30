@@ -52,19 +52,25 @@ export default function ProductsPage() {
           
           // Преобразуем IProductLean в Product
           const formattedProducts: Product[] = productsData.map(product => ({
-            id: product._id?.toString() || '',
+            _id: product._id?.toString() || '',
             name: product.name || '',
+            description: product.description || '',
             price: product.price || 0,
             originalPrice: product.originalPrice,
-            image: product.images?.[0] || '/images/placeholder.jpg',
             images: product.images || [],
             slug: product.slug || '',
             category: product.category || '',
-            ratings: product.ratings || { average: 0, count: 0 },
             brand: product.brand || '',
-            description: '',
+            sku: product.sku || '',
+            featured: product.featured || false,
+            active: product.active !== undefined ? product.active : true,
+            gender: product.gender || 'unisex',
             sizes: product.sizes || [],
-            colors: product.colors || []
+            colors: product.colors || [],
+            ratings: product.ratings || { average: 0, count: 0 },
+            specifications: product.specifications || {},
+            createdAt: product.createdAt || new Date().toISOString(),
+            updatedAt: product.updatedAt || new Date().toISOString()
           }));
           
           setProducts(formattedProducts);
@@ -134,7 +140,7 @@ export default function ProductsPage() {
 
     // Apply featured filter
     if (filters.featured) {
-      filtered = filtered.filter(product => product.isFeatured);
+      filtered = filtered.filter(product => product.featured);
     }
 
     // Apply price range filter
@@ -156,7 +162,8 @@ export default function ProductsPage() {
         filtered.sort((a, b) => b.price - a.price);
         break;
       case 'newest':
-        filtered.sort((a, b) => (b.isNew ? 1 : 0) - (a.isNew ? 1 : 0));
+        // Сортируем по дате создания (новые сначала)
+        filtered.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
         break;
       case 'rating':
         filtered.sort((a, b) => b.ratings.average - a.ratings.average);
@@ -220,7 +227,7 @@ export default function ProductsPage() {
               <>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                   {filteredProducts.map((product) => (
-                    <ProductCard key={product.id} product={product} />
+                    <ProductCard key={product._id} product={product} />
                   ))}
                 </div>
 

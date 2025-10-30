@@ -37,6 +37,43 @@ export interface Product {
   updatedAt: string;
 }
 
+export interface IProductLean {
+  _id?: string;
+  name: string;
+  description: string;
+  price: number;
+  originalPrice?: number;
+  images: string[];
+  category: string;
+  brand: string;
+  sku: string;
+  slug: string;
+  featured: boolean;
+  active: boolean;
+  gender: 'men' | 'women' | 'kids' | 'unisex';
+  ageCategory?: 'infant' | 'toddler' | 'child' | 'teen';
+  specifications?: Record<string, string>;
+  sizes: IProductSize[];
+  colors: IProductColor[];
+  ratings: {
+    average: number;
+    count: number;
+  };
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CartProduct {
+  id: string;
+  name: string;
+  price: number;
+  image: string;
+  sizes: IProductSize[];
+  colors?: IProductColor[];
+  sku: string; // Делаем обязательным
+  requiresSizeSelection?: boolean;
+}
+
 export interface CartItem {
   id: string;
   productId: string;
@@ -68,6 +105,58 @@ export interface OrderItemRequest {
   color?: string;
   sku: string;
 }
+
+export interface FavoriteProduct {
+  id: string;
+  name: string;
+  price: number;
+  originalPrice?: number;
+  image: string;
+  slug: string;
+  ratings: {
+    average: number;
+    count: number;
+  };
+  brand?: string;
+  category: string;
+  sizes: IProductSize[];
+  sku: string; // Делаем обязательным
+}
+
+// ДОБАВЛЕНО: Интерфейс для элементов избранного в контексте
+export interface FavoriteItem {
+  _id: string;
+  id: string;
+  name: string;
+  description: string;
+  price: number;
+  originalPrice?: number;
+  images: string[];
+  category: string;
+  brand: string;
+  sku: string;
+  slug: string;
+  featured: boolean;
+  active: boolean;
+  gender: 'men' | 'women' | 'kids' | 'unisex';
+  ageCategory?: 'infant' | 'toddler' | 'child' | 'teen';
+  specifications?: Record<string, string>;
+  sizes: IProductSize[];
+  colors: IProductColor[];
+  ratings: {
+    average: number;
+    count: number;
+  };
+  createdAt: string;
+  updatedAt: string;
+  addedAt: string | Date;
+}
+
+// ДОБАВЛЕНО: Утилитарный тип для преобразования FavoriteItem в Product
+export type FavoriteItemAsProduct = FavoriteItem & {
+  isNew?: boolean;
+  isFeatured?: boolean;
+};
 
 export interface ProductFilter {
   category?: string;
@@ -118,7 +207,7 @@ export interface SearchParams {
   limit?: number;
 }
 
-// Admin product types
+// Admin product
 export interface ProductFormData {
   name: string;
   description: string;
@@ -146,7 +235,7 @@ export interface ProductFormData {
   }>;
 }
 
-// API response types
+// API response
 export interface ApiResponse<T = any> {
   success: boolean;
   data?: T;
@@ -159,6 +248,6 @@ export interface CartResponse {
 }
 
 export interface OrderResponse {
-  order: any; // This would be more specific in a real implementation
+  order: any; 
   message: string;
 }

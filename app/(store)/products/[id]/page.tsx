@@ -4,11 +4,11 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import ProductDetail from '@/components/product/ProductDetail';
-import { IProduct } from '@/types/product';
+import { Product } from '@/types/product';
 
 export default function ProductDetailPage() {
   const { id } = useParams();
-  const [product, setProduct] = useState<IProduct | null>(null);
+  const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -26,8 +26,8 @@ export default function ProductDetailPage() {
         const productData = await response.json();
         
         // Преобразуем данные в формат, ожидаемый ProductDetail
-        const formattedProduct: IProduct = {
- _id: productData._id || productData.id,
+        const formattedProduct: Product = {
+          _id: productData._id || productData.id,
           name: productData.name,
           description: productData.description,
           price: productData.price,
@@ -45,8 +45,8 @@ export default function ProductDetailPage() {
           gender: productData.gender || 'unisex',
           ageCategory: productData.ageCategory,
           featured: productData.featured || false,
-          createdAt: productData.createdAt ? new Date(productData.createdAt) : new Date(),
-          updatedAt: productData.updatedAt ? new Date(productData.updatedAt) : new Date(),
+          createdAt: productData.createdAt,
+          updatedAt: productData.updatedAt,
         };
 
         setProduct(formattedProduct);

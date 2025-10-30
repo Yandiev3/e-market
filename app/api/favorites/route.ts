@@ -24,22 +24,33 @@ export async function GET(request: NextRequest) {
     }
 
     const user = await User.findById(session.user.id)
-      .populate('favorites.product', 'name price images slug')
+      .populate('favorites.product')
       .select('favorites');
 
     if (!user) {
       return NextResponse.json({ message: 'User not found' }, { status: 404 });
     }
 
-    // Проверяем, что favorites существует и является массивом
-    const favorites = (user.favorites || []).map((fav: any) => ({
-      id: fav.product?._id?.toString(),
-      name: fav.product?.name,
-      price: fav.product?.price,
-      image: fav.product?.images?.[0],
-      slug: fav.product?.slug,
-      addedAt: fav.addedAt,
-    })).filter((fav: any) => fav.id); // Фильтруем невалидные элементы
+    const favorites = (user.favorites || []).map((fav: any) => {
+      const product = fav.product;
+      if (!product) return null;
+
+      return {
+        _id: product._id?.toString(),
+        id: product._id?.toString(),
+        name: product.name,
+        price: product.price,
+        originalPrice: product.originalPrice,
+        image: product.images?.[0] || '/images/placeholder.jpg',
+        slug: product.slug,
+        ratings: product.ratings || { average: 0, count: 0 },
+        brand: product.brand,
+        category: product.category,
+        sizes: product.sizes || [],
+        sku: product.sku,
+        addedAt: fav.addedAt,
+      };
+    }).filter((fav: any) => fav !== null); // Фильтруем невалидные элементы
 
     return NextResponse.json({ favorites });
   } catch (error: any) {

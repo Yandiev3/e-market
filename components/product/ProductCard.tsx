@@ -11,7 +11,10 @@ import { Product } from '@/types/product';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface ProductCardProps {
-  product: Product;
+  product: Product & {
+    isNew?: boolean;
+    isFeatured?: boolean;
+  };
 }
 
 const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
@@ -31,7 +34,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   // Получаем массив изображений
   const images = product.images && product.images.length > 0 
     ? product.images 
-    : [product.image || '/images/placeholder.jpg'];
+    : ['/images/placeholder.jpg'];
 
   const hasMultipleImages = images.length > 1;
 
@@ -130,7 +133,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
         <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10">
           <AddToFavoritesButton
             product={{
-              id: product.id,
+              id: product._id,
               name: product.name,
               price: product.price,
               originalPrice: product.originalPrice,
@@ -140,6 +143,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
               ratings: product.ratings,
               brand: product.brand,
               category: product.category,
+              sku: product.sku
             }}
             size="sm"
           />
@@ -159,21 +163,6 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           </h3>
         </Link>
 
-        {/* {ratingCount > 0 && (
-          <div className="flex items-center mb-3">
-            <div className="flex text-yellow-400">
-              {[...Array(5)].map((_, i) => (
-                <span key={i} className="text-xs">
-                  {i < Math.floor(averageRating) ? '★' : '☆'}
-                </span>
-              ))}
-            </div>
-            <span className="text-xs text-muted-foreground ml-2">
-              ({ratingCount})
-            </span>
-          </div>
-        )} */}
-
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center space-x-2">
             <span className="text-lg font-bold text-foreground">
@@ -186,6 +175,20 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
             )}
           </div>
         </div>
+
+        <AddToCartButton 
+          product={{
+            id: product._id,
+            name: product.name,
+            price: product.price,
+            image: images[0],
+            sizes: product.sizes,
+            colors: product.colors,
+            sku: product.sku
+          }}
+          size="sm"
+          className="w-full"
+        />
       </div>
     </Card>
   );

@@ -6,7 +6,7 @@ import dbConnect from '@/lib/dbConnect';
 import Product from '@/models/Product';
 import ProductGrid from '@/components/product/ProductGrid';
 import Button from '@/components/ui/Button';
-import { IProductLean } from '@/types/product';
+import { IProductLean, Product as ProductType } from '@/types/product';
 
 export default async function Home() {
   await dbConnect();
@@ -32,6 +32,28 @@ export default async function Home() {
     .lean() as unknown as IProductLean[];
 
   const session = await getServerSession(authOptions);
+
+
+  const mapToProduct = (product: IProductLean): ProductType => ({
+    _id: product._id?.toString() || '',
+    name: product.name,
+    price: product.price,
+    originalPrice: product.originalPrice,
+    images: product.images || [],
+    slug: product.slug,
+    category: product.category || '',
+    sizes: product.sizes,
+    ratings: product.ratings,
+    brand: product.brand,
+    description: '', 
+    sku: '',
+    active: true,
+    featured: false,
+    gender: 'unisex',
+    colors: [],
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  });
 
   return (
     <div className="min-h-screen bg-background">
@@ -120,16 +142,7 @@ export default async function Home() {
           
           <ProductGrid 
             products={newProducts.map(product => ({
-              id: product._id?.toString() || '',
-              name: product.name,
-              price: product.price,
-              originalPrice: product.originalPrice,
-              image: product.images?.[0] || '/images/placeholder.jpg',
-              slug: product.slug,
-              category: product.category || '',
-              sizes: product.sizes,
-              ratings: product.ratings,
-              brand: product.brand,
+              ...mapToProduct(product),
               isNew: true
             }))} 
           />
@@ -155,16 +168,7 @@ export default async function Home() {
           
           <ProductGrid 
             products={featuredProducts.map(product => ({
-              id: product._id?.toString() || '',
-              name: product.name,
-              price: product.price,
-              originalPrice: product.originalPrice,
-              image: product.images?.[0] || '/images/placeholder.jpg',
-              slug: product.slug,
-              category: product.category || '',
-              sizes: product.sizes,
-              ratings: product.ratings,
-              brand: product.brand,
+              ...mapToProduct(product),
               isFeatured: true
             }))} 
           />

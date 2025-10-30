@@ -4,10 +4,10 @@
 import { useState, useEffect } from 'react';
 import ProductList from '@/components/admin/ProductList';
 import Button from '@/components/ui/Button';
-import { IProduct } from '@/types/product';
+import { Product } from '@/types/product';
 
 export default function ManageProductsPage() {
-  const [products, setProducts] = useState<IProduct[]>([]);
+  const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
 
   const fetchProducts = async () => {

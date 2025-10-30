@@ -4,10 +4,10 @@ import Image from 'next/image';
 import { formatPrice } from '@/lib/utils';
 import AddToCartButton from '@/components/cart/AddToCartButton';
 import AddToFavoritesButton from '@/components/favorites/AddToFavoritesButton';
-import { IProduct, IProductSize, IProductColor, CartProduct } from '@/types/product';
+import { Product, IProductSize, IProductColor, CartProduct } from '@/types/product';
 
 interface ProductDetailProps {
-  product: IProduct;
+  product: Product;
 }
 
 const ProductDetail: React.FC<ProductDetailProps> = ({ product }) => {
@@ -39,15 +39,17 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product }) => {
   ];
 
   // Основное изображение
-  const mainImage = product.images?.[0] || '';
+  const mainImage = product.images?.[0] || '/images/placeholder.jpg';
 
   // Продукт для корзины
   const cartProduct: CartProduct = {
-    id: product._id.toString(),
+    id: product._id,
     name: product.name,
     price: product.price,
     image: mainImage,
     sizes: product.sizes,
+    colors: product.colors,
+    sku: product.sku, 
     requiresSizeSelection: requiresSizeSelection
   };
 
@@ -84,7 +86,7 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product }) => {
           {/* Main image */}
           <div className="relative aspect-square bg-secondary rounded-lg overflow-hidden">
             <Image
-              src={product.images[selectedImage] || mainImage || '/images/placeholder.jpg'}
+              src={product.images[selectedImage] || mainImage}
               alt={product.name}
               fill
               className="object-cover"
@@ -100,7 +102,7 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product }) => {
             <div className="absolute top-4 right-4">
               <AddToFavoritesButton
                 product={{
-                  id: product._id.toString(),
+                  id: product._id,
                   name: product.name,
                   price: product.price,
                   image: mainImage,

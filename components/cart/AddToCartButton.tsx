@@ -78,6 +78,7 @@ const AddToCartButton: React.FC<AddToCartButtonProps> = ({
       size: selectedSize,
       color: selectedColor,
       sizes: product.sizes,
+      colors: product.colors || [], // Добавляем colors с fallback значением
       sku: product.sku
     });
     

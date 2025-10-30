@@ -31,7 +31,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
           <p className="text-gray-600 mb-4">Please sign in to access this page.</p>
           <a
             href="/login"
-            className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
+            className="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
           >
             Sign In
           </a>
