@@ -16,12 +16,19 @@ interface Order {
     quantity: number;
     price: number;
     image: string;
+    sizes: Array<{
+      size: string;
+      quantity: number;
+      stockQuantity: number;
+      inStock: boolean;
+    }>;
   }>;
   totalPrice: number;
   status: string;
   createdAt: string;
+  paymentMethod: string;
   isPaid: boolean;
-  isDelivered: boolean;
+  // isDelivered: boolean;
 }
 
 export default function OrdersPage() {
@@ -45,24 +52,27 @@ export default function OrdersPage() {
     }
   };
 
-  const getStatusIcon = (status: string, isPaid: boolean, isDelivered: boolean) => {
-    if (isDelivered) return <CheckCircle className="h-5 w-5 text-green-600" />;
-    if (status === 'processing') return <Clock className="h-5 w-5 text-blue-600" />;
-    if (status === 'shipped') return <Truck className="h-5 w-5 text-orange-600" />;
-    return <AlertCircle className="h-5 w-5 text-yellow-600" />;
+  const getStatusIcon = (status: string, ) => {
+    if (status === 'delivered') return <CheckCircle className={` text-green-600`} />;
+    if (status === 'processing') return <Clock className={` text-blue-600`} />;
+    if (status === 'shipped') return <Truck className={` text-orange-600`} />;
+    if (status === 'cancelled') return <AlertCircle className={` text-red-600`} />;
+      return <AlertCircle className={` text-yellow-600`} />;
   };
 
-  const getStatusText = (status: string, isPaid: boolean, isDelivered: boolean) => {
-    if (isDelivered) return 'Доставлен';
+  const getStatusText = (status: string, ) => {
+    if (status === 'delivered') return 'Доставлен';
     if (status === 'processing') return 'Обрабатывается';
     if (status === 'shipped') return 'В пути';
-    return 'Ожидает оплаты';
+    if (status === 'cancelled') return 'Отменен';
+      return 'Ожидает';
   };
 
-  const getStatusColor = (status: string, isPaid: boolean, isDelivered: boolean) => {
-    if (isDelivered) return 'bg-green-100 text-green-800 border-green-200';
+  const getStatusColor = (status: string, ) => {
+    if (status === 'delivered') return 'bg-green-100 text-green-800 border-green-200';
     if (status === 'processing') return 'bg-blue-100 text-blue-800 border-blue-200';
     if (status === 'shipped') return 'bg-orange-100 text-orange-800 border-orange-200';
+    if (status === 'cancelled') return 'bg-red-100 text-red-800 border-red-200';
     return 'bg-yellow-100 text-yellow-800 border-yellow-200';
   };
 
@@ -155,15 +165,15 @@ export default function OrdersPage() {
                         <CardContent className="p-0">
                           {/* Шапка заказа */}
                           <div className="bg-card border-b border-border p-6">
-                            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                              <div className="space-y-2">
+                            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 w-full">
+                              <div className="space-y-2 w-full">
                                 <div className="flex items-center gap-3">
                                   <h3 className="font-semibold text-lg">
                                     Заказ #{order._id.slice(-8).toUpperCase()}
                                   </h3>
-                                  <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm font-medium border ${getStatusColor(order.status, order.isPaid, order.isDelivered)}`}>
-                                    {getStatusIcon(order.status, order.isPaid, order.isDelivered)}
-                                    {getStatusText(order.status, order.isPaid, order.isDelivered)}
+                                  <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm font-medium border ${getStatusColor(order.status)}`}>
+                                    {getStatusIcon(order.status)}
+                                    {getStatusText(order.status)}
                                   </span>
                                 </div>
                                 <div className="flex items-center gap-4 text-sm text-muted-foreground">
@@ -173,16 +183,8 @@ export default function OrdersPage() {
                                   </div>
                                   <div className="flex items-center gap-1">
                                     <CreditCard className="h-4 w-4" />
-                                    {order.isPaid ? 'Оплачен' : 'Ожидает оплаты'}
+                                    {order.paymentMethod === 'cash' ? 'Наличные' : order.paymentMethod === 'card' ? 'Карта' : 'Неизвестно'}
                                   </div>
-                                </div>
-                              </div>
-                              <div className="text-right">
-                                <div className="text-2xl font-bold text-primary">
-                                  {formatPrice(order.totalPrice)}
-                                </div>
-                                <div className="text-sm text-muted-foreground">
-                                  {order.orderItems.length} товар{order.orderItems.length > 1 ? 'а' : ''}
                                 </div>
                               </div>
                             </div>
@@ -209,15 +211,15 @@ export default function OrdersPage() {
                                       {item.name}
                                     </h4>
                                     <p className="text-sm text-muted-foreground">
+                                      Размер: {item.sizes?.[0]?.size || 'Не указан'}
+                                    </p>
+                                    <p className="text-sm text-muted-foreground">
                                       Количество: {item.quantity}
                                     </p>
                                   </div>
                                   <div className="text-right">
                                     <div className="font-semibold">
                                       {formatPrice(item.price * item.quantity)}
-                                    </div>
-                                    <div className="text-sm text-muted-foreground">
-                                      {formatPrice(item.price)} × {item.quantity}
                                     </div>
                                   </div>
                                 </div>

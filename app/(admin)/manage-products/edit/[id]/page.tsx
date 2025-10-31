@@ -75,7 +75,7 @@ export default function EditProductPage() {
       }
 
       // Перенаправляем на страницу управления товарами
-      router.push('/admin/manage-products');
+      router.push('/manage-products');
       router.refresh();
       
     } catch (error: any) {

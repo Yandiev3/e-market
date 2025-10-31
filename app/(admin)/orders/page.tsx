@@ -58,7 +58,7 @@ export default function OrdersPage() {
 
   const handleStatusChange = async (orderId: string, status: ApiOrder['status']) => {
     try {
-      const response = await fetch(`/api/admin/orders/${orderId}`, {
+      const response = await fetch(`/api/orders/${orderId}`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',

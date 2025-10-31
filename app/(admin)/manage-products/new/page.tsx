@@ -48,7 +48,7 @@ export default function NewProductPage() {
       const product = await response.json();
       
       // Перенаправляем на страницу управления товарами
-      router.push('/admin/manage-products');
+      router.push('/manage-products');
       router.refresh();
       
     } catch (error: any) {

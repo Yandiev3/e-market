@@ -80,7 +80,7 @@ export default function ManageProductsPage() {
           <h1 className="text-3xl font-bold text-foreground">Управление товарами</h1>
           <p className="text-muted-foreground mt-2">Создание и редактирование товаров магазина</p>
         </div>
-        <Button href="/admin/manage-products/new">
+        <Button href="/manage-products/new">
           Добавить товар
         </Button>
       </div>

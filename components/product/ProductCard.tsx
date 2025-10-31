@@ -175,20 +175,6 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
             )}
           </div>
         </div>
-
-        <AddToCartButton 
-          product={{
-            id: product._id,
-            name: product.name,
-            price: product.price,
-            image: images[0],
-            sizes: product.sizes,
-            colors: product.colors,
-            sku: product.sku
-          }}
-          size="sm"
-          className="w-full"
-        />
       </div>
     </Card>
   );

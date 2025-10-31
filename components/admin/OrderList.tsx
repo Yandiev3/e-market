@@ -133,6 +133,7 @@ const OrderList: React.FC<OrderListProps> = ({ orders, onStatusChange, loading =
                   </div>
                 </td>
                 <td className="px-6 py-4">
+                  {order.shippingAddress?.street}
                 </td>
                 <td className="px-6 py-4 text-sm text-foreground">
                   {order.items.length} товар(ов)

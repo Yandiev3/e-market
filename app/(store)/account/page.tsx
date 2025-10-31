@@ -144,7 +144,7 @@ export default function AccountPage() {
                           <div>
                             <div className="font-medium flex items-center gap-2">
                               <Calendar className="h-4 w-4 text-muted-foreground" />
-                              Заказ #{order._id.slice(-6)}
+                              Заказ #{order._id.slice(-8)}
                             </div>
                             <div className="text-sm text-muted-foreground">
                               {formatDate(new Date(order.createdAt))} • 
