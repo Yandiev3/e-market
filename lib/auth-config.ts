@@ -1,14 +1,7 @@
-// lib/auth-config.ts
-import { type NextAuthOptions } from 'next-auth';
+import { NextAuthOptions } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
-import dbConnect from './dbConnect';
-import User, { IUser } from '@/models/User';
-import { validateEmail } from './utils';
-import { Types } from 'mongoose'; 
-
-interface IUserWithId extends IUser {
-  _id: Types.ObjectId;
-}
+import dbConnect from '@/lib/dbConnect';
+import User from '@/models/User';
 
 export const authOptions: NextAuthOptions = {
   providers: [
@@ -19,90 +12,119 @@ export const authOptions: NextAuthOptions = {
         password: { label: 'Password', type: 'password' },
       },
       async authorize(credentials) {
+        if (!credentials?.email || !credentials?.password) {
+          throw new Error('Email и пароль обязательны');
+        }
+
+        await dbConnect();
+
         try {
-          console.log('=== AUTHORIZE START ===');
-          console.log('Credentials received:', credentials);
-          
-          await dbConnect();
-          console.log('DB connected successfully');
+          const user = await User.findOne({ email: credentials.email.toLowerCase() });
 
-          if (!credentials?.email || !credentials?.password) {
-            console.log('Missing credentials');
-            throw new Error('Email and password are required');
-          }
-
-          if (!validateEmail(credentials.email)) {
-            console.log('Invalid email format');
-            throw new Error('Invalid email format');
-          }
-
-          const userEmail = credentials.email.toLowerCase();
-          console.log('Searching for user with email:', userEmail);
-
-          const user: IUserWithId | null = await User.findOne({ email: userEmail });
-          console.log('User found:', user ? 'Yes' : 'No');
-          
           if (!user) {
-            console.log('User not found in database');
-            throw new Error('No user found with this email');
+            throw new Error('Пользователь не найден');
           }
 
-          console.log('Stored password hash:', user.password.substring(0, 20) + '...');
-          console.log('Input password:', credentials.password);
+          // Проверяем активность аккаунта
+          if (!user.active) {
+            throw new Error('Ваш аккаунт заблокирован. Обратитесь к администратору.');
+          }
 
           const isPasswordValid = await user.comparePassword(credentials.password);
-          console.log('Password validation result:', isPasswordValid);
 
           if (!isPasswordValid) {
-            console.log('Password comparison failed');
-            throw new Error('Invalid password');
+            throw new Error('Неверный email или пароль');
           }
 
-          if (!user.active) {
-            console.log('User account is not active');
-            throw new Error('Account is deactivated');
-          }
-
-          console.log('=== AUTHORIZE SUCCESS ===');
           return {
-            id: user._id.toString(),
+            id: user.id.toString(),
             email: user.email,
             name: user.name,
             lastname: user.lastname,
+            phone: user.phone,
             role: user.role,
-            phone: user.phone || '',
+            address: user.address,
           };
         } catch (error) {
-          console.error('Authorize error:', error);
-          return null;
+          console.error('Auth error:', error);
+          throw error;
         }
       },
     }),
   ],
   callbacks: {
-    async jwt({ token, user }) {
+    async jwt({ token, user, trigger, session }) {
       if (user) {
-        token.role = user.role;
         token.id = user.id;
+        token.role = user.role;
+        token.lastname = user.lastname;
         token.phone = user.phone;
+        token.address = user.address;
       }
+
+      // Обработка обновления сессии
+      if (trigger === 'update' && session) {
+        token = { ...token, ...session };
+      }
+
       return token;
     },
     async session({ session, token }) {
-      if (session.user) {
+      if (token) {
         session.user.id = token.id as string;
         session.user.role = token.role as string;
+        session.user.lastname = token.lastname as string;
         session.user.phone = token.phone as string;
+        session.user.address = token.address as string;
       }
+
+      // Дополнительная проверка активности пользователя при каждой сессии
+      if (session.user.id) {
+        try {
+          await dbConnect();
+          const user = await User.findById(session.user.id);
+          if (!user || !user.active) {
+            // Возвращаем сессию без данных пользователя, что приведет к разлогину
+            return {
+              ...session,
+              user: {
+                id: '',
+                email: '',
+                name: null,
+                lastname: '',
+                role: '',
+                phone: null,
+                address: null,
+              }
+            };
+          }
+        } catch (error) {
+          console.error('Session validation error:', error);
+          // Возвращаем пустую сессию при ошибке
+          return {
+            ...session,
+            user: {
+              id: '',
+              email: '',
+              name: null,
+              lastname: '',
+              role: '',
+              phone: null,
+              address: null,
+            }
+          };
+        }
+      }
+
       return session;
     },
   },
   pages: {
     signIn: '/login',
-    newUser: '/register',
   },
   session: {
     strategy: 'jwt',
-    maxAge: 30 * 24 * 60 * 60,
+    maxAge: 30 * 24 * 60 * 60, // 30 дней
   },
+  secret: process.env.NEXTAUTH_SECRET,
 };

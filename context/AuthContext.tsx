@@ -1,4 +1,3 @@
-// context/AuthContext.tsx
 'use client';
 
 import React, { createContext, useContext, useEffect, useState } from 'react';
@@ -12,6 +11,7 @@ interface User {
   role: string;
   phone?: string;
   address?: string;
+  active?: boolean;
 }
 
 interface AuthContextType {
@@ -66,13 +66,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const initializeUser = async () => {
       if (status === 'loading') {
         setLoading(true);
-      } else if (session?.user) {
+      } else if (session?.user && session.user.id) {
         try {
           // При загрузке получаем актуальные данные из API
           const response = await fetch('/api/account/profile');
           if (response.ok) {
             const data = await response.json();
             if (data.user) {
+              // Проверяем активность аккаунта
+              if (!data.user.active) {
+                // Если аккаунт деактивирован, сбрасываем состояние
+                setUser(null);
+                setLoading(false);
+                return;
+              }
               setUser(data.user);
             }
           } else {

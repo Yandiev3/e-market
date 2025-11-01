@@ -7,7 +7,7 @@ interface LabelProps extends React.LabelHTMLAttributes<HTMLLabelElement> {
   className?: string;
 }
 
-export const Label: React.FC<LabelProps> = ({ 
+const Label: React.FC<LabelProps> = ({ 
   children, 
   htmlFor, 
   className = '', 
@@ -23,3 +23,5 @@ export const Label: React.FC<LabelProps> = ({
     </label>
   );
 };
+
+export default Label

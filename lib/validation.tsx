@@ -92,6 +92,35 @@ export function validateUser(data: any): ValidationResult {
   };
 }
 
+export function validateUserUpdate(data: any): ValidationResult {
+  const errors: string[] = [];
+
+  if (data.email && !validator.isEmail(data.email)) {
+    errors.push('Некорректный email адрес');
+  }
+
+  if (data.password && !validator.isLength(data.password, { min: 6 })) {
+    errors.push('Пароль должен содержать минимум 6 символов');
+  }
+
+  if (data.name && !validator.isLength(data.name, { min: 2 })) {
+    errors.push('Имя должно содержать минимум 2 символа');
+  }
+
+  if (data.role && !['user', 'admin'].includes(data.role)) {
+    errors.push('Некорректная роль пользователя');
+  }
+
+  if (data.active !== undefined && typeof data.active !== 'boolean') {
+    errors.push('Статус активности должен быть boolean');
+  }
+
+  return {
+    isValid: errors.length === 0,
+    errors,
+  };
+}
+
 export function validateOrder(data: any): ValidationResult {
   const errors: string[] = [];
 
