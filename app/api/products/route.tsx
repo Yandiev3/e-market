@@ -1,8 +1,10 @@
+// app/api/products/route.tsx
 import { NextRequest, NextResponse } from 'next/server';
 import dbConnect from '@/lib/dbConnect';
 import Product from '@/models/Product';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-config';
+import { toProductsArray, toPlainObject } from '@/lib/utils';
 
 export async function GET(request: NextRequest) {
   try {
@@ -78,8 +80,11 @@ export async function GET(request: NextRequest) {
 
     const total = await Product.countDocuments(query);
 
+    // Преобразуем продукты в простые объекты
+    const plainProducts = toProductsArray(products);
+
     return NextResponse.json({
-      products,
+      products: plainProducts,
       totalPages: Math.ceil(total / limit),
       currentPage: page,
       total,
@@ -106,7 +111,10 @@ export async function POST(request: NextRequest) {
     const product = new Product(body);
     await product.save();
 
-    return NextResponse.json(product, { status: 201 });
+    // Преобразуем созданный продукт
+    const plainProduct = toPlainObject(product);
+
+    return NextResponse.json(plainProduct, { status: 201 });
   } catch (error: any) {
     console.error('Product creation error:', error);
     return NextResponse.json(

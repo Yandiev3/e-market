@@ -40,37 +40,77 @@ export function debounce<T extends (...args: any[]) => any>(
 export function formatDate(date: Date | string): string {
   const dateObj = typeof date === 'string' ? new Date(date) : date;
   return new Intl.DateTimeFormat('ru-RU', {
-    // year: 'numeric',
     month: 'long',
     day: 'numeric',
   }).format(dateObj);
 }
 
+// Универсальная функция для преобразования MongoDB документа в простой объект
+export function toPlainObject(obj: any): any {
+  if (!obj) return null;
+  
+  if (Array.isArray(obj)) {
+    return obj.map(item => toPlainObject(item));
+  }
+  
+  if (obj && typeof obj === 'object') {
+    // Преобразуем ObjectId в строку
+    if (obj._id && typeof obj._id === 'object' && obj._id.toString) {
+      obj._id = obj._id.toString();
+    }
+    
+    // Преобразуем другие поля ObjectId
+    if (obj.id && typeof obj.id === 'object' && obj.id.toString) {
+      obj.id = obj.id.toString();
+    }
+    
+    // Рекурсивно обрабатываем вложенные объекты
+    const result: any = {};
+    for (const key in obj) {
+      if (obj.hasOwnProperty(key)) {
+        result[key] = toPlainObject(obj[key]);
+      }
+    }
+    return result;
+  }
+  
+  return obj;
+}
+
+// Специализированная функция для продуктов
 export function toProductLean(obj: any): IProductLean | null {
   if (!obj) return null;
   
+  const plainObj = toPlainObject(obj);
+  
   return {
-    _id: obj._id?.toString(),
-    name: obj.name,
-    description: obj.description,
-    price: obj.price,
-    originalPrice: obj.originalPrice,
-    images: obj.images || [],
-    category: obj.category,
-    brand: obj.brand,
-    sku: obj.sku,
-    gender: obj.gender,
-    slug: obj.slug,
-    featured: obj.featured,
-    active: obj.active,
-    specifications: obj.specifications,
-    sizes: Array.isArray(obj.sizes) ? obj.sizes : [],
-    colors: Array.isArray(obj.colors) ? obj.colors : [],
-    ratings: obj.ratings ? {
-      average: obj.ratings.average,
-      count: obj.ratings.count
+    _id: plainObj._id?.toString(),
+    name: plainObj.name,
+    description: plainObj.description,
+    price: plainObj.price,
+    originalPrice: plainObj.originalPrice,
+    images: plainObj.images || [],
+    category: plainObj.category,
+    brand: plainObj.brand,
+    sku: plainObj.sku,
+    gender: plainObj.gender,
+    slug: plainObj.slug,
+    featured: plainObj.featured,
+    active: plainObj.active,
+    specifications: plainObj.specifications,
+    sizes: Array.isArray(plainObj.sizes) ? plainObj.sizes : [],
+    colors: Array.isArray(plainObj.colors) ? plainObj.colors : [],
+    ratings: plainObj.ratings ? {
+      average: plainObj.ratings.average,
+      count: plainObj.ratings.count
     } : { average: 0, count: 0 },
-    createdAt: obj.createdAt,
-    updatedAt: obj.updatedAt
+    createdAt: plainObj.createdAt,
+    updatedAt: plainObj.updatedAt
   };
+}
+
+// Функция для преобразования массива продуктов
+export function toProductsArray(products: any[]): IProductLean[] {
+  if (!Array.isArray(products)) return [];
+  return products.map(product => toProductLean(product)).filter(Boolean) as IProductLean[];
 }

@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
-import Label from '@/components/ui/Label';
+import { Label } from '@/components/ui/Label';
 
 export default function LoginForm() {
   const [email, setEmail] = useState('');

@@ -1,6 +1,8 @@
+// app/api/products/search/route.tsx
 import { NextRequest, NextResponse } from 'next/server';
 import dbConnect from '@/lib/dbConnect';
 import Product from '@/models/Product';
+import { toProductsArray } from '@/lib/utils';
 
 export async function GET(request: NextRequest) {
   try {
@@ -18,7 +20,6 @@ export async function GET(request: NextRequest) {
       {
         $text: { $search: q },
         active: true,
-        stock: { $gt: 0 },
       },
       {
         score: { $meta: 'textScore' },
@@ -26,10 +27,13 @@ export async function GET(request: NextRequest) {
     )
       .sort({ score: { $meta: 'textScore' } })
       .limit(limit)
-      .select('name price images slug')
+      .select('name price images slug brand')
       .lean();
 
-    return NextResponse.json(products);
+    // Преобразуем продукты в простые объекты
+    const plainProducts = toProductsArray(products);
+
+    return NextResponse.json(plainProducts);
   } catch (error: any) {
     console.error('Search error:', error);
     return NextResponse.json(

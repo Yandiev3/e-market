@@ -1,9 +1,10 @@
+// app/api/products/[id]/route.tsx
 import { NextRequest, NextResponse } from 'next/server';
 import dbConnect from '@/lib/dbConnect';
 import Product, { IProductLean } from '@/models/Product';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-config';
-import { toProductLean } from '@/lib/utils';
+import { toProductLean, toPlainObject } from '@/lib/utils';
 
 interface RouteContext {
   params: Promise<{ id: string }>;
@@ -90,7 +91,10 @@ export async function PUT(request: NextRequest, context: RouteContext) {
       return NextResponse.json({ message: 'Product not found' }, { status: 404 });
     }
 
-    return NextResponse.json(product);
+    // Преобразуем обновленный продукт
+    const plainProduct = toPlainObject(product);
+
+    return NextResponse.json(plainProduct);
   } catch (error: any) {
     console.error('Product update error:', error);
     return NextResponse.json(
@@ -167,7 +171,10 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
       return NextResponse.json({ message: 'Product not found' }, { status: 404 });
     }
 
-    return NextResponse.json(product);
+    // Преобразуем обновленный продукт
+    const plainProduct = toPlainObject(product);
+
+    return NextResponse.json(plainProduct);
   } catch (error: any) {
     console.error('Product patch error:', error);
     return NextResponse.json(
