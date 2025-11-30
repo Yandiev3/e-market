@@ -9,6 +9,7 @@ export default withAuth(
     
     const isAdminRoute = req.nextUrl.pathname.startsWith('/admin');
     const isStoreAccountRoute = req.nextUrl.pathname.startsWith('/account');
+    const isCheckoutRoute = req.nextUrl.pathname.startsWith('/checkout');
 
     if (isAuthPage) {
       if (isAuth) {
@@ -17,7 +18,7 @@ export default withAuth(
       return null;
     }
 
-    if (!isAuth && (isAdminRoute || isStoreAccountRoute)) {
+    if (!isAuth && (isAdminRoute || isStoreAccountRoute || isCheckoutRoute)) {
       return NextResponse.redirect(new URL('/login', req.url));
     }
 

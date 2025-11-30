@@ -33,7 +33,6 @@ export default async function Home() {
 
   const session = await getServerSession(authOptions);
 
-
   const mapToProduct = (product: IProductLean): ProductType => ({
     _id: product._id?.toString() || '',
     name: product.name,
@@ -57,7 +56,7 @@ export default async function Home() {
 
   return (
     <div className="min-h-screen bg-background">
-      <section className="relative overflow-hidden flex items-center justify-center min-h-[calc(100vh-113px)] border-[2px] border-primary">
+      <section className="relative overflow-hidden flex items-center justify-center min-h-[calc(100vh-113px)]">
         <div className="container mx-auto px-4 text-center relative z-10">
           <div className="max-w-4xl mx-auto">
             <h1 className="text-6xl md:text-8xl font-bold mb-6 tracking-tight">
@@ -86,39 +85,57 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* Features Section */}
-      <section className="py-20 border-t border-border">
-        <div className="container mx-auto px-4">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
-            <div className="text-center p-6 group hover:bg-card/50 rounded-lg transition-all duration-300">
-              <div className="inline-flex items-center justify-center w-16 h-16 bg-primary/10 rounded-full mb-4 group-hover:bg-primary/20 transition-colors">
-                🚚
-              </div>
-              <h3 className="text-xl font-semibold mb-2">Быстрая доставка</h3>
-              <p className="text-muted-foreground">
-                Бесплатная доставка по России от 5000₽
-              </p>
-            </div>
+      {/* Promo Section - Полная ширина, без отступов и скруглений */}
+      <section className="py-5 border-t border-border ">
+        <div className="w-full">
+          <div className="grid grid-cols-3 max-lg:flex flex-col">
+            {[
+              {
+                image: "https://static.street-beat.ru/upload/iblock/5a5/c1dco842874x9snhtz3yledhz5zghkbm.jpg",
+                text: "Зимняя коллекция",
+                title: "UGG Classic Natural",
+                href: "/promo#winter-collection"
+              },
+              {
+                image: "https://static.street-beat.ru/upload/iblock/90e/ixzo16910c2ir0rwqbany3r3b2uw8d4i.jpg",
+                text: "Новые поступления",
+                title: "Nike Air Max",
+                href: "/promo#new-arrivals"
+              },
+              {
+                image: "https://static.street-beat.ru/upload/iblock/230/1mapmy300mc8jn0dmjim6dn7bi4tb26d.jpg",
+                text: "Распродажа",
+                title: "Adidas Ultraboost",
+                href: "/promo#sale"
+              }
+            ].map((promo, index) => (
+              <Link 
+                key={index} 
+                href={promo.href}
+                className="group relative overflow-hidden cursor-pointer aspect-square"
+              >
+              <div className="group relative overflow-hidden cursor-pointer aspect-square">
 
-            <div className="text-center p-6 group hover:bg-card/50 rounded-lg transition-all duration-300">
-              <div className="inline-flex items-center justify-center w-16 h-16 bg-primary/10 rounded-full mb-4 group-hover:bg-primary/20 transition-colors">
-                🛡️
-              </div>
-              <h3 className="text-xl font-semibold mb-2">Гарантия качества</h3>
-              <p className="text-muted-foreground">
-                Оригинальная продукция с гарантией
-              </p>
-            </div>
-
-            <div className="text-center p-6 group hover:bg-card/50 rounded-lg transition-all duration-300">
-              <div className="inline-flex items-center justify-center w-16 h-16 bg-primary/10 rounded-full mb-4 group-hover:bg-primary/20 transition-colors">
-                ⚡
-              </div>
-              <h3 className="text-xl font-semibold mb-2">Новые коллекции</h3>
-              <p className="text-muted-foreground">
-                Следите за последними трендами
-              </p>
-            </div>
+                <div className="absolute inset-0 bg-black/20 z-10"></div>
+                <img 
+                  className="w-full h-full object-cover group-hover:scale-105 transition-all duration-400 relative z-0" 
+                  src={promo.image} 
+                  alt={promo.title} 
+                />
+                <div className="absolute inset-0 bg-black opacity-0 group-hover:opacity-30 transition-all duration-400"></div>
+                
+                <div className="absolute inset-0 z-20 flex flex-col justify-end p-5">
+                  <div className="pl-5">
+                    <p className="text-white text-sm mb-1">{promo.text}</p>
+                    <h3 className="text-white font-semibold text-lg mb-3">{promo.title}</h3>
+                    <Button variant="outline" className="bg-transparent text-white border-white hover:bg-white hover:text-black">
+                      Смотреть
+                    </Button>
+                  </div>
+                </div>   
+              </div>       
+              </Link>
+            ))}
           </div>
         </div>
       </section>
@@ -187,9 +204,9 @@ export default async function Home() {
           
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto">
             {[
-              { name: 'Женские', href: '/products?category=women', count: '24 товара' },
-              { name: 'Мужские', href: '/products?category=men', count: '18 товаров' },
-              { name: 'Детские', href: '/products?category=kids', count: '12 товаров' },
+              { name: 'Женские', href: '/products?gender=women', count: '24 товара' },
+              { name: 'Мужские', href: '/products?gender=men', count: '18 товаров' },
+              { name: 'Детские', href: '/products?gender=kids', count: '12 товаров' },
               { name: 'Аксессуары', href: '/products?category=accessories', count: '8 товаров' },
             ].map((category, index) => (
               <Link 
