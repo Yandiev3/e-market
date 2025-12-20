@@ -4,13 +4,62 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-config';
 import dbConnect from '@/lib/dbConnect';
 import Product from '@/models/Product';
-import ProductGrid from '@/components/product/ProductGrid';
 import Button from '@/components/ui/Button';
 import { IProductLean, Product as ProductType } from '@/types/product';
+import CategorySwiper from '@/components/product/CategorySwiper';
+import Legendaryseries from '@/components/product/LegendarySeries';
 
 export default async function Home() {
   await dbConnect();
   
+  const categoryItems = [
+  {
+    id: '1',
+    brand: 'PUMA',
+    model: 'Tuff Terra',
+    description: 'Удобные тапочки для дома и улицы',
+    image: 'https://static.street-beat.ru/upload/resize_cache/iblock/059/240_360_1/wfg6bw02lkva33wwn6a27m3k7hgklq6x.jpg',
+    filterParams: '?brand=PUMA&category=tapochki',
+    href: '/products?brand=PUMA&category=tapochki'
+  },
+  {
+    id: '2', 
+    brand: 'Kipling',
+    model: 'River Collection',
+    description: 'Стильные женские аксессуары и обувь',
+    image: 'https://static.street-beat.ru/upload/resize_cache/iblock/7d5/240_360_1/9n6k1l1hddox5jac513y4q803dmtpa5o.jpg',
+    filterParams: '?brand=Kipling&gender=women',
+    href: '/products?brand=Kipling&gender=women'
+  },
+  {
+    id: '4',
+    brand: 'The North Face',
+    model: 'ThermoBall',
+    description: 'Теплые и легкие тапочки для активного отдыха',
+    image: 'https://static.street-beat.ru/upload/resize_cache/iblock/79e/240_360_1/r64wev7ii1038f2nxn31c8ge8u47404m.jpg',
+    filterParams: '?brand=The North Face&gender=women&category=tapochki',
+    href: '/products?brand=The North Face&gender=women&category=tapochki'
+  },
+  {
+    id: '5',
+    brand: 'Napapijri',
+    model: 'Urban Style',
+    description: 'Городская одежда и обувь для современной женщины',
+    image: 'https://static.street-beat.ru/upload/resize_cache/iblock/ebe/240_360_1/fejcvmtik3aso0yrm8e6epm40y3903j6.jpg',
+    filterParams: '?brand=Napapijri&gender=women&category=clothing',
+    href: '/products?brand=Napapijri&gender=women&category=clothing'
+  },
+  {
+    id: '6',
+    brand: 'Vans',
+    model: 'SK8-Hi',
+    description: 'Культовые высокие кеды для скейтбординга',
+    image: 'https://static.street-beat.ru/upload/resize_cache/iblock/c8e/240_360_1/d84t0sbyh75bh4yao6ojql6w1tcb50n7.jpg',
+    filterParams: '?brand=Vans&category=sneakers',
+    href: '/products?brand=Vans&category=sneakers'
+  },
+];
+
   // Get featured products
   const featuredProducts = await Product.find({
     featured: true,
@@ -140,57 +189,39 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* New Arrivals */}
-      <section className="py-20 border-t border-border">
-        <div className="container mx-auto px-4">
-          <div className="flex justify-between items-center mb-12">
-            <div>
-              <h2 className="text-3xl md:text-4xl font-bold mb-2">Новинки</h2>
-              <p className="text-muted-foreground">Самые свежие поступления в коллекции</p>
-            </div>
-            <Link 
-              href="/products?sort=newest" 
-              className="group flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors"
-            >
-              Смотреть все
-              <span className="group-hover:translate-x-1 transition-transform">→</span>
-            </Link>
-          </div>
-          
-          <ProductGrid 
-            products={newProducts.map(product => ({
-              ...mapToProduct(product),
-              isNew: true
-            }))} 
-          />
-        </div>
-      </section>
+      <CategorySwiper 
+        categories={categoryItems}
+      />
 
-      {/* Featured Products */}
-      <section className="py-20 border-t border-border bg-card/30">
-        <div className="container mx-auto px-4">
-          <div className="flex justify-between items-center mb-12">
-            <div>
-              <h2 className="text-3xl md:text-4xl font-bold mb-2">Популярные товары</h2>
-              <p className="text-muted-foreground">Выбор наших покупателей</p>
-            </div>
-            <Link 
-              href="/products?sort=popular" 
-              className="group flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors"
-            >
-              Смотреть все
-              <span className="group-hover:translate-x-1 transition-transform">→</span>
-            </Link>
-          </div>
+      {/* Legendary Series */}
+      
+      <Legendaryseries/>
+
+      {/* Featured Products
+      // <section className="py-20 border-t border-border bg-card/30">
+      //   <div className="container mx-auto px-4">
+      //     <div className="flex justify-between items-center mb-12">
+      //       <div>
+      //         <h2 className="text-3xl md:text-4xl font-bold mb-2">Популярные товары</h2>
+      //         <p className="text-muted-foreground">Выбор наших покупателей</p>
+      //       </div>
+      //       <Link 
+      //         href="/products?sort=popular" 
+      //         className="group flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors"
+      //       >
+      //         Смотреть все
+      //         <span className="group-hover:translate-x-1 transition-transform">→</span>
+      //       </Link>
+      //     </div>
           
-          <ProductGrid 
-            products={featuredProducts.map(product => ({
-              ...mapToProduct(product),
-              isFeatured: true
-            }))} 
-          />
-        </div>
-      </section>
+      //     <ProductGrid 
+      //       products={featuredProducts.map(product => ({
+      //         ...mapToProduct(product),
+      //         isFeatured: true
+      //       }))} 
+      //     />
+      //   </div>
+      // </section> */}
 
       {/* Categories Preview */}
       <section className="py-20 border-t border-border">
@@ -236,7 +267,7 @@ export default async function Home() {
             </p>
             <Link href="/products">
               <Button size="lg" className="text-lg px-8 py-6 h-auto">
-                📦 Перейти в каталог
+                 Перейти в каталог
               </Button>
             </Link>
           </div>

@@ -127,13 +127,9 @@ const Header: React.FC = () => {
 
   return (
     <header className="border-b border-border z-50 bg-card static top-0">
-      {/* Main header */}
       <div className="max-w-7xl mx-auto px-4">
-        {/* First row - Logo and actions */}
         <div className="flex items-center justify-between h-16">
-          {/* Left side - Mobile menu button and categories (for desktop) */}
           <div className="flex items-center space-x-4">
-            {/* Mobile menu button */}
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
               className="lg:hidden p-2 text-muted-foreground hover:text-foreground transition-colors"
@@ -150,7 +146,6 @@ const Header: React.FC = () => {
               )}
             </button>
 
-            {/* Categories - hidden on mobile, visible on desktop */}
             <div className="hidden lg:flex items-center space-x-6">
               {categories.map((category) => (
                 <Link
@@ -164,7 +159,6 @@ const Header: React.FC = () => {
             </div>
           </div>
 
-          {/* Center - Logo */}
           <div className="absolute left-1/2 transform -translate-x-1/2">
             <Link 
               href="/" 
@@ -174,13 +168,12 @@ const Header: React.FC = () => {
             </Link>
           </div>
 
-          {/* Right side - Actions */}
           <div className='hidden lg:flex items-center space-x-4 pr-4'>
               <Link
                   href="/promo"
                   className="text-muted-foreground text-sm font-medium py-3 transition-colors hover:text-primary"
               >
-                  <span className="text-primary font-semibold">Акции</span>
+                  <span>Акции</span>
               </Link>
 
               <Link
@@ -239,7 +232,6 @@ const Header: React.FC = () => {
           </nav>
 
           <div className="flex items-center space-x-2 pr-2">
-            {/* Search */}
             {isSearchOpen ? (
               <form onSubmit={handleSearch} className="relative">
                 <input
@@ -280,7 +272,6 @@ const Header: React.FC = () => {
               </button>
             )}
 
-            {/* Favorites */}
             <Link 
               href="/favorites" 
               className="p-2 text-muted-foreground hover:text-foreground transition-colors relative"
@@ -296,7 +287,6 @@ const Header: React.FC = () => {
               )}
             </Link>
 
-            {/* Cart */}
             <Link 
               href="/cart" 
               className="p-2 text-muted-foreground hover:text-foreground transition-colors relative"
@@ -312,7 +302,6 @@ const Header: React.FC = () => {
               )}
             </Link>
 
-            {/* User account */}
             {isAuthenticated ? (
               <div className="relative group">
                 <button 
@@ -381,11 +370,9 @@ const Header: React.FC = () => {
 
         </div>
       </div>
-
-      {/* Mobile Menu */}
+            
       {isMobileMenuOpen && (
         <div className="lg:hidden fixed inset-0 top-16 bg-card z-50 overflow-y-auto">
-          {/* Quick Actions */}
           <div className="border-b border-border p-4">
             <div className="grid grid-cols-4 gap-4 text-center">
               <button 
@@ -450,7 +437,6 @@ const Header: React.FC = () => {
             </div>
           </div>
 
-          {/* Main Navigation for Mobile */}
           <div className="p-4 border-b border-border">
             <h3 className="font-semibold text-foreground mb-3 text-lg">Каталог</h3>
             <nav className="space-y-2">
@@ -500,7 +486,6 @@ const Header: React.FC = () => {
             </nav>
           </div>
 
-          {/* Additional Links for Mobile */}
           <div className="p-4 border-b border-border">
             <h3 className="font-semibold text-foreground mb-3 text-lg">Дополнительно</h3>
             <div className="space-y-1">
@@ -528,7 +513,6 @@ const Header: React.FC = () => {
             </div>
           </div>
 
-          {/* Categories for Mobile */}
           <div className="p-4">
             <h3 className="font-semibold text-foreground mb-3 text-lg">Для кого</h3>
             <div className="space-y-1">

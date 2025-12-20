@@ -2,39 +2,64 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { Filter } from 'lucide-react';
 import ProductCard from '@/components/product/ProductCard';
 import ProductFilter from '@/components/product/ProductFilter';
+import Breadcrumbs from '@/components/ui/Breadcrumbs';
 import { Product, IProductLean } from '@/types/product';
 
 export default function ProductsPage() {
+  const searchParams = useSearchParams();
   const [products, setProducts] = useState<Product[]>([]);
   const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [categories, setCategories] = useState<string[]>([]);
   const [brands, setBrands] = useState<string[]>([]);
   const [filters, setFilters] = useState({
-    category: '',
-    priceRange: '',
-    sortBy: 'popular',
-    inStock: false,
-    featured: false,
-    brand: '',
-    size: '',
-    color: '',
+    category: searchParams.get('category') || '',
+    priceRange: searchParams.get('priceRange') || '',
+    sortBy: searchParams.get('sortBy') || 'popular',
+    inStock: searchParams.get('inStock') === 'true',
+    featured: searchParams.get('featured') === 'true',
+    brand: searchParams.get('brand') || '',
+    size: searchParams.get('size') || '',
+    color: searchParams.get('color') || '',
   });
+
+  // Обновляем фильтры при изменении search params
+  useEffect(() => {
+    const newFilters = {
+      category: searchParams.get('category') || '',
+      priceRange: searchParams.get('priceRange') || '',
+      sortBy: searchParams.get('sortBy') || 'popular',
+      inStock: searchParams.get('inStock') === 'true',
+      featured: searchParams.get('featured') === 'true',
+      brand: searchParams.get('brand') || '',
+      size: searchParams.get('size') || '',
+      color: searchParams.get('color') || '',
+    };
+    setFilters(newFilters);
+  }, [searchParams]);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         setLoading(true);
         
-        // Fetch products
-        const productsResponse = await fetch('/api/products');
+        // Build query string from filters
+        const queryParams = new URLSearchParams();
+        Object.entries(filters).forEach(([key, value]) => {
+          if (value && value !== '') {
+            queryParams.set(key, value.toString());
+          }
+        });
+
+        // Fetch products with filters
+        const productsResponse = await fetch(`/api/products?${queryParams}`);
         if (productsResponse.ok) {
           const responseData = await productsResponse.json();
           
-          // Обрабатываем разные форматы ответа
           let productsData: IProductLean[] = [];
           
           if (Array.isArray(responseData)) {
@@ -48,9 +73,6 @@ export default function ProductsPage() {
             productsData = [];
           }
           
-          console.log('Products data received:', productsData);
-          
-          // Преобразуем IProductLean в Product
           const formattedProducts: Product[] = productsData.map(product => ({
             _id: product._id?.toString() || '',
             name: product.name || '',
@@ -110,11 +132,7 @@ export default function ProductsPage() {
     };
 
     fetchData();
-  }, []);
-
-  useEffect(() => {
-    applyFilters();
-  }, [filters, products]);
+  }, [filters]);
 
   const applyFilters = () => {
     setLoading(true);
@@ -131,7 +149,7 @@ export default function ProductsPage() {
       filtered = filtered.filter(product => product.brand === filters.brand);
     }
 
-    // Apply in-stock filter - теперь проверяем через размеры
+    // Apply in-stock filter
     if (filters.inStock) {
       filtered = filtered.filter(product => 
         product.sizes && product.sizes.some(size => size.inStock && size.stockQuantity > 0)
@@ -162,7 +180,6 @@ export default function ProductsPage() {
         filtered.sort((a, b) => b.price - a.price);
         break;
       case 'newest':
-        // Сортируем по дате создания (новые сначала)
         filtered.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
         break;
       case 'rating':
@@ -177,12 +194,26 @@ export default function ProductsPage() {
   };
 
   const handleFilterChange = (newFilters: any) => {
+    // Update URL with new filters
+    const params = new URLSearchParams();
+    Object.entries(newFilters).forEach(([key, value]) => {
+      if (value && value !== '') {
+        params.set(key, value.toString());
+      }
+    });
+    
+    window.history.pushState({}, '', `?${params.toString()}`);
     setFilters(newFilters);
   };
 
   return (
     <div className="min-h-screen bg-background">
       <div className="container mx-auto px-4 py-8">
+        {/* Хлебные крошки - ДОБАВЛЕНЫ */}
+        <div className="mb-6">
+          <Breadcrumbs />
+        </div>
+
         <div className="flex flex-col lg:flex-row gap-8">
           {/* Filters */}
           <aside className="w-full lg:w-80 shrink-0">
