@@ -44,13 +44,13 @@ const OrderList: React.FC<OrderListProps> = ({ orders, onStatusChange, loading =
     cancelled: 'bg-red-500/20 text-red-600 border-red-500/30',
   };
 
-  const statusLabels = {
-    pending: 'Ожидание',
-    processing: 'В обработке',
-    shipped: 'Отправлен',
-    delivered: 'Доставлен',
-    cancelled: 'Отменен',
-  };
+  // const statusLabels = {
+  //   pending: 'Ожидание',
+  //   processing: 'В обработке',
+  //   shipped: 'Отправлен',
+  //   delivered: 'Доставлен',
+  //   cancelled: 'Отменен',
+  // };
 
   if (loading) {
     return (

@@ -70,7 +70,7 @@ export interface CartProduct {
   image: string;
   sizes: IProductSize[];
   colors?: IProductColor[];
-  sku: string; // Делаем обязательным
+  sku: string;
   requiresSizeSelection?: boolean;
 }
 
@@ -123,7 +123,6 @@ export interface FavoriteProduct {
   sku: string; // Делаем обязательным
 }
 
-// ДОБАВЛЕНО: Интерфейс для элементов избранного в контексте
 export interface FavoriteItem {
   _id: string;
   id: string;
@@ -152,7 +151,6 @@ export interface FavoriteItem {
   addedAt: string | Date;
 }
 
-// ДОБАВЛЕНО: Утилитарный тип для преобразования FavoriteItem в Product
 export type FavoriteItemAsProduct = FavoriteItem & {
   isNew?: boolean;
   isFeatured?: boolean;

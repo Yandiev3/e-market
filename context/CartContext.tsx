@@ -193,9 +193,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const createOrder = async (orderData: any) => {
     try {
-      // Prepare items for order with proper size quantities
       const orderItems = items.map(item => {
-        // For items with specific size, create size array with quantity
         const sizes = item.size ? [{
           size: item.size,
           quantity: item.quantity,
