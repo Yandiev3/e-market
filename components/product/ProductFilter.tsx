@@ -79,8 +79,8 @@ const ProductFilter: React.FC<ProductFilterProps> = ({
     { value: 'popular', label: 'По популярности' },
     { value: 'price-asc', label: 'По возрастанию цены' },
     { value: 'price-desc', label: 'По убыванию цены' },
-    { value: 'newest', label: 'Сначала новинки' },
-    { value: 'rating', label: 'По рейтингу' },
+    // { value: 'newest', label: 'Сначала новинки' },
+    // { value: 'rating', label: 'По рейтингу' },
   ];
 
   const sizes = ['35', '36', '37', '38', '39', '40', '41', '42', '43', '44'];
@@ -123,7 +123,7 @@ const ProductFilter: React.FC<ProductFilterProps> = ({
         </div>
 
         {/* Category Filter */}
-        <div>
+        {/* <div>
           <Label className="text-base font-semibold mb-3 block">Категория</Label>
           <RadioGroup value={filters.category} onValueChange={handleCategoryChange}>
             <div className="flex items-center space-x-2 mb-3">
@@ -143,7 +143,7 @@ const ProductFilter: React.FC<ProductFilterProps> = ({
               </div>
             ))}
           </RadioGroup>
-        </div>
+        </div> */}
 
         {/* Price Range Filter */}
         <div>

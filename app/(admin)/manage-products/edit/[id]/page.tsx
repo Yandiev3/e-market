@@ -1,4 +1,4 @@
-// app/(admin)/manage-products/edit/[id]/page.tsx
+-products/edit/[id]/page.tsx
 "use client";
 
 import { useState, useEffect } from 'react';
@@ -74,7 +74,6 @@ export default function EditProductPage() {
         throw new Error(errorData.message || 'Failed to update product');
       }
 
-      // Перенаправляем на страницу управления товарами
       router.push('/manage-products');
       router.refresh();
       

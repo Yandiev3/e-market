@@ -125,7 +125,7 @@ export default async function Home() {
               {!session && (
                 <Link href="/register">
                   <Button variant="outline" size="lg" className="text-lg px-8 py-6 h-auto border-2">
-                    👤 Создать аккаунт
+                    Создать аккаунт
                   </Button>
                 </Link>
               )}

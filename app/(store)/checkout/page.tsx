@@ -154,7 +154,7 @@ export default function CheckoutPage() {
                 />
 
                 <Input
-                  label="Имя *"
+                  label="Фамилия *"
                   name="lastname"
                   value={formData.lastname}
                   onChange={handleInputChange}
@@ -177,6 +177,7 @@ export default function CheckoutPage() {
                   name="phone"
                   value={formData.phone}
                   onChange={handleInputChange}
+                  maxLength={11}
                   required
                   className="bg-input border-border"
                 />

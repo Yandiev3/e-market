@@ -217,7 +217,7 @@ export default function ProductsPage() {
         <div className="flex flex-col lg:flex-row gap-8">
           {/* Filters */}
           <aside className="w-full lg:w-80 shrink-0">
-            <div className="sticky top-24">
+            <div className="">
               <div className="flex items-center gap-2 mb-6">
                 <Filter className="h-5 w-5 text-primary" />
                 <h2 className="text-lg font-semibold text-foreground">Фильтры</h2>

@@ -187,9 +187,6 @@ const AdminDashboard: React.FC = () => {
                 </div>
               ))}
             </div>
-            <Link href="/admin/orders" className="btn-outline w-full mt-4">
-              Все заказы
-            </Link>
           </div>
         </div>
 
