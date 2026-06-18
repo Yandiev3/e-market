@@ -60,7 +60,6 @@ export default async function Home() {
   },
 ];
 
-  // Get featured products
   const featuredProducts = await Product.find({
     featured: true,
     active: true,
@@ -70,7 +69,6 @@ export default async function Home() {
     .select('name price images slug sizes ratings brand category')
     .lean() as unknown as IProductLean[];
 
-  // Get new arrivals
   const newProducts = await Product.find({
     active: true,
     'sizes.stockQuantity': { $gt: 0 },
@@ -134,7 +132,7 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* Promo Section - Полная ширина, без отступов и скруглений */}
+      {/* Promo Section */}
       <section className="py-5 border-t border-border ">
         <div className="w-full">
           <div className="grid grid-cols-3 max-lg:flex flex-col">
