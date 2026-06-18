@@ -8,8 +8,8 @@ import Link from 'next/link';
 export default function OrderSuccessPage() {
   const router = useRouter();
 
-  useEffect(() => {
-    // Clear cart or perform other success actions
+  useEffect(() => { 
+  
   }, []);
 
   return (

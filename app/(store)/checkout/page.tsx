@@ -29,7 +29,6 @@ export default function CheckoutPage() {
     saveInfo: true,
   });
 
-  // Инициализация формы данными пользователя
   useEffect(() => {
     if (user) {
       setFormData((prev) => ({

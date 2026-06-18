@@ -47,7 +47,6 @@ export default function ProfilePage() {
     setLoading(true);
 
     try {
-      // Валидация паролей
       if (formData.newPassword && formData.newPassword !== formData.confirmPassword) {
         toast.error('Новые пароли не совпадают');
         setLoading(false);
@@ -78,10 +77,9 @@ export default function ProfilePage() {
       const data = await response.json();
 
       if (response.ok) {
-        // Показываем успешный тостер
+
         toast.success('Профиль успешно обновлен');
         
-        // Реактивное обновление данных в контексте без перезагрузки страницы
         updateUser({
           name: formData.name,
           lastname: formData.lastname,
@@ -89,7 +87,6 @@ export default function ProfilePage() {
           address: formData.address,
         });
 
-        // Очищаем поля паролей и закрываем секцию
         setFormData(prev => ({
           ...prev,
           currentPassword: '',
@@ -98,7 +95,7 @@ export default function ProfilePage() {
         }));
         setShowPasswordSection(false);
       } else {
-        // Показываем ошибку с деталями из API
+
         const errorMessage = data.errors 
           ? data.errors.join(', ') 
           : data.message || 'Не удалось обновить профиль';

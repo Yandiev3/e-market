@@ -47,7 +47,6 @@ export default function NewProductPage() {
 
       const product = await response.json();
       
-      // Перенаправляем на страницу управления товарами
       router.push('/manage-products');
       router.refresh();
       
